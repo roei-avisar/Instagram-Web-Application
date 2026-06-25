@@ -1,0 +1,783 @@
+<!-- ron-hefetz-204793749-roei-avisar-211496658-rotem-glotman-325123370 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Instagram</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="icon" href="elements/icons/Instagram-logo.png" type="image/png">
+  <link rel="stylesheet" href="css/general-elements.css" />
+  <link rel="stylesheet" href="css/main-feed.css" />
+  <link rel="stylesheet" href="css/right-sidebar-style.css" />
+  <link rel="stylesheet" href="css/profile-pic.css" />
+  <link rel="stylesheet" href="css/messages.css" />
+  <link rel="stylesheet" href="./css/instagram_left_sidebar.css">
+  <link rel="stylesheet" href="./css/create-post.css">
+  <link rel="stylesheet" href="./css/notifications.css">
+  <link rel="stylesheet" href="./css/dark-mode.css">
+</head>
+
+<body id="top">
+
+<div id="storyModal" class="story-modal">
+    <div class="instagram-logo">
+        <img src="elements/media/stories-section/logoInstagram.png" alt="Instagram">
+    </div>
+
+    <span id="closeStory">&times;</span>
+    <div class="stories-viewer">
+         <!-- Previous Story 2 -->
+        <div class="side-story side-story-far">
+            <img id="prev2StoryImage" src="">
+            <div class="side-story-user">
+               <img id="prev2ProfileImage" src="">
+               <div id="prev2ProfileName"></div>
+            </div>
+       </div>
+
+        <!-- Previous Story -->
+        <div class="side-story">
+            <img id="prevStoryImage" src="">
+
+            <div class="side-story-user">
+                <img id="prevProfileImage" src="">
+                <div id="prevProfileName"></div>
+            </div>
+        </div>
+
+        <!-- Current Story -->
+        <div class="story-view">
+            <span id="prevStoryBtn" class="story-nav story-nav-left">
+                <i class="bi bi-chevron-left"></i>
+            </span>
+
+            <span id="nextStoryBtn" class="story-nav story-nav-right">
+                <i class="bi bi-chevron-right"></i>
+            </span>
+
+            <div class="story-progress-bg"></div>
+            <div class="story-progress"></div>
+            <div class="story-header">
+
+                <img
+                    src="" class="story-header-avatar">
+
+                <div>
+                    <div class="story-name"></div>
+                    <div class="story-time">1h</div>
+                </div>
+
+                <span class="story-actions">
+                    <i class="bi bi-volume-up-fill"></i>
+                    <i id="pauseStory" class="bi bi-pause-fill"></i>
+                    <i class="bi bi-three-dots"></i>
+            </span>
+
+
+            </div>
+
+            <img id="storyImage" src="" alt="Story">
+            <video id="storyVideo" autoplay muted loop playsinline style="display:none;"></video>
+
+            <div class="story-footer">
+
+                <div class="reply-wrapper">
+
+                    <input
+                        type="text"
+                        id="storyReplyInput"
+                        placeholder="Reply to"
+                        class="story-reply">
+
+                    <span id="storySendBtn" class="send-btn">
+                        Send
+                    </span>
+
+                </div>
+
+                <i class="bi bi-heart story-icon"></i>
+                <i class="bi bi-send story-icon"></i>
+
+            </div>
+
+        </div>
+
+        <!-- Next Story -->
+        <div class="side-story">
+
+            <img id="nextStoryImage" src="">
+
+            <div class="side-story-user">
+                <img id="nextProfileImage" src="">
+                <div id="nextProfileName"></div>
+            </div>
+
+        </div>
+        <!-- Next Story 2 -->
+        <div class="side-story side-story-far">
+            <img id="next2StoryImage" src="">
+            <div class="side-story-user">
+                <img id="next2ProfileImage" src="">
+                <div id="next2ProfileName"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<main class="main-page d-flex">
+
+  <nav class="left-sidebar">
+
+    <!-- Logo -->
+    <div class="logo">
+        <a href="#top">
+            <img src="elements/icons/instagram-black-white.png"
+                alt="Instagram"
+                class="logo-icon">
+        </a>
+    </div>
+
+    <div class="menu">
+
+        <!-- Home -->
+        <button class="menu-item">
+            <a href="#top">
+                <i class="bi bi-house-door"></i>
+            </a>
+            <span>Home</span>
+        </button>
+
+        <!-- Reels -->
+        <button class="menu-item">
+            <i class="bi bi-camera-reels"></i>
+            <span>Reels</span>
+        </button>
+
+        <!-- Messages -->
+        <button class="menu-item" onclick="openMessagesPopup()">
+            <i class="bi bi-send"></i>
+            <span>Messages</span>
+        </button>
+
+        <!-- Search -->
+        <button class="menu-item js-search-btn">
+            <i class="bi bi-search"></i>
+            <span>Search</span>
+        </button>
+
+        <!-- Notifications -->
+        <button class="menu-item js-notifications-btn">
+            <i class="bi bi-heart"></i>
+            <span>Notifications</span>
+        </button>
+
+        <!-- Create -->
+        <button class="menu-item js-menu-create-btn">
+            <i class="bi bi-plus-square"></i>
+            <span>Create</span>
+        </button>
+
+        <!-- Filter -->
+        <button class="menu-item js-filter-btn">
+            <div class="bi bi-funnel small-icon"></div>
+            <span>Filter Posts</span>
+        </button>
+
+          <!-- Profile -->
+        <button class="menu-item">
+            <img
+                src="elements/media/profile-pictures/besteam_ever.jpg"
+                class="right-sidebar-avatar rounded-circle profile-avatar"
+            >
+            <span>Profile</span>
+        </button>
+
+    </div>
+    <div class="menu bottom">
+
+        <button class="menu-item" id="theme-toggle">
+             <img src="elements/icons/dark-mode.png" class="logo-icon" />
+             <span> Dark Mode</span>
+        </button>
+
+        <button class="menu-item">
+            <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.3" class="small-icon">
+                <line x1="1" y1="4" x2="27" y2="4"/>
+                <line x1="1" y1="14" x2="27" y2="14"/>
+                <line x1="1" y1="24" x2="27" y2="24"/>
+            </svg>
+            <span>More</span>
+        </button>
+
+        <button class="menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="small-icon">
+                <rect x="7" y="1" width="9" height="9" rx="1"/>
+                <rect x="1" y="14" width="9" height="9" rx="1"/>
+                <rect x="14" y="14" width="9" height="9" rx="1"/>
+            </svg>
+            <span>Also from Meta</span>
+        </button>
+
+    </div>
+
+  </nav>
+  <div class="notifications-panel js-notifications-panel shadow-lg d-none">
+      <div class="p-4 border-bottom">
+          <h4 class="fw-bold mb-0">Notifications</h4>
+      </div>
+      <div class="notifications-list js-notifications-list p-4 overflow-y-auto">
+          </div>
+  </div>
+
+  <div class="filter-menu-dropdown js-filter-menu d-none">
+    <h6 class="fw-bold mb-3 fs-6">Filter by Media</h6>
+
+    <div class="form-check mb-2">
+        <input class="form-check-input js-filter-all" type="checkbox" value="all" id="filterAll" checked>
+        <label class="form-check-label fs-7 cursor-pointer" for="filterAll">
+            <i class="bi bi-grid me-2"></i>All
+        </label>
+    </div>
+
+    <div class="form-check mb-2">
+        <input class="form-check-input js-filter-single" type="checkbox" value="image" id="filterImage" checked>
+        <label class="form-check-label fs-7 cursor-pointer" for="filterImage">
+            <i class="bi bi-image me-2"></i>Images
+        </label>
+    </div>
+
+    <div class="form-check mb-2">
+        <input class="form-check-input js-filter-single" type="checkbox" value="video" id="filterVideo" checked>
+        <label class="form-check-label fs-7 cursor-pointer" for="filterVideo">
+            <i class="bi bi-play-btn me-2"></i>Videos
+        </label>
+    </div>
+
+    <div class="form-check mb-0">
+        <input class="form-check-input js-filter-single" type="checkbox" value="text" id="filterText" checked>
+        <label class="form-check-label fs-7 cursor-pointer" for="filterText">
+            <i class="bi bi-card-text me-2"></i>Text
+        </label>
+    </div>
+
+  </div>
+
+  <section class="main-feed-section"> <!-- Main feed section -->
+
+    <a id="backToTop" href="#top">
+        <span class="bi bi-arrow-up"></span>
+    </a>
+
+    <div class="stories-div position-relative bg-white p-3 me-5"> <!-- Stories Section -->
+
+        <!-- Left Arrow Button -->
+        <button id="stories-left" class="white-arrow position-absolute bottom-50 start-0 rounded-circle border border-white shadow-sm ms-2" type="button">
+		<div class="bi bi-chevron-left"></div>
+	</button>
+        <div class="stories-scroll d-flex gap-3 px-2 py-1">
+
+     <div class="story-item"
+         data-story="elements/media/stories-section/story1.jpg"
+         data-profile="elements/media/profile-pictures/maya_99.jpg"
+         data-name="maya_99"
+         data-video="elements/media/stories-section/videoStory.mp4">
+
+        <div class="profile-circle p-1 rounded-circle">
+        <img src="elements/media/profile-pictures/maya_99.jpg"
+            alt="maya's profile"
+            class="story-avatar rounded-circle border border-white border-4"/>
+	</div>
+	<p class="story-username">maya_99</p>
+     </div>
+
+    <div class="story-item"
+        data-story="elements/media/stories-section/story2.jpg"
+        data-profile="elements/media/profile-pictures/tomer19.jpg"
+        data-name="tomer19">
+
+        <div class="profile-circle p-1 rounded-circle">
+            <img src="elements/media/profile-pictures/tomer19.jpg"
+                alt="tomer's profile"
+                class="story-avatar rounded-circle border border-white border-4"/>
+        </div>
+        <p class="story-username">tomer19</p>
+    </div>
+
+    <div class="story-item"
+        data-story="elements/media/stories-section/story3.jpg"
+        data-profile="elements/media/profile-pictures/sara22.jpg"
+        data-name="sara22">
+
+        <div class="profile-circle p-1 rounded-circle">
+            <img src="elements/media/profile-pictures/sara22.jpg"
+                alt="sara's profile"
+                class="story-avatar rounded-circle border border-white border-4"/>
+        </div>
+        <p class="story-username">sara22</p>
+    </div>
+
+    <div class="story-item"
+        data-story="elements/media/stories-section/story4.jpg"
+        data-profile="elements/media/profile-pictures/jamil.abukhaima.jpg"
+        data-name="jamil.abukhaima">
+
+        <div class="profile-circle p-1 rounded-circle">
+            <img src="elements/media/profile-pictures/jamil.abukhaima.jpg"
+                alt="jamil's profile"
+                class="story-avatar rounded-circle border border-white border-4"/>
+        </div>
+        <p class="story-username">jamil.abukhaima</p>
+    </div>
+
+    <div class="story-item"
+        data-story="elements/media/stories-section/story5.jpg"
+        data-profile="elements/media/profile-pictures/nalin12.jpg"
+        data-name="nalin12">
+
+        <div class="profile-circle p-1 rounded-circle">
+            <img src="elements/media/profile-pictures/nalin12.jpg"
+                alt="nalin's profile"
+                class="story-avatar rounded-circle border border-white border-4"/>
+        </div>
+        <p class="story-username">nalin12</p>
+    </div>
+
+    <div class="story-item"
+        data-story="elements/media/stories-section/story6.jpg"
+        data-profile="elements/media/profile-pictures/jacob-ashkenazi2.jpg"
+        data-name="jacob_ashkenazi2">
+
+        <div class="profile-circle p-1 rounded-circle">
+            <img src="elements/media/profile-pictures/jacob-ashkenazi2.jpg"
+                alt="jacob's profile"
+                class="story-avatar rounded-circle border border-white border-4"/>
+        </div>
+        <p class="story-username">jacob_ashkenazi2</p>
+    </div>
+
+    <div class="story-item"
+        data-story="elements/media/stories-section/story7.jpg"
+        data-profile="elements/media/profile-pictures/noa.nesh1.jpg"
+        data-name="noa.nesh1">
+
+        <div class="profile-circle p-1 rounded-circle">
+            <img src="elements/media/profile-pictures/noa.nesh1.jpg"
+                alt="noa's profile"
+                class="story-avatar rounded-circle border border-white border-4"/>
+        </div>
+        <p class="story-username">noa.nesh1</p>
+    </div>
+
+    <div class="story-item"
+        data-story="elements/media/stories-section/story8.jpg"
+        data-profile="elements/media/profile-pictures/omer_44.jpg"
+        data-name="omer_44">
+
+        <div class="profile-circle p-1 rounded-circle">
+            <img src="elements/media/profile-pictures/omer_44.jpg"
+                alt="omer's profile"
+                class="story-avatar rounded-circle border border-white border-4"/>
+        </div>
+
+        <p class="story-username">omer_44</p>
+    </div>
+
+    <div class="story-item"
+        data-story="elements/media/stories-section/story9.jpg"
+        data-profile="elements/media/profile-pictures/alex_56.jpg"
+        data-name="alex_56">
+
+        <div class="profile-circle p-1 rounded-circle">
+            <img src="elements/media/profile-pictures/alex_56.jpg"
+                alt="alex's profile"
+                class="story-avatar rounded-circle border border-white border-4"/>
+        </div>
+
+        <p class="story-username">alex_56</p>
+    </div>
+
+    <div class="story-item"
+        data-story="elements/media/stories-section/story10.jpg"
+        data-profile="elements/media/profile-pictures/lili_18.jpg"
+        data-name="lili_18">
+
+        <div class="profile-circle p-1 rounded-circle">
+            <img src="elements/media/profile-pictures/lili_18.jpg"
+                alt="lili's profile"
+                class="story-avatar rounded-circle border border-white border-4"/>
+        </div>
+
+        <p class="story-username">lili_18</p>
+    </div>
+
+    <div class="story-item"
+        data-story="elements/media/stories-section/story11.jpg"
+        data-profile="elements/media/profile-pictures/guy_13.jpg"
+        data-name="guy_13">
+
+        <div class="profile-circle p-1 rounded-circle">
+            <img src="elements/media/profile-pictures/guy_13.jpg"
+                alt="guy's profile"
+                class="story-avatar rounded-circle border border-white border-4"/>
+        </div>
+
+        <p class="story-username">guy_13</p>
+    </div>
+
+    <div class="story-item"
+        data-story="elements/media/stories-section/story12.jpg"
+        data-profile="elements/media/profile-pictures/dan_11.jpg"
+        data-name="dan_11">
+
+        <div class="profile-circle p-1 rounded-circle">
+            <img src="elements/media/profile-pictures/dan_11.jpg"
+                alt="dan's profile"
+                class="story-avatar rounded-circle border border-white border-4"/>
+        </div>
+
+        <p class="story-username">dan_11</p>
+    </div>
+
+        </div>
+
+        <!-- Right Arrow Button -->
+        <button id="stories-right" class="white-arrow position-absolute bottom-50 end-0 rounded-circle border border-white shadow-sm me-4" type="button">
+		<div class="bi bi-chevron-right"></div>
+        </button>
+    </div>
+
+    <div class="search-container js-search-container d-none ">
+    <input type="text" class="form-control posts-search-input js-posts-search-input" placeholder="Search captions and authors...">
+    </div>
+
+
+    <div class="instagram-posts container"> <!-- Posts section - render by javascript file: posts.js -->
+
+    </div>
+  </section>
+
+  <div class="right-sidebar mt-5 me-5">
+    <div class="user-row d-flex justify-content-between align-items-center mb-4">
+        <div class="user-info d-flex align-items-center gap-3">
+            <img src="elements/media/profile-pictures/besteam_ever.jpg" class="right-sidebar-avatar rounded-circle" />
+            <div class="user-text d-flex flex-column">
+                <span class="username">besteam_ever</span>
+                <span class="fullname text-muted fs-7">Best Team Ever :)</span>
+            </div>
+        </div>
+        <button class="small-transparent-btn instagram-blue fw-semibold hover-underline">Switch</button>
+    </div>
+
+    <div class="suggestions-container">
+        <div class="suggestions-header d-flex justify-content-between mb-3">
+            <span class="fw-bold fs-7">Suggested for you</span>
+            <button class="small-transparent-btn fw-semibold link-dark link-underline-opacity-0 link-opacity-50-hover">See All</button>
+        </div>
+
+        <div class="suggestions-list d-flex flex-column gap-3">
+
+            <div class="user-row d-flex justify-content-between align-items-center">
+                <div class="user-info d-flex align-items-center gap-2">
+                    <img src="elements/media/profile-pictures/anna_russia.jpg" class="right-sidebar-avatar rounded-circle" />
+                    <div class="lh-1">
+                        <span class="username">anna_russia</span>
+                        <div class="d-flex mt-1">
+                            <img src="elements/media/profile-pictures/galit_gg4.jpg" class="followed-by-profile-pic rounded-circle" alt="Image">
+                            <img src="elements/media/profile-pictures/mrs.lady.jpg" class="followed-by-profile-pic rounded-circle" alt="Image">
+                            <span class="text-muted fs-8 ms-1 ">Followed by galit_gg4 + 19</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="small-transparent-btn instagram-blue fw-semibold hover-darken js-suggested-follow">Follow</button>
+            </div>
+
+            <div class="user-row d-flex justify-content-between align-items-center">
+                <div class="user-info d-flex align-items-center gap-2">
+                    <img src="elements/media/profile-pictures/cow_boy55.jpg" class="right-sidebar-avatar rounded-circle" />
+                    <div class="lh-1">
+                        <span class="username">cow_boy55</span>
+                        <div class="d-flex mt-1">
+                            <img src="elements/media/profile-pictures/noa.nesh1.jpg" class="followed-by-profile-pic rounded-circle" alt="Image">
+                            <span class="text-muted fs-8 ms-1 ">Followed by noa.nesh1</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="small-transparent-btn instagram-blue fw-semibold hover-darken js-suggested-follow">Follow</button>
+            </div>
+
+            <div class="user-row d-flex justify-content-between align-items-center">
+                <div class="user-info d-flex align-items-center gap-2">
+                    <img src="elements/media/profile-pictures/noa_122.jpg" class="right-sidebar-avatar rounded-circle" />
+                    <div class="lh-1">
+                        <span class="username">noa_122</span>
+                        <div class="d-flex mt-1">
+                            <img src="elements/media/profile-pictures/sara22.jpg" class="followed-by-profile-pic rounded-circle" alt="Image">
+                            <img src="elements/media/profile-pictures/liat.dell.jpg" class="followed-by-profile-pic rounded-circle" alt="Image">
+                            <span class="text-muted fs-8 ms-1 ">Followed by sara22 + 2</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="small-transparent-btn instagram-blue fw-semibold hover-darken js-suggested-follow">Follow</button>
+            </div>
+
+            <div class="user-row d-flex justify-content-between align-items-center">
+                <div class="user-info d-flex align-items-center gap-2">
+                    <img src="elements/media/profile-pictures/prof_smart.jpg" class="right-sidebar-avatar rounded-circle" />
+                    <div class="lh-1">
+                        <span class="username">prof_smart</span>
+                        <div class="d-flex mt-1">
+                            <span class="text-muted fs-8 ms-1">Suggested for you</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="small-transparent-btn instagram-blue fw-semibold hover-darken js-suggested-follow">Follow</button>
+            </div>
+
+            <div class="user-row d-flex justify-content-between align-items-center">
+                <div class="user-info d-flex align-items-center gap-2">
+                    <img src="elements/media/profile-pictures/joe_bama.jpg" class="right-sidebar-avatar rounded-circle" />
+                    <div class="lh-1">
+                        <span class="username">joe_bama</span>
+                        <div class="d-flex mt-1">
+                            <img src="elements/media/profile-pictures/abba.band.jpg" class="followed-by-profile-pic rounded-circle" alt="Image">
+                            <img src="elements/media/profile-pictures/yardenaaa_.jpg" class="followed-by-profile-pic rounded-circle" alt="Image">
+                            <span class="text-muted fs-8 ms-1 ">Followed by abba.band + 4</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="small-transparent-btn instagram-blue fw-semibold hover-darken js-suggested-follow">Follow</button>
+            </div>
+        </div>
+    </div> <!-- buttons -->
+    <div class="mt-4">
+        <a href="#!" class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover fs-8">About</a>
+        <span class="point text-muted cursor-default">&bull;</span>
+        <a href="#!" class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover fs-8">Help</a>
+        <span class="point text-muted cursor-default">&bull;</span>
+        <a href="#!" class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover fs-8">Press</a>
+        <span class="point text-muted cursor-default">&bull;</span>
+        <a href="#!" class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover fs-8">API</a>
+        <span class="point text-muted cursor-default">&bull;</span>
+        <a href="#!" class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover fs-8">Jobs</a>
+        <span class="point text-muted cursor-default">&bull;</span>
+        <a href="#!" class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover fs-8">Privacy</a>
+        <span class="point text-muted cursor-default">&bull;</span>
+        <a href="#!" class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover fs-8">Terms</a>
+        <span class="point text-muted cursor-default">&bull;</span>
+    </div>
+    <div class="p-0">
+        <a href="#!" class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover fs-8">Locations</a>
+        <span class="point text-muted cursor-default">&bull;</span>
+        <a href="#!" class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover fs-8">Language</a>
+        <span class="point text-muted cursor-default">&bull;</span>
+        <a href="#!" class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover fs-8">Meta Verified</a>
+    </div>
+    <div class="mt-3">
+        <span class="text-muted fs-8">&copy; 2026 INSTAGRAM FROM BEST TEAM EVER :)</span>
+    </div>
+  </div>
+</main>
+
+<!-- Messages Box -->
+<div class="js-messages-capsule messages rounded-pill position-fixed z-5 shadow-lg px-3 py-3" onclick="openMessagesPopup()">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <button class= "bi bi-send fs-5 fw-bold bg-transparent border-0 p-0" > </button>
+            <span class="ms-2 fw-semibold messages-text">Messages</span>
+        </div>
+        <div>
+            <div class="d-flex align-items-center ms-5">
+                <div class="message-profile">
+                    <img src="elements/media/profile-pictures/jamil.abukhaima.jpg" class="message-alert-profile-pic rounded-circle" alt="Image">
+                    <span class="text-bubble">Jamil</span>
+                </div>
+                <div class="message-profile">
+                    <img src="elements/media/profile-pictures/sara22.jpg" class="message-alert-profile-pic rounded-circle" alt="Image">
+                    <span class="text-bubble">Sara Haya</span>
+                </div>
+                <div class="message-profile">
+                    <img src="elements/media/profile-pictures/tomer19.jpg" class="message-alert-profile-pic rounded-circle" alt="Image">
+                    <span class="text-bubble">TOMER ;)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- comment popup -->
+<div class="comment-popup-background dark-overlay d-none align-items-center justify-content-center" onclick="closePopupComment(event, false)">
+    <div class="comment-popup-container d-flex">
+        <div class="comment-popup-post d-flex align-items-center justify-content-center bg-dark position-relative"></div>
+        <div class="comment-popup-comments d-flex flex-column">
+            <div class="js-popup-header-slot p-3 border-bottom"></div>
+            <div class="js-popup-comments-slot flex-grow-1 overflow-y-auto"></div>
+            <div class="js-popup-icons-slot px-3 py-2 border-top">
+                <div class="d-flex justify-content-between js-icon-line"> <!-- For the icons line -->
+                    <div class="d-flex"> <!-- Like Comment and share-->
+                        <div class="d-flex align-items-center js-like-container">
+                            <button class= "bi bi-heart fs-4 fw-bold bg-transparent border-0 p-0 post-icons" onclick="likePost(this)"> </button>  <!-- Button - because of the cursor change -->
+                        </div>
+                        <div class="d-flex align-items-center ms-3">
+                            <button class= "bi bi-chat fs-4 fw-bold bg-transparent border-0 p-0 post-icons" onclick="document.querySelector('.js-comment-input').focus()"> </button>
+                        </div>
+                        <div class="d-flex align-items-center ms-3">
+                            <button class= "bi bi-send fs-4 fw-bold bg-transparent border-0 p-0 post-icons" onclick="openSharePopup(this)"> </button>
+                        </div>
+                    </div>
+                    <button class="js-save-button bi bi-bookmark fs-4 fw-bold bg-transparent border-0 p-0 post-icons" onclick="savePost(this)"></button> <!-- Save icon -->
+                </div>
+                <div class="js-popup-likedBy-slot mt-3"></div>
+            </div>
+            <div class="js-popup-add-comment-slot px-3 py-2 md-2 border-top d-flex align-items-center">
+                <button class="bg-transparent border-0 bi bi-emoji-smile fs-4 me-3"></button>
+                <input type="text" class="js-comment-input form-control border-0 shadow-none flex-grow-1 p-0" placeholder="Add a comment...">
+                <button class="js-post-button btn text-primary fw-bold ms-2 p-0 opacity-50 pe-none" onclick="publishNewComment()">Post</button>
+            </div>
+        </div>
+    </div>
+    <button class="bi bi-x-lg white-close-btn hover-extend"></button>
+</div>
+
+<div class="dark-overlay create-form-overlay align-items-center justify-content-center d-none">
+
+    <div class="create-form-container">
+
+        <div class="create-post-header js-post-header">
+            <button class="bi bi-arrow-left back-post-btn js-back-post-btn hover-extend d-none"></button>
+            <span class="header-title">Create new post</span>
+            <button class="upload-post-btn instagram-blue hover-underline js-upload-post-btn d-none">Share</button>
+        </div>
+
+        <div class="create-form-body js-upload-form">
+
+            <img src="./elements/icons/image-and-video-logo.jpg" class="create-form-icon text-dark">
+
+            <p class="fs-5 text-dark mb-1 fw-normal">Drag photos and videos here</p>
+
+            <button type="button" class="upload-from-computer-btn create-post-form-btn instagram-blue-bg hover-darken-slight mt-2">
+                Select from computer
+            </button>
+            <button type="button" class="create-text-post-btn create-post-form-btn instagram-blue-bg hover-darken-slight mt-2">
+                Create Text Post
+            </button>
+            <input type="file" class="js-file-input d-none" accept="image/*,video/*">
+        </div>
+
+        <div class="create-form-details js-form-details d-none">
+            <div class="media-src">
+                <img src="" class="js-preview-img preview-media d-none" alt="Preview">
+                <video src="" class="js-preview-video preview-media d-none" controls autoplay></video>
+                <textarea class="js-preview-text preview-media d-none" placeholder="Write post text..."></textarea>
+            </div>
+            <div class="post-metadata">
+                <div class="caption-container">
+                    <div class="user-profile-container">
+                        <img src="elements/media/profile-pictures/besteam_ever.jpg" class="form-profile-pic rounded-circle" alt="Profile">
+                        <span class="form-username">besteam_ever</span>
+                    </div>
+                    <textarea class="form-control caption-input js-caption-input" placeholder="Write a caption..."></textarea>
+                </div>
+                <div class="post-settings">
+
+                    <div class="location-container">
+                        <input type="text" class="form-control js-location-input location-input" placeholder="Add location">
+                        <div class="bi bi-geo-alt text-muted ms-auto pe-2"></div>
+                    </div>
+
+                    <div class="user-profile-container">
+                        <img src="elements/media/profile-pictures/besteam_ever.jpg" class="form-profile-pic rounded-circle" alt="Profile">
+                        <span class="form-username">besteam_ever</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <button class="bi bi-x-lg white-close-btn hover-extend"></button>
+
+</div>
+
+<div class="dark-overlay discard-overlay js-discard-overlay d-none">
+    <div class="discard-container">
+        <div class="p-4 text-center">
+            <h5 class="fw-bold mb-1 fs-5">Discard Post?</h5>
+            <span class="text-muted fs-7">If you leave, your edits won't be saved.</span>
+        </div>
+        <button class="discard-btn js-discard-btn">Discard</button>
+        <button class="cancel-discard-btn js-cancel-discard-btn">Cancel</button>
+    </div>
+</div>
+
+<div class="new-post-notification-bubble js-new-post-notification">
+    <span class="fw-semibold">New Post created !</span>
+</div>
+
+<!-- share popup -->
+<div class="share-popup-background dark-overlay d-none align-items-center justify-content-center" onclick="closeSharePopup(event)">
+    <div class="share-popup-container bg-white rounded-4 d-flex flex-column position-relative">
+
+        <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+            <div class="fw-bold fs-5 mx-auto">Share</div>
+            <button class="bg-transparent border-0 bi bi-x fs-3 position-absolute end-0 me-3" onclick="closeSharePopup(event, true)"></button>
+        </div>
+
+        <div class="p-3 border-bottom">
+            <input type="text" class="js-share-search-input form-control bg-light border-0 shadow-none" placeholder="Search..." oninput="searchShareFriends(this.value)">
+        </div>
+
+        <div class="overflow-y-auto p-3 flex-grow-1">
+        </div>
+
+        <div class="p-3 border-top">
+            <button class="btn btn-primary w-100 fw-bold py-2 js-send-share-btn" onclick="sendSharedPost()">Send</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- mesaages popup -->
+<div class="messages-popup-container bg-white rounded-4 shadow border d-flex flex-column position-fixed bottom-0 end-0 me-3 mb-3 d-none">
+    <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+        <div class="fw-bold fs-5">Messages</div>
+        <button class="bg-transparent border-0 bi bi-x fs-4" onclick="closeMessagesPopup()"></button>
+    </div>
+    <div class="overflow-y-auto p-2 flex-grow-1 js-messages-list-container contain-scroll">
+    </div>
+</div>
+
+
+<!-- specific chat -->
+<div class="chat-window-container bg-white rounded-4 shadow border d-flex flex-column position-fixed bottom-0 end-0 me-3 mb-3 d-none">
+
+    <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+        <button class="bg-transparent border-0 bi bi-arrow-left fs-4" onclick="backToMessages()"></button>
+        <div class="d-flex align-items-center gap-2 js-chat-header-info">
+        </div>
+        <button class="bg-transparent border-0 bi bi-x fs-4" onclick="closeChatWindow()"></button>
+    </div>
+
+    <div class="overflow-y-auto p-3 flex-grow-1 js-chat-history-container contain-scroll white-back">
+    </div>
+
+    <div class="p-3 border-top bg-white rounded-bottom-4">
+        <div class="border rounded-pill px-3 py-2 d-flex align-items-center gap-2">
+            <span class="bi bi-emoji-smile fs-5 text-muted"></span>
+            <input type="text" class="js-chat-message-input border-0 shadow-none flex-grow-1 bg-transparent" placeholder="Message..." onkeydown="handleChatInput(event)">
+            <span class="bi bi-mic fs-5 text-muted"></span>
+            <span class="bi bi-image fs-5 text-muted"></span>
+        </div>
+    </div>
+
+</div>
+<script src="javascript/stories.js"></script>
+<script src="javascript/events.js"></script>
+<script src="javascript/notifications.js"></script>
+<script src="javascript/post-buttons.js"></script>
+<script src="javascript/messages.js"></script>
+<script src="javascript/posts.js"></script>
+</body>
+</html>

