@@ -1,0 +1,467 @@
+.main-page {
+    width: 75%;
+    margin: auto;
+
+}
+
+.menu-item i {
+    display: flex;
+    font-size: 24px;
+    margin-bottom: 3px;
+    -webkit-text-stroke: 0.3px currentColor;
+    gap: 16px;
+    color: inherit;
+}
+
+.menu-item a {
+    display: flex;
+    font-size: 26px !important;
+    -webkit-text-stroke: 0.3px currentColor;
+    align-items: center;
+    gap: 16px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.menu-item a:hover {
+    color: inherit;
+}
+
+.hover-underline:hover {
+    text-decoration: underline;
+}
+
+.hover-darken {
+    transition: filter 0.2s ease;
+}
+
+.hover-darken:hover {
+    filter: brightness(65%);
+}
+
+.hover-darken-slight {
+    transition: filter 0.2s ease;
+}
+
+.hover-darken-slight:hover {
+    filter: brightness(95%);
+}
+
+.hover-extend {
+    transition: transform 0.2s ease; 
+}
+
+.hover-extend:hover {
+    transform: scale(1.05); 
+}
+
+.instagram-blue {
+    color: #4150F7;
+}
+
+.instagram-blue-bg {
+    background-color: #4150F7;
+}
+
+.small-transparent-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 12px;
+}
+
+.white-arrow {
+    width: 28px;
+    height: 28px;
+    transition: background-color 0.2s ease;
+    background-color: rgba(255, 255, 255, 0.85);
+}
+
+.white-arrow:hover,
+.white-arrow:focus {
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.dark-overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(12, 16, 20, 0.7);
+    z-index: 11;
+}
+
+.white-close-btn {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 18px;
+    -webkit-text-stroke: 0.5px white;
+}
+
+/* Posts */
+
+body.dark-mode .instagram-posts .card,
+body.dark-mode .instagram-posts .card-header,
+body.dark-mode .instagram-posts .card-body {
+    background-color: #0C1014 !important;
+    color: white !important;
+}
+
+body.dark-mode .instagram-posts .text-dark,
+body.dark-mode .instagram-posts .text-muted,
+body.dark-mode .instagram-posts .small-text,
+body.dark-mode .instagram-posts small,
+body.dark-mode .instagram-posts a,
+body.dark-mode .instagram-posts span,
+body.dark-mode .instagram-posts p,
+body.dark-mode .instagram-posts button,
+body.dark-mode .instagram-posts .post-icons,
+body.dark-mode .instagram-posts .bi-three-dots {
+    color: white !important;
+}
+
+/* Messages */
+
+body.dark-mode .messages {
+    background-color: rgb(56, 57, 62);
+    color: white;
+}
+
+body.dark-mode .bi-send {
+    color: white;
+}
+
+/* Buttons */
+
+body.dark-mode .btn-gray {
+    background-color: #262B33 !important;
+    color: white !important;
+    border-color: #262B33 !important;
+}
+
+body.dark-mode .messages:hover {
+    background-color: rgb(72, 73, 80);
+}
+
+body.dark-mode .right-sidebar .text-muted {
+    color: #6c757d !important;
+}
+
+.stories-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    user-select: none;
+}
+
+.story-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #111;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.story-modal img {
+    max-width: 400px;
+    max-height: 90vh;
+    border-radius: 12px;
+}
+
+#closeStory {
+    margin-top: -15px;
+    position: fixed;
+    top: 20px;
+    right: 25px;
+    font-size: 35px;
+    color: white;
+    cursor: pointer;
+    z-index: 20;
+    
+}
+
+
+.instagram-logo {
+    position: fixed;
+
+    top: -18px !important;
+    left: -15px;
+
+    z-index: 18;
+}
+
+.instagram-logo img {
+    width: 200px !important;
+    height: auto;
+}
+
+
+.story-view {
+    width: 380px;
+    height: 700px;
+    background: black;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+}
+
+#storyImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.story-header {
+    position: absolute;
+    width: 90%;
+    top: 15px;
+    left: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 999;
+    color: white;
+}
+
+.story-header-avatar {
+    margin-top: 8px;
+    width: 35px !important;
+    height: 35px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+}
+
+.story-progress {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+
+    width: 0%;
+    height: 3px;
+
+    background: white !important;
+    z-index: 10;
+}
+
+.story-progress-bg {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+
+    height: 2px;
+
+    background: rgba(255,255,255,0.3);
+
+    border-radius: 999px;
+
+    z-index: 9;
+}
+
+.story-reply {
+    width: 100%;
+    background: transparent;
+    border: 1px solid white;
+    border-radius: 30px;
+    padding: 12px 70px 12px 15px;
+    color: white;
+}
+.story-reply::placeholder {
+    color: rgba(255,255,255,.8);
+}
+
+.story-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 15px;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    align-items: center;
+    z-index: 20;
+}
+
+.story-footer {
+    position: absolute;
+    bottom: 20px;
+    left: 15px;
+    right: 15px;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    z-index: 100;
+}
+
+.reply-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.send-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    color: #ffffff;
+    font-weight: 600;
+
+    display: none;
+    cursor: pointer;
+}
+
+.story-icon {
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+
+.stories-viewer {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+/* User preview shown on side stories */
+
+.side-story {
+    position: relative;
+}
+
+.side-story-user {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    color: white;
+    font-weight: bold;
+    z-index: 10;
+}
+
+.story-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+
+    width: 30px;
+    height: 30px;
+
+    background: white;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: black;
+    cursor: pointer;
+    z-index: 9999;
+}
+
+.story-nav-left {
+    left: 10px;
+    opacity: 0.7;
+}
+
+.story-nav-right {
+    right: 10px;
+    opacity: 0.7;
+}
+
+.story-nav i {
+    font-size: 14px;
+}
+
+.hover-darken {
+    transition: filter 0.2s ease;
+}
+
+.hover-darken:hover {
+    filter: brightness(65%);
+}
+
+.story-item {
+    flex-shrink: 0;
+}
+
+.stories-scroll:active {
+    cursor: grabbing;
+}
+
+.story-name {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.story-time {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+
+.side-story-user img {
+    width: 70px !important;
+    height: 70px !important;
+
+    border-radius: 50% !important;
+    object-fit: cover !important;
+
+    border: 3px solid white;
+    margin-bottom: 10px;
+}
+
+
+.side-story-far img,
+.side-story img {
+    width: 180px;
+    height: 320px;
+    object-fit: cover;
+    border-radius: 15px;
+    filter: brightness(60%);
+}
+
+#backToTop {
+    position: sticky;
+    top: 15px;
+    margin: 0 auto -30px auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(250, 250, 250, 0.76);
+    text-align: center;
+    font-size: 17px;
+    cursor: pointer;
+    z-index: 8;
+    transition: all 0.3s ease;
+    border: none;
+    display: none;
+}
+
+#backToTop,
+#backToTop *,
+#backToTop i {
+    color: rgb(0, 0, 0) !important;
+}
+
+#backToTop i {
+    position: relative;
+    left: -1px;
+    top: 1px;
+    
+}
