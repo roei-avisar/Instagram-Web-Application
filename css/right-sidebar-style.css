@@ -1,0 +1,57 @@
+.right-sidebar {
+    top: 40px;
+    width: 280px;
+    margin-top: 35px;
+}
+
+.right-sidebar-avatar {
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+}
+
+.fs-7 {
+    font-size: 14px;
+}
+
+.fs-8 {
+    font-size: 12px;
+}
+
+.right-sidebar .username {
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 650;
+}
+.followed-by-profile-pic{
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    object-fit: cover;
+    transition: opacity 0.2s ease-in-out;
+
+    position: relative; /* while opacity is on the photo stay in it place */
+    z-index: 1;
+}
+.followed-by-profile-pic:hover {
+    opacity: 0.8;
+}
+.followed-by-profile-pic + .followed-by-profile-pic {  /*while to "followed by" photos were merged*/
+    margin-left: -4px;
+    box-shadow: 0 0 0 2px white;
+}
+.point{
+    font-size: 6px;
+}
+.cursor-default {
+    cursor: default !important;
+}
+
+.following-state-btn {
+    color: #262626;
+    border: 1px solid #030303;
+    border-width: 2px;
+    border-radius: 8px;
+    padding: 2px 8px;
+    background-color: transparent;
+}

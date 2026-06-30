@@ -1,0 +1,30 @@
+.right-sidebar-avatar {
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+}
+
+.story-avatar {
+  width: 74px;
+  height: 74px;
+  box-sizing: content-box; /* Don't include border in the size of the avatar */
+}
+
+.profile-circle {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  border-radius: 50%;
+  padding: 2px;
+
+}
+
+.profile-circle img {
+    border: 2px solid white;
+    padding: 0;
+}
+
+
+.post-profile-pic{
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+}
