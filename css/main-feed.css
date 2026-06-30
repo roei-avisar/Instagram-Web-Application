@@ -1,0 +1,303 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.main-feed-section {
+  width: 100%;
+  margin: auto;
+  max-width: 668px; /* This width can contain 6 story items. It's calculated as 6 * 90px + 5 * 16px (stories-scroll gap) + 2 * 16px (stories-div padding) + 2 * 8px (stories-scroll padding) */
+}
+
+.stories-div {
+  width: 100%;
+}
+
+.stories-scroll {
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+}
+
+.story-item {
+  scroll-snap-align: start;
+  cursor: pointer;
+  flex-shrink: 0;
+  max-width: 90px;
+}
+
+.story-username {
+  font-size: 12px;
+  font-family: sans-serif;
+  color: #262626;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  max-width: 100%;
+}
+
+.instagram-posts{
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.main-post{
+    width: 100%;
+    height: auto;
+    object-fit: cover; /* If the photo doesn't fit it will cut the sides*/
+
+}
+.liked-by-profile-pic{
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    object-fit: cover;
+    transition: opacity 0.2s ease-in-out;
+    position: relative; /* while opacity is on the photo stay in it place */
+    z-index: 1;
+}
+.liked-by-profile-pic:hover {
+    opacity: 0.8; 
+}
+.liked-by-profile-pic + .liked-by-profile-pic {
+    margin-left: -6px;
+    box-shadow: 0 0 0 2px white;
+}
+.small-text{
+    font-size: 14px;
+}
+.text-12 {
+    font-size: 12px;
+}
+.tiny-icon-background {
+    width: 30px;
+    height: 30px;
+}
+.post-icons{
+transition: transform 0.2s ease-in-out;
+}
+.post-icons:hover{
+transform: scale(1.05);
+}
+.joint-first-profile-pic{
+    width: 24px;
+    height: 24px;
+}
+.joint-second-profile-pic{
+    width: 24px;
+    height: 24px;
+    margin-left: -18px;
+    transform: translateY(-8px);
+}
+.btn-gray {
+    background-color: #f0f2f5;
+    color: #0c1014;
+    border-radius: 8px;
+    padding: 5px 16px;
+    transition: none;
+}
+.btn-gray:hover {
+    background-color: #dbdbdb; 
+}
+.verified-icon{
+    font-size: 12px;
+    background: radial-gradient(circle, white 45%, transparent 50%);
+}
+
+.post-options-dropdown {
+
+    position: absolute;
+    left: 0;
+    background-color: white;
+    border: 1px solid #dbdbdb;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 130px;
+    z-index: 10;
+    padding: 4px;
+}
+
+.delete-post-btn {
+    background: none;
+    border: none;
+    color: #ff3b30;
+    width: 100%;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.delete-post-btn:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+.search-container {
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.posts-search-input {
+    background-color: #efefef;
+    border: none;
+    border-radius: 100px;
+    padding: 10px 24px;
+    font-size: 14px;
+}
+
+.posts-search-input:focus {
+    background-color: #efefef;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.posts-search-input::placeholder {
+    color: #8e8e8e;
+    font-weight: 400;
+}
+
+.text-post-container {
+    width: 100%;
+    min-height: 400px;
+    background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); 
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+}
+
+.text-post-content {
+    color: #262626;
+    font-size: 18px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    line-height: 1.4;
+    max-width: 90%;
+}
+@keyframes press-button-pop { /*animation to the like button when the user press like*/
+  0% 
+  {
+    transform: scale(1);
+  }
+  50% 
+  {
+    transform: scale(1.3);  }
+  100% 
+  {
+  
+    transform: scale(1);
+  }
+}
+.buttons-pop-animation {
+  animation-name: press-button-pop;
+  animation-duration: 0.3s;
+}
+.dark-overlay{
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(12, 16, 20, 0.7);
+    position: fixed;
+    z-index: 10;
+}
+.comment-popup-container{
+    width: 65vw;
+    height: 95vh;
+    background-color: white;
+    border-radius: 0 8px 8px 0; 
+    z-index: 11;
+}
+.comment-popup-post{
+    height: 100%;
+    min-width: 50%;
+}
+.comment-popup-post .js-post-media {
+    width: 100%; 
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.comment-popup-post img,  .comment-popup-post video{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    
+}
+.comment-popup-comments{
+    min-width: 40%;
+    height: 100%;
+    flex: 1;
+}
+
+@keyframes popuping-comment { /*animation to the comment popup when the user press comment*/
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.comment-popup-animation {
+  animation-name: popuping-comment;
+  animation-duration: 0.2s;
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation-fill-mode: forwards;
+}
+.someone-is-typing {
+    font-size: 16px;
+    color: #8e8e8e;
+}
+
+.typing-dots span {
+    display: inline-block;
+    font-size: 24px;
+    animation: dotsFrame 1.8s infinite ease-in-out both;
+}
+
+.typing-dots span:nth-child(1) { animation-delay: -0.64s; }
+.typing-dots span:nth-child(2) { animation-delay: -0.32s; }
+
+@keyframes dotsFrame {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+.js-popup-comments-slot {
+    scroll-behavior: smooth;
+}
+.share-popup-container {
+    width: 400px;
+    max-height: 80vh;
+    z-index: 12;
+}
+.messages-popup-container {
+    width: 350px;
+    height: 500px;
+    z-index: 20;
+}
+
+.chat-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.chat-row:hover {
+    background-color: #f8f9fa;
+}
+.chat-window-container {
+    width: 350px;
+    height: 500px;
+    z-index: 21;
+}
+.contain-scroll {
+    overscroll-behavior: contain;
+}
+.white-back{
+background-color: #fafafa;
+}

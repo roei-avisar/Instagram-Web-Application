@@ -1,0 +1,67 @@
+.messages{
+    bottom: 30px;
+    right: 40px;
+    width: 251px;
+    height: 56px;
+    cursor: pointer;
+    background-color: #ffffff;
+    transition: background-color 0.2s ease-in-out;
+}
+.messages:hover {
+    background-color: #efefef;
+}
+.message-alert-profile-pic{
+    width: 24px;
+    height: 24px;
+    object-fit: cover;
+    transition: opacity 0.2s ease-in-out;
+    position: relative; /* while opacity is on the photo stay in it place */
+    z-index: 1;
+}
+.messages-text{
+    font-size: 16px;
+}
+.message-profile{
+    position: relative;
+    display: inline-flex;
+}
+.message-profile + .message-profile {
+    margin-left: -6px;
+}
+.message-profile + .message-profile img {
+    box-shadow: 0 0 0 2px white;
+}
+.text-bubble {
+    position: absolute;
+    bottom: 130%; 
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    color: black;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease-in-out;
+}
+
+.text-bubble::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+}
+
+.message-profile:hover .text-bubble {
+    opacity: 1; 
+    visibility: visible;
+    bottom: 130%;
+}

@@ -1,0 +1,203 @@
+/* Global backgrounds */
+body.dark-mode,
+body.dark-mode .bg-white,
+body.dark-mode .white-back,
+body.dark-mode .left-sidebar,
+body.dark-mode .right-sidebar,
+body.dark-mode .stories-div,
+body.dark-mode .card,
+body.dark-mode .card-header,
+body.dark-mode .card-body,
+body.dark-mode .comment-popup-container,
+body.dark-mode .messages-popup-container,
+body.dark-mode .chat-window-container,
+body.dark-mode .share-popup-container,
+body.dark-mode .notifications-panel {
+    background-color: #0C1014 !important;
+    color: white !important;
+}
+
+/* Secondary Backgrounds */
+body.dark-mode .bg-light,
+body.dark-mode .chat-row:hover,
+body.dark-mode .menu-item:hover,
+body.dark-mode .btn-gray {
+    background-color: #262B33 !important;
+    color: white !important;
+    border-color: #262B33 !important;
+}
+
+/* Global Text Colors */
+body.dark-mode .text-dark,
+body.dark-mode .link-dark,
+body.dark-mode .username,
+body.dark-mode .story-username,
+body.dark-mode .small-text,
+body.dark-mode h4,
+body.dark-mode button,
+body.dark-mode span,
+body.dark-mode p,
+body.dark-mode a,
+body.dark-mode .bi-three-dots,
+body.dark-mode .bi-send,
+body.dark-mode .post-icons {
+    color: white !important;
+}
+
+/* Global Muted Text */
+body.dark-mode .text-muted {
+    color: #a8a8a8 !important;
+}
+
+/* Global Borders */
+body.dark-mode .border,
+body.dark-mode .border-top,
+body.dark-mode .border-bottom,
+body.dark-mode .border-right,
+body.dark-mode .border-left {
+    border-color: #262B33 !important;
+}
+/* Inputs */
+body.dark-mode input,
+body.dark-mode textarea {
+    background-color: transparent !important;
+    color: white !important;
+}
+
+body.dark-mode .delete-post-btn,
+body.dark-mode .instagram-posts .delete-post-btn,
+body.dark-mode .instagram-posts .delete-post-btn span {
+    color: #ff3b30 !important;
+}
+
+/* Following */
+body.dark-mode .following-state-btn {
+    color: white !important;
+    border-color: #8e8e8e !important;
+}
+
+body.dark-mode .left-sidebar img:not(.profile-avatar) {
+    filter: invert(1);
+}
+
+body.dark-mode .messages {
+    background-color: rgb(56, 57, 62);
+    color: white;
+}
+body.dark-mode .messages:hover {
+    background-color: rgb(72, 73, 80);
+}
+
+body.dark-mode .filter-menu-dropdown {
+    background-color: #0C1014 !important;
+    border: 1px solid #262B33 !important;
+}
+
+body.dark-mode .filter-menu-dropdown h6,
+body.dark-mode .filter-menu-dropdown label {
+    color: white !important;
+}
+
+body.dark-mode .js-share-search-input {
+    background-color: #262B33 !important;
+    color: white !important;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: #a8a8a8 !important;
+}
+
+body.dark-mode .create-form-container,
+body.dark-mode .post-metadata,
+body.dark-mode .discard-container {
+    background-color: #0C1014 !important;
+}
+
+body.dark-mode .create-post-header,
+body.dark-mode .media-src,
+body.dark-mode .location-container,
+body.dark-mode .user-profile-container,
+body.dark-mode .discard-btn,
+body.dark-mode .cancel-discard-btn {
+    border-color: #262B33 !important;
+}
+
+body.dark-mode .header-title,
+body.dark-mode .form-username,
+body.dark-mode .cancel-discard-btn,
+body.dark-mode .discard-container h5 {
+    color: white !important;
+}
+
+body.dark-mode .upload-post-btn {
+    color: #4150F7 !important;
+}
+body.dark-mode .discard-btn {
+    color: #ed4956 !important;
+}
+
+body.dark-mode .discard-btn:hover,
+body.dark-mode .cancel-discard-btn:hover {
+    background-color: #262B33 !important;
+}
+
+body.dark-mode .create-form-icon {
+    filter: invert(1) brightness(0.8);
+}
+
+body.dark-mode .js-preview-text {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
+    color: white !important;
+}
+body.dark-mode .js-preview-text::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+body.dark-mode span.text-primary{ /* for the verfied icon still be blue */
+    color: #0d6efd !important;
+}
+
+body.dark-mode .bi-heart-fill.text-danger { /* for the like icon still be red */
+    color: #ed4956 !important;
+}
+body.dark-mode .js-posts-search-input {
+    background-color: #262B33 !important; 
+    color: white !important;
+    border: none !important;
+}
+
+body.dark-mode .js-posts-search-input::placeholder {
+    color: #a8a8a8 !important;
+}
+
+body.dark-mode #storyModal input.story-reply {
+    background-color: transparent !important;
+    color: white !important;
+    border: 1px solid rgba(255,255,255,0.4) !important;
+}
+
+body.dark-mode #storyModal input.story-reply::placeholder {
+    color: rgba(255,255,255,0.8) !important;
+}
+
+body.dark-mode .white-arrow {
+    background-color: #262B33 !important; 
+    border-color: #3a3f47 !important; 
+}
+
+body.dark-mode .white-arrow .bi {
+    color: #ffffff !important; 
+}
+
+body.dark-mode #storyModal .story-nav {
+    background-color: rgba(38, 43, 51, 0.8) !important;
+    border-radius: 50%;
+}
+
+body.dark-mode #storyModal .story-nav i {
+    color: #ffffff !important;
+}
+body.dark-mode #storyModal .bi-heart-fill.text-danger {
+    color: #ed4956 !important;
+}
