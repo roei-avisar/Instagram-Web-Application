@@ -1,0 +1,25 @@
+{
+  "name": "internet-web-apps",
+  "version": "1.0.0",
+  "description": "A web-based Instagram clone demonstrating core social media functionalities, featuring a interactive user interface built with HTML, CSS, Bootstrap and JavaScript.\r Since we currently use only HTML, CSS, Bootstrap and Javascript, all of our users are fake and any changes made (deleting posts, sending messages) are ephemeral and will not be saved.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/internet-web-applications/Internet-web-apps.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://gitlab.com/internet-web-applications/Internet-web-apps/issues"
+  },
+  "homepage": "https://gitlab.com/internet-web-applications/Internet-web-apps#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongoose": "^9.9.1"
+  }
+}
