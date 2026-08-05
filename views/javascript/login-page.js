@@ -52,5 +52,33 @@ function handleLogin() {
     return;
   }
 
-  window.location.href = './main-page.html';
+  // --- Send login request to server ---
+  const loginBtn = document.querySelector('.btn-login');
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'Logging in...';
+
+  fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identifier: username, password: password })
+  })
+    .then(response => response.json().then(data => ({ status: response.status, data })))
+    .then(({ status, data }) => {
+      if (status === 200) {
+        // Login successful — redirect to main page
+        window.location.href = '/main';
+      } else {
+        // Show server error message
+        errorText.innerHTML = data.error + ' <a href="#">Find your account and log in.</a>';
+        errorBox.style.display = 'flex';
+      }
+    })
+    .catch(() => {
+      errorText.innerHTML = 'Connection error. Please try again. <a href="#">Find your account and log in.</a>';
+      errorBox.style.display = 'flex';
+    })
+    .finally(() => {
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Log in';
+    });
 }
