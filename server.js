@@ -2,13 +2,13 @@ require('dotenv').config(); // load .env variables
 const express = require('express'); // import to express framework
 const path = require('path'); // import to path library
 const session = require('express-session');
-const { MongoStore } = require('connect-mongo');
+const { MongoStore } = require('connect-mongo'); //allows you to save user session in mongodb
 const { connectDB, getMongoURI } = require('./db');
 const authRoutes = require('./routes/auth');
 const { requireLogin } = require('./middleware/auth');
 
 const app = express(); // app is our server
-const port = 3000;
+const port = 3301;
 
 // Connect to MongoDB
 connectDB();
@@ -19,12 +19,12 @@ app.use(express.urlencoded({ extended: true })); // parse form data
 
 // Session configuration
 app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
+  secret: process.env.SESSION_SECRET, // secret key for saving user session
+  resave: false, // prevents saving session if it wasn't changed
+  saveUninitialized: false, // prevents saving session if it wasn't initialized
   store: MongoStore.create({
-    mongoUrl: getMongoURI(),
-    collectionName: 'sessions'
+    mongoUrl: getMongoURI(), // store session in mongodb
+    collectionName: 'sessions' // collection name for sessions
   }),
   cookie: {
     maxAge: 1000 * 60 * 60 * 24 // 1 day
@@ -32,7 +32,7 @@ app.use(session({
 }));
 
 // Auth API routes
-app.use('/api', authRoutes);
+app.use('/api', authRoutes); // routes for login, logout, register and puts /api in front of the routes in auth.js
 
 // Login page — publicly accessible
 app.get('/', (req, res) => {
@@ -49,7 +49,7 @@ app.get('/main', requireLogin, (req, res) => {
 });
 
 // Serve static files from views folder (css, js, images etc.)
-app.use(express.static(path.join(__dirname, 'views'))); // if the client will ask for a file in our "views" folder we will return it to him (like js or css files)
+app.use(express.static(path.join(__dirname, 'views'))); // if the client will ask for a file it will check if it's in the views folder and if it is it will return it to the client 
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`); // runing the server by "node server.js" on console

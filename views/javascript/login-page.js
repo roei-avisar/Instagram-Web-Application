@@ -37,7 +37,7 @@ function handleLogin() {
     errorBox.style.display = 'flex';
     return;
   }
-  
+
   if (!password) {
     errorText.innerHTML =
       'Please enter your password. <a href="#">Find your account and log in.</a>';
@@ -52,10 +52,10 @@ function handleLogin() {
     return;
   }
 
-  // --- Send login request to server ---
+  // Send Login Request To Server
   const loginBtn = document.querySelector('.btn-login');
-  loginBtn.disabled = true;
-  loginBtn.textContent = 'Logging in...';
+  loginBtn.disabled = true; // disable login button so user won't click it twice
+  loginBtn.textContent = 'Logging in...'; // change login button text to loading
 
   fetch('/api/login', {
     method: 'POST',
@@ -69,16 +69,125 @@ function handleLogin() {
         window.location.href = '/main';
       } else {
         // Show server error message
-        errorText.innerHTML = data.error + ' <a href="#">Find your account and log in.</a>';
+        errorText.innerHTML = data.error + ' <a href="#">Find your account and log in.</a>'; //will add forgot password later
         errorBox.style.display = 'flex';
       }
     })
     .catch(() => {
-      errorText.innerHTML = 'Connection error. Please try again. <a href="#">Find your account and log in.</a>';
+      errorText.innerHTML = 'Connection error. Please try again. <a href="#">Find your account and log in.</a>'; //will add forgot password later
       errorBox.style.display = 'flex';
     })
     .finally(() => {
       loginBtn.disabled = false;
       loginBtn.textContent = 'Log in';
+    });
+}
+
+// ========== SIGNUP MODAL ==========
+
+function openSignupModal() {
+  document.getElementById('signupModal').classList.add('active');
+  // Reset form when opening
+  document.getElementById('signup-email').value = '';
+  document.getElementById('signup-phone').value = '';
+  document.getElementById('signup-username').value = '';
+  document.getElementById('signup-password').value = '';
+  document.getElementById('signup-error-box').style.display = 'none';
+  document.getElementById('signup-success-box').style.display = 'none';
+}
+
+function closeSignupModal() {
+  document.getElementById('signupModal').classList.remove('active');
+}
+
+// Close modal when clicking on the dark overlay (outside the box)
+document.getElementById('signupModal').addEventListener('click', function (e) {
+  if (e.target === this) {
+    closeSignupModal();
+  }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    closeSignupModal();
+  }
+});
+
+function handleSignup() {
+  const email = document.getElementById('signup-email').value.trim();
+  const phone = document.getElementById('signup-phone').value.trim();
+  const username = document.getElementById('signup-username').value.trim();
+  const password = document.getElementById('signup-password').value;
+  const errorBox = document.getElementById('signup-error-box');
+  const errorText = document.getElementById('signup-error-text');
+  const successBox = document.getElementById('signup-success-box');
+  const successText = document.getElementById('signup-success-text');
+  const signupBtn = document.getElementById('signupBtn');
+
+  // Hide previous messages
+  errorBox.style.display = 'none';
+  successBox.style.display = 'none';
+
+  // Validation
+  if (!email && !phone) {
+    errorText.textContent = 'Please provide at least an email or phone number.';
+    errorBox.style.display = 'flex';
+    return;
+  }
+
+  if (email) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      errorText.textContent = 'Please enter a valid email address.';
+      errorBox.style.display = 'flex';
+      return;
+    }
+  }
+
+  if (!username) {
+    errorText.textContent = 'Username is required.';
+    errorBox.style.display = 'flex';
+    return;
+  }
+
+  if (!password || password.length < 6) {
+    errorText.textContent = 'Password must be at least 6 characters.';
+    errorBox.style.display = 'flex';
+    return;
+  }
+
+  // Disable button while sending
+  signupBtn.disabled = true;
+  signupBtn.textContent = 'Signing up...';
+
+  fetch('/api/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, phone, username, password })
+  })
+    .then(response => response.json().then(data => ({ status: response.status, data })))
+    .then(({ status, data }) => {
+      if (status === 201) {
+        // Registration successful — show success then redirect
+        successText.textContent = `Welcome, ${data.username}! Redirecting...`;
+        successBox.style.display = 'flex';
+        errorBox.style.display = 'none';
+        setTimeout(() => {
+          window.location.href = '/main';
+        }, 1500);
+      } else {
+        // Show server error
+        errorText.textContent = data.error;
+        errorBox.style.display = 'flex';
+      }
+    })
+    .catch(() => {
+      errorText.textContent = 'Connection error. Please try again.';
+      errorBox.style.display = 'flex';
+    })
+    .finally(() => {
+      signupBtn.disabled = false;
+      signupBtn.textContent = 'Sign up';
     });
 }
