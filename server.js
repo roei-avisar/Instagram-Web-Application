@@ -4,7 +4,7 @@ const path = require('path'); // import to path library
 const session = require('express-session');
 const { MongoStore } = require('connect-mongo'); //allows you to save user session in mongodb
 const { connectDB, getMongoURI } = require('./db');
-const authRoutes = require('./routes/auth');
+const authRoutes = require('./routes/authenticationRouter');
 const { requireLogin } = require('./middleware/auth');
 
 const app = express(); // app is our server

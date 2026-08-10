@@ -118,11 +118,11 @@ function handleSignup() {
   const email = document.getElementById('signup-email').value.trim();
   const phone = document.getElementById('signup-phone').value.trim();
   const username = document.getElementById('signup-username').value.trim();
-  const password = document.getElementById('signup-password').value;
-  const errorBox = document.getElementById('signup-error-box');
-  const errorText = document.getElementById('signup-error-text');
-  const successBox = document.getElementById('signup-success-box');
-  const successText = document.getElementById('signup-success-text');
+  const password = document.getElementById('signup-password').value.trim();// need to check if i want to keep the trim() for password or not
+  const errorBox = document.getElementById('signup-error-box');//saves the error box to use it later 
+  const errorText = document.getElementById('signup-error-text'); // save the error text to use it later
+  const successBox = document.getElementById('signup-success-box'); // save the success box to use it later
+  const successText = document.getElementById('signup-success-text'); // save the success text to use it later
   const signupBtn = document.getElementById('signupBtn');
 
   // Hide previous messages
