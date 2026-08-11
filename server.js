@@ -22,8 +22,8 @@ app.use(session({
   secret: process.env.SESSION_SECRET, // secret key for saving user session
   resave: false, // prevents saving session if it wasn't changed
   saveUninitialized: false, // prevents saving session if it wasn't initialized
-  store: MongoStore.create({
-    mongoUrl: getMongoURI(), // store session in mongodb
+  store: MongoStore.create({ // store session in mongodb
+    mongoUrl: getMongoURI(),
     collectionName: 'sessions' // collection name for sessions
   }),
   cookie: {
