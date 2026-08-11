@@ -4,8 +4,8 @@ const path = require('path'); // import to path library
 const session = require('express-session');
 const { MongoStore } = require('connect-mongo'); //allows you to save user session in mongodb
 const { connectDB, getMongoURI } = require('./db');
-const authRoutes = require('./routes/authenticationRouter');
-const { requireLogin } = require('./middleware/auth');
+const userRoutes = require('./routes/userRouter');
+const { requireLogin } = require('./middleware/userMiddleware');
 
 const app = express(); // app is our server
 const port = 3301;
@@ -32,7 +32,7 @@ app.use(session({
 }));
 
 // Auth API routes
-app.use('/api', authRoutes); // routes for login, logout, register and puts /api in front of the routes in auth.js
+app.use('/api', userRoutes); // routes for login, logout, register and puts /api in front of the routes in userRouter.js
 
 // Login page — publicly accessible
 app.get('/', (req, res) => {

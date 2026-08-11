@@ -1,7 +1,7 @@
 const User = require('../models/User');
 
 // Controller class that handles all authntication logic (register, login, logout)
-class AuthenticationController {
+class UserController {
 
   // POST /api/register
   async register(req, res) {
@@ -15,11 +15,38 @@ class AuthenticationController {
       if (!email && !phone) {
         return res.status(400).json({ error: 'Email or phone number is required.' });
       }
+      // Validate email format if provided
+      if (email) {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+          return res.status(400).json({ error: 'Please enter a valid email address.' });
+        }
+      }
+      // Validate phone format if provided (and no email)
+      if (phone && !email) {
+        const phoneRegex = /^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
+        if (!phoneRegex.test(phone)) {
+          return res.status(400).json({ error: 'Please enter a valid phone number.' });
+        }
+      }
       if (!username) {
         return res.status(400).json({ error: 'Username is required.' });
       }
+      // Username: only allow letters, numbers, underscores, and dots (blocks XSS, injection attacks)
+      const usernameRegex = /^[a-zA-Z0-9_.]+$/;
+      if (!usernameRegex.test(username)) {
+        return res.status(400).json({ error: 'Username can only contain letters, numbers, underscores, and dots.' });
+      }
       if (!password || password.length < 6) {
         return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+      }
+      if (password.includes(' ')) {
+        return res.status(400).json({ error: 'Password cannot contain spaces.' });
+      }
+      // Block dangerous characters that could be used for XSS, NoSQL injection, or command injection
+      const dangerousCharsRegex = /[<>"'`${};|\\]/;
+      if (dangerousCharsRegex.test(password)) {
+        return res.status(400).json({ error: 'Password contains characters that are not allowed: < > \" \' ` $ { } ; | \\' });
       }
 
       // Check if user already exists
@@ -63,8 +90,25 @@ class AuthenticationController {
       if (!identifier) {
         return res.status(400).json({ error: 'Email or phone number is required.' });
       }
+      // Validate identifier format (must be a valid email or phone number)
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      const phoneRegex = /^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
+      if (!emailRegex.test(identifier) && !phoneRegex.test(identifier)) {
+        return res.status(400).json({ error: 'Please enter a valid email address or phone number.' });
+      }
       if (!password) {
         return res.status(400).json({ error: 'Password is required.' });
+      }
+      if (password.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+      }
+      if (password.includes(' ')) {
+        return res.status(400).json({ error: 'Password cannot contain spaces.' });
+      }
+      // Block dangerous characters that could be used for XSS, NoSQL injection, or command injection
+      const dangerousCharsRegex = /[<>"'`${};|\\]/;
+      if (dangerousCharsRegex.test(password)) {
+        return res.status(400).json({ error: 'Password contains characters that are not allowed: < > \" \' ` $ { } ; | \\' });
       }
 
       // Find user by email or phone
@@ -110,4 +154,4 @@ class AuthenticationController {
   }
 }
 
-module.exports = new AuthenticationController();
+module.exports = new UserController();
