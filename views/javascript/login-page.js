@@ -151,6 +151,12 @@ function handleSignup() {
     return;
   }
 
+  if (username.length > 30) {
+    errorText.textContent = 'Username cannot exceed 30 characters.';
+    errorBox.style.display = 'flex';
+    return;
+  }
+
   if (!password || password.length < 6) {
     errorText.textContent = 'Password must be at least 6 characters.';
     errorBox.style.display = 'flex';

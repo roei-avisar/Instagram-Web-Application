@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const { encrypt, decrypt } = require('../utils/encryption');
 
 // Controller class that handles all authntication logic (register, login, logout)
 class UserController {
@@ -32,6 +33,9 @@ class UserController {
       if (!username) {
         return res.status(400).json({ error: 'Username is required.' });
       }
+      if (username.length > 30) {
+        return res.status(400).json({ error: 'Username cannot exceed 30 characters.' });
+      }
       // Username: only allow letters, numbers, underscores, and dots (blocks XSS, injection attacks)
       const usernameRegex = /^[a-zA-Z0-9_.]+$/;
       if (!usernameRegex.test(username)) {
@@ -49,20 +53,19 @@ class UserController {
         return res.status(400).json({ error: 'Password contains characters that are not allowed: < > \" \' ` $ { } ; | \\' });
       }
 
-      // Check if user already exists
-      const existingUser = await User.findOne({
-        // $or is a MongoDB operator that allows you to query based on multiple conditions.
-        $or: [
-          ...(email ? [{ email }] : []),
-          ...(phone ? [{ phone }] : []),
-          { username }
-        ]
-      });
+      // Check if user already exists based on email or phone
+      let existingUser = null;
+      if (email || phone) {
+        existingUser = await User.findOne({
+          // $or is a MongoDB operator that allows you to query based on multiple conditions.
+          $or: [
+            ...(email ? [{ email }] : []),
+            ...(phone ? [{ phone }] : [])
+          ]
+        });
+      }
 
       if (existingUser) {
-        if (existingUser.username === username) {
-          return res.status(409).json({ error: 'Username is already taken.' });
-        }
         return res.status(409).json({ error: 'An account with this email or phone already exists.' });
       }
 
@@ -70,11 +73,11 @@ class UserController {
       const user = new User({ email, phone, username, password });
       await user.save();
 
-      // Auto-login after registration
+      // Auto-login after registration (store the original plaintext username in the session)
       req.session.userId = user._id;
-      req.session.username = user.username;
+      req.session.username = username; // use original plaintext, not the encrypted version from DB
 
-      return res.status(201).json({ message: 'User registered successfully.', username: user.username });
+      return res.status(201).json({ message: 'User registered successfully.', username: username });
     } catch (err) {
       console.error('Register error:', err);
       return res.status(500).json({ error: 'Server error. Please try again.' });
@@ -129,11 +132,11 @@ class UserController {
         return res.status(401).json({ error: 'Incorrect password. Please try again.' });
       }
 
-      // Create session
+      // Create session (decrypt the username so the user sees the original plaintext)
       req.session.userId = user._id;
-      req.session.username = user.username;
+      req.session.username = user.decryptUsername();
 
-      return res.json({ message: 'Login successful.', username: user.username });
+      return res.json({ message: 'Login successful.', username: user.decryptUsername() });
     } catch (err) {
       console.error('Login error:', err);
       return res.status(500).json({ error: 'Server error. Please try again.' });
