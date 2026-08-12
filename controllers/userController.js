@@ -53,20 +53,20 @@ class UserController {
         return res.status(400).json({ error: 'Password contains characters that are not allowed: < > \" \' ` $ { } ; | \\' });
       }
 
-      // Check if user already exists based on email or phone
-      let existingUser = null;
-      if (email || phone) {
-        existingUser = await User.findOne({
-          // $or is a MongoDB operator that allows you to query based on multiple conditions.
-          $or: [
-            ...(email ? [{ email }] : []),
-            ...(phone ? [{ phone }] : [])
-          ]
-        });
+      // Check if email is already taken
+      if (email) {
+        const emailExists = await User.findOne({ email });
+        if (emailExists) {
+          return res.status(409).json({ error: 'An account with this email already exists.' });
+        }
       }
 
-      if (existingUser) {
-        return res.status(409).json({ error: 'An account with this email or phone already exists.' });
+      // Check if phone number is already taken
+      if (phone) {
+        const phoneExists = await User.findOne({ phone });
+        if (phoneExists) {
+          return res.status(409).json({ error: 'An account with this phone number already exists.' });
+        }
       }
 
       // Create user (password is hashed automatically by the pre-save hook)
