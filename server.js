@@ -48,8 +48,17 @@ app.get('/main', requireLogin, (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'main-page.html'));
 });
 
+// Block direct access to .html files — prevents IDOR bypass via static file serving
+// Without this, anyone could access /main-page.html directly and skip the requireLogin middleware
+app.use((req, res, next) => {
+  if (req.path.endsWith('.html')) {
+    return res.redirect('/');
+  }
+  next();
+});
+
 // Serve static files from views folder (css, js, images etc.)
-app.use(express.static(path.join(__dirname, 'views'))); // if the client will ask for a file it will check if it's in the views folder and if it is it will return it to the client 
+app.use(express.static(path.join(__dirname, 'views'))); // serves only non-html assets (css, js, images) since .html is blocked above
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`); // runing the server by "node server.js" on console
