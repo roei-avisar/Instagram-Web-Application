@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../models/usersModel');
 const { encrypt, decrypt } = require('../utils/encryption');
 
 // Controller class that handles all authntication logic (register, login, logout)
@@ -23,8 +23,8 @@ class UserController {
           return res.status(400).json({ error: 'Please enter a valid email address.' });
         }
       }
-      // Validate phone format if provided (and no email)
-      if (phone && !email) {
+      // Validate phone format if provided
+      if (phone) {
         const phoneRegex = /^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
         if (!phoneRegex.test(phone)) {
           return res.status(400).json({ error: 'Please enter a valid phone number.' });
