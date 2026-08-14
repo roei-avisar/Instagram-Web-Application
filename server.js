@@ -1,15 +1,31 @@
-const express = require('express'); // import to express framework
-const path = require('path'); // import to path library
-const app = express(); // app is our server
+const express = require('express'); // Import express framework
+const path = require('path'); // Import path library
+const app = express(); // App is our server
 const port = 3000;
 
+// Import the post routes
+const postRoutes = require('./routes/postsRouter');
 
-app.use(express.static(path.join(__dirname, 'views'))); // if the client will ask for a file in our "views" folder we will return it to him (like js or css files)
+// Built-in middleware to parse incoming JSON requests
+app.use(express.json());
+
+// If the client asks for a file in our "views" folder, return it (like js or css files)
+app.use(express.static(path.join(__dirname, 'views'))); 
+
+// Mount the routes to the standard RESTful endpoint
+app.use('/api/posts', postsRouter);
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'instagram_login.html')); // at first login send the login page to the user
+  // At first login send the login page to the user
+  res.sendFile(path.join(__dirname, 'views', 'instagram_login.html')); 
+});
+
+// Route to serve the main feed page directly
+app.get('/main', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'main-page.html'));
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`); // runing the server by "node server.js" on console
+  // Running the server by "node server.js" on console
+  console.log(`Server is running on port ${port}`); 
 });
