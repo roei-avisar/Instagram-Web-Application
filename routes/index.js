@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const userRouter = require('./userRouter');
+const userRouter = require('./usersRouter');
 
 // Mount each resource router under its own prefix
 // All user-related routes: /api/user/...
