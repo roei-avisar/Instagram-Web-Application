@@ -4,7 +4,7 @@ const { encrypt, decrypt } = require('../utils/encryption');
 // Controller class that handles all authntication logic (register, login, logout)
 class UserController {
 
-  // POST /api/register
+  // POST /api/user/register
   async register(req, res) {
     try {
       const email = req.body.email;
@@ -84,7 +84,7 @@ class UserController {
     }
   }
 
-  // POST /api/login
+  // POST /api/user/login
   async login(req, res) {
     try {
       const identifier = req.body.identifier; // email or phone
@@ -143,7 +143,7 @@ class UserController {
     }
   }
 
-  // GET /api/logout
+  // GET /api/user/logout
   logout(req, res) {
     req.session.destroy((err) => {
       if (err) {

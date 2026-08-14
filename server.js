@@ -4,7 +4,7 @@ const path = require('path'); // import to path library
 const session = require('express-session');
 const { MongoStore } = require('connect-mongo'); //allows you to save user session in mongodb
 const { connectDB, getMongoURI } = require('./db');
-const userRoutes = require('./routes/userRouter');
+const apiRouter = require('./routes'); // central router that combines all API routers (user, post, etc.)
 const { requireLogin } = require('./middleware/userMiddleware');
 
 const app = express(); // app is our server
@@ -31,8 +31,8 @@ app.use(session({
   }
 }));
 
-// Auth API routes
-app.use('/api', userRoutes); // routes for login, logout, register and puts /api in front of the routes in userRouter.js
+// API routes - all routers are combined in routes/index.js
+app.use('/api', apiRouter); // mounts all API routes under /api (e.g. /api/user/login, /api/user/register)
 
 // Login page — publicly accessible
 app.get('/', (req, res) => {

@@ -57,7 +57,7 @@ function handleLogin() {
   loginBtn.disabled = true; // disable login button so user won't click it twice
   loginBtn.textContent = 'Logging in...'; // change login button text to loading
 
-  fetch('/api/login', {
+  fetch('/api/user/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ identifier: username, password: password })
@@ -167,7 +167,7 @@ function handleSignup() {
   signupBtn.disabled = true;
   signupBtn.textContent = 'Signing up...';
 
-  fetch('/api/register', {
+  fetch('/api/user/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, phone, username, password })

@@ -13,7 +13,7 @@ document.getElementById('more-dropdown').addEventListener('mouseleave', () => {
 // Logout - calls the server to destroy the session and redirects to login page
 async function handleLogout() {
   try {
-    const res = await fetch('/api/logout');
+    const res = await fetch('/api/user/logout');
     const data = await res.json();
     if (res.ok) {
       window.location.href = '/'; // redirect to login page
