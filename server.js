@@ -4,7 +4,7 @@ const app = express(); // App is our server
 const port = 3000;
 
 // Import the post routes
-const postRoutes = require('./routes/postsRouter');
+const postsRouter = require('./routes/postsRouter');
 
 // Built-in middleware to parse incoming JSON requests
 app.use(express.json());

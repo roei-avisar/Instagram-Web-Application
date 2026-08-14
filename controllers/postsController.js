@@ -8,7 +8,7 @@ exports.getAllPosts = async (req, res) => {
         res.status(200).json(posts);
     } catch (error) {
         res.status(500).json({ message: "Error fetching posts from database", error });
-    }
+    }i
 };
 
 // Controller function to handle creating a new post in the database

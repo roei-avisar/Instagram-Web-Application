@@ -53,7 +53,7 @@ async function addNewPost(newPostData) {
             
             // Re-apply the glow effect to the newest post (which is now at index 0)
             if (allPostsData.length > 0) {
-                const newestId = allPostsData[0].id;
+                const newestId = allPostsData[0]._id;
                 setTimeout(() => {
                     const newPostElement = document.querySelector(`[data-post-id="${newestId}"]`);
                     if (newPostElement) {
@@ -153,7 +153,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
         <button class="bi bi-three-dots fs-4 bg-transparent border-0 p-0 ${textColour[post.mediaType]} options-btn"></button>
 
         <div class="d-none post-options-dropdown">
-                <button class="delete-post-btn" data-id="${post.id}">
+                <button class="delete-post-btn" data-id="${post._id}">
                     Delete Post <span class="bi bi-trash"></span>
                 </button>
         </div>
@@ -163,14 +163,14 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
     let audioTagHTML = '';
     if (post.audioSource) {
         let isLoop = post.mediaType === "video" ? "" : "loop"; // if the media is a photo the sound is looped automaticlly if its a video then the sound will be looped with the video
-        audioTagHTML = `<audio id="audio-${post.id}" src="${post.audioSource}" autoplay muted ${isLoop}></audio>`;
+        audioTagHTML = `<audio id="audio-${post._id}" src="${post.audioSource}" autoplay muted ${isLoop}></audio>`;
     }
 
     let muteButtonHTML = '';
     if (post.hasMuteButton) {
         muteButtonHTML = `
         <div class="tiny-icon-background position-absolute bottom-0 end-0 m-3 bg-dark bg-opacity-50 rounded-circle d-flex justify-content-center align-items-center" style="z-index: 5;">
-            <button class="bi bi-volume-mute-fill text-white bg-transparent border-0 p-0" onclick="togglePostAudio(this, '${post.id}')"></button>
+            <button class="bi bi-volume-mute-fill text-white bg-transparent border-0 p-0" onclick="togglePostAudio(this, '${post._id}')"></button>
         </div>`;
     }
 
@@ -197,7 +197,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                 </div>
                 
                 <div class="js-post-media position-relative">
-                    <video id="video-${post.id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline onended="restartMedia(this)"></video>
+                    <video id="video-${post._id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline onended="restartMedia(this)"></video>
                     ${audioTagHTML}
                     ${muteButtonHTML}
                 </div>
@@ -262,7 +262,7 @@ function createPostButtonsHTML(post) {
     let heartClass = "bi-heart";
     let heartTextColor = "";
 
-    if (likedPosts[post.id]) {
+    if (likedPosts[post._id]) {
         heartClass = "bi-heart-fill";
         heartTextColor = "text-danger";
     }
@@ -270,7 +270,7 @@ function createPostButtonsHTML(post) {
     let bookmarkClass = "bi-bookmark";
     let bookmarkTextColor = "";
 
-    if (savedPosts[post.id]) {
+    if (savedPosts[post._id]) {
         bookmarkClass = "bi-bookmark-fill";
         bookmarkTextColor = "text-dark";
     }
@@ -359,7 +359,7 @@ function renderPosts(postsData) {
         let captionHTML = createCaptionHTML(post);
 
         const postHTML = `
-        <div class="card mb-2 border-0 js-all-post" data-post-id="${post.id}">
+        <div class="card mb-2 border-0 js-all-post" data-post-id="${post._id}">
         
             ${postContentHTML}
 
