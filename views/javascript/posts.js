@@ -7,7 +7,12 @@ let allPostsData = []; // Start with an empty array
 // Fetch initial post data from the server
 async function fetchPostsFromServer() {
     try {
-        const response = await fetch('/api/posts');
+        const response = await fetch('/api/posts/getAllPosts', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
         allPostsData = await response.json();
         renderPosts(allPostsData);
     } catch (error) {
@@ -39,7 +44,7 @@ const filtersFunctions = {
 // Create new post by sending a POST request to the server
 async function addNewPost(newPostData) {
     try {
-        const response = await fetch('/api/posts', {
+        const response = await fetch('/api/posts/createPost', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -93,7 +98,7 @@ function updateMediaFilter(mediaTypes) {
 // Update the deletePostById function to send delete request to the server
 async function deletePostById(deleteId) {
     try {
-        const response = await fetch(`/api/posts/${deleteId}`, {
+        const response = await fetch(`/api/posts/deletePost/${deleteId}`, {
             method: 'DELETE'
         });
 
