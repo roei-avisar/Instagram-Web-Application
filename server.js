@@ -3,7 +3,7 @@ const express = require('express'); // import to express framework
 const path = require('path'); // import to path library
 const session = require('express-session');
 const { MongoStore } = require('connect-mongo'); //allows you to save user session in mongodb
-const { connectDB, getMongoURI } = require('./db');
+const { connectDB, getMongoURI } = require('./config/db');
 const apiRouter = require('./routes'); // central router that combines all API routers (user, post, etc.)
 const { requireLogin } = require('./middleware/userMiddleware');
 

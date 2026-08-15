@@ -41,6 +41,20 @@ class UserController {
       if (!usernameRegex.test(username)) {
         return res.status(400).json({ error: 'Username can only contain letters, numbers, underscores, and dots.' });
       }
+
+      // Check if username is already taken (usernames are encrypted in DB, so we decrypt and compare)
+      const allUsers = await User.find({}, 'username');
+      const usernameTaken = allUsers.some(u => {
+        try {
+          return u.decryptUsername().toLowerCase() === username.toLowerCase();
+        } catch {
+          return false;
+        }
+      });
+      if (usernameTaken) {
+        return res.status(409).json({ error: 'This username is already taken.' });
+      }
+
       if (!password || password.length < 6) {
         return res.status(400).json({ error: 'Password must be at least 6 characters.' });
       }
