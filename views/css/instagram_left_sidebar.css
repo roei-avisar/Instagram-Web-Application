@@ -127,3 +127,36 @@
 .left-sidebar:hover ~ .filter-menu-dropdown {
     left: 230px;
 }
+
+/* MORE DROPDOWN MENU */
+.more-dropdown-menu {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    padding: 6px;
+    margin: 4px 12px;
+    width: calc(100% - 24px);
+    z-index: 10;
+}
+
+.more-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #262626;
+}
+
+.more-dropdown-item:hover {
+    background: #f5f5f5;
+}
+
+.more-dropdown-item i {
+    font-size: 18px;
+}
