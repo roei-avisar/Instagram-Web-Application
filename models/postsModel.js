@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Stats schema definition  - likes, comments, and shares
+// Post stats schema definition  - likes, comments, and shares
 const statsSchema = new mongoose.Schema({
     likes: { type: Number, default: 0 },
     comments: { type: Number, default: 0 },

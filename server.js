@@ -1,10 +1,15 @@
+require('dotenv').config(); // load .env variables
 const express = require('express'); // Import express framework
 const path = require('path'); // Import path library
 const app = express(); // App is our server
 const port = 3000;
+const { connectDB, getMongoURI } = require('./config/db');
+
 
 // Import the post routes
 const postsRouter = require('./routes/postsRouter');
+
+connectDB();
 
 // Built-in middleware to parse incoming JSON requests
 app.use(express.json());
