@@ -11,4 +11,9 @@ router.post('/createPost/', postController.createPost);
 // Route to delete a post by ID (DELETE /api/posts/deletePost/:id)
 router.delete('/deletePost/:id', postController.deletePost);
 
+// Post actions routes like, save, and add comment
+router.post('/like/:id', postController.managelikesPost);
+router.post('/save/:id', postController.manageSavePost);
+router.post('/addComment/:id', postController.addComment);
+
 module.exports = router;

@@ -16,12 +16,27 @@ const postSchema = new mongoose.Schema({
     mediaType: { type: String, enum: ['image', 'video', 'text'], required: true },
     mediaSource: { type: String, required: true },
     audioSource: { type: String, default: null },
-    hasMuteButton: { type: Boolean, default: false },
     stats: { type: statsSchema, default: () => ({}) },
     likedByUsers: [{ type: String }],
+    savedByUsers: [{ type: String }],
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
     caption: { type: String, default: "" },
-    isSuggested: { type: Boolean, default: false }
+    isSuggested: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+});
+
+// Comment schema definition
+const commentSchema = new mongoose.Schema({
+    postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post', required: true },
+    username: { type: String, required: true },
+    text: { type: String, required: true },
+    likes: { type: Number, default: 0 },
+    likedBy: [{ type: String }],
+    createdAt: { type: Date, default: Date.now }
 });
 
 // Create and export the Mongoose model
-module.exports = mongoose.model('Post', postSchema);
+const Post = mongoose.model('Post', postSchema);
+const Comment = mongoose.model('Comment', commentSchema);
+
+module.exports = { Post, Comment };

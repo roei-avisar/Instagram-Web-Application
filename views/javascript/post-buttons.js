@@ -1,209 +1,3 @@
-const commentsDatabase = {
-    1: [
-        { 
-            username: "ofra_fan99", 
-            text: "רק טים עופרה!" ,
-            likes: "20",
-            time: "50m",
-            isLiked: false
-        },
-        { 
-            username: "yardena.arazi.fanpage", 
-            text: "איכככככ מי יצביע לעופרה כולנו ירדנה בלב ❤️" ,
-            likes: "5",
-            time: "48m",
-            isLiked: false
-        },
-        { 
-            username: "real_dafna_dekel", 
-            text: "חבר'ה פה בתגובות חייבים להרגע. זה רק ספורט!" ,
-            likes: "100",
-            time: "42m",
-            isLiked: false
-        },
-        { 
-            username: "ofra.haza.my.love", 
-            text: "עופרה היא המלכה האמיתית! ירדנה סתם חקיינית" ,
-            likes: "12",
-            time: "31m",
-            isLiked: false
-        },
-        { 
-            username: "gali_atari10", 
-            text: "סורי עופרה אני אוהבת את המסיבות על שמך אבל נראלי אני מצביעה לירדנה",
-            likes: "33",
-            time: "22m",
-            isLiked: false
-        },
-        { 
-            username: "yardena.thequeennnn", 
-            text: "עופרה חזה מתה מבושה!!",
-            likes: "12",
-            time: "12m",
-            isLiked: false
-        },
-        { 
-            username: "gual.nefesh", 
-            text: "גועל נפש",
-            likes: "58",
-            time: "4m",
-            isLiked: false
-        }
-    ],
-   2: [
-        { 
-            username: "donald.j.trump", 
-            text: "You have to release a new song!! Thank you for your attention to this matter! PRESIDENT DONALD J. TRUMP" ,
-            likes: "1541",
-            time: "5h",
-            isLiked: false
-        },
-        { 
-            username: "elon.musk23", 
-            text: "Can you sing one trillion dollar?" ,
-            likes: "948",
-            time: "3h",
-            isLiked: false
-        },
-        { 
-            username: "gual.nefesh", 
-            text: "גועל נפש",
-            likes: "912",
-            time: "5m",
-            isLiked: false
-        }
-    ],
-    3: [
-        { 
-            username: "mustache.man", 
-            text: "Thank you for the music!! The songs you're singing... Thanks for all the joy you're bringing!!" ,
-            likes: "15",
-            time: "1d",
-            isLiked: false
-        },
-        { 
-            username: "john_len99", 
-            text: "I'm dreaming about moving to your band so bad" ,
-            likes: "88",
-            time: "1d",
-            isLiked: false
-        },
-        { 
-            username: "paulmc.cartney", 
-            text: "@john_len99 WTH? LENON?!?! WE NEED TO TALK..." ,
-            likes: "99",
-            time: "23h",
-            isLiked: false
-        },
-        { 
-            username: "gual.nefesh", 
-            text: "גועל נפש",
-            likes: "144",
-            time: "20h",
-            isLiked: false
-        }
-    ],
-    4: [
-        { 
-            username: "neil_arm_strong", 
-            text: "BRO 🔥" ,
-            likes: "4",
-            time: "11h",
-            isLiked: false
-        },
-        { 
-            username: "lance_arm_strong", 
-            text: "BRO 🔥" ,
-            likes: "2",
-            time: "9h",
-            isLiked: false
-        }
-    ],
-    5: [
-        { 
-            username: "lihi_griner67", 
-            text: "רק נחתת מאיפה יש לך שיר חדש?!" ,
-            likes: "985",
-            time: "2d",
-            isLiked: false
-        },
-        { 
-            username: "rickroll", 
-            text: "Never Gonna Give You Up, Never Gonna Let You Down" ,
-            likes: "188",
-            time: "1d",
-            isLiked: false
-        },
-        { 
-            username: "gual.nefesh", 
-            text: "גועל נפש",
-            likes: "214",
-            time: "1d",
-            isLiked: false
-        }
-    ],
-    6: [
-        { 
-            username: "anna_russia", 
-            text: "Big wheel keep on turnin'🛞" ,
-            likes: "71",
-            time: "1h",
-            isLiked: false
-        },
-        { 
-            username: "michael_jack2222", 
-            text: "So beat it, just beat it" ,
-            likes: "65",
-            time: "1h",
-            isLiked: false
-        },
-        { 
-            username: "gurlll", 
-            text: "I just wanna have fun" ,
-            likes: "24",
-            time: "1h",
-            isLiked: false
-        }
-    ],
-    7: [
-        { 
-            username: "abba.band", 
-            text: "As we always said, The winner takes it all." ,
-            likes: "555",
-            time: "55m",
-            isLiked: false
-        },
-        { 
-            username: "hamsa.band", 
-            text: "חמסה חמסה חמסה 🖐️🖐️🖐️" ,
-            likes: "555",
-            time: "55m",
-            isLiked: false
-        },
-        { 
-            username: "zehava.b", 
-            text: "שאלוהים יתן לכם רק טיפת מזל" ,
-            likes: "555",
-            time: "55m",
-            isLiked: false
-        },
-        { 
-            username: "tina.terner111", 
-            text: "You're simply the best! Better than all the rest...",
-            likes: "55",
-            time: "5m",
-            isLiked: false
-        },
-        { 
-            username: "gual.nefesh", 
-            text: "זה לא גועל נפש" ,
-            likes: "55",
-            time: "5m",
-            isLiked: false
-        }
-    ]
-};
-
 const timeDictionary = {
     's': 'seconds',
     'm': 'minutes',
@@ -211,9 +5,6 @@ const timeDictionary = {
     'd': 'days',
     'w': 'weeks'
 };
-
-const likedPosts = {};
-const savedPosts = {};
 
 const friends = [
     { 
@@ -282,108 +73,65 @@ let selectedShareFriends = {};
 
 const chatsDatabase = {};
 
-function likePost(button) { // the function only update on database if the post were liked or unliked and then call to other function to draw it
-  
-    let idDiv = button.closest('[data-post-id]');  // find the id of the post
+async function likePost(button) {
+    let idDiv = button.closest('[data-post-id]');
     if (!idDiv) return;
-    
     let postId = idDiv.dataset.postId;
-    let changeLike = 0;
+    let currentUser = "besteam_ever";
 
-  
-    if (likedPosts[postId]) {
-        delete likedPosts[postId];
-        changeLike = -1;
-    } else {
-        likedPosts[postId] = true;
-        changeLike = 1;
+    // 1. Optimistic local data update
+    let post = allPostsData.find(p => p._id === postId);
+    if (post) {
+        if (post.likedByUsers.includes(currentUser)) {
+            post.likedByUsers = post.likedByUsers.filter(u => u !== currentUser);
+            post.stats.likes = Math.max(0, post.stats.likes - 1);
+        } else {
+            post.likedByUsers.push(currentUser);
+            post.stats.likes += 1;
+        }
     }
-
 
     button.classList.add('button-pop-animation');
-    setTimeout(() => button.classList.remove('button-pop-animation'), 300); // make the button jump
+    setTimeout(() => button.classList.remove('button-pop-animation'), 300);
 
+    // 2. Render UI based on updated local data
+    updatePostButtonsUI(postId);
 
-    syncLikePost(postId, changeLike);
-}
-
-
-
-function syncLikePost(postId, changeLike) {
-    let isLiked = likedPosts[postId] === true;
-    
-    let postInData = allPostsData.find(post => post.id === parseInt(postId));
-
-    if (postInData && changeLike !== 0) {
-        postInData.stats.likes = (parseInt(postInData.stats.likes) + changeLike).toString();
-    }
-
-    let allMatchingPosts = document.querySelectorAll(`[data-post-id="${postId}"]`);  // the post in the feed the and the post in the popup section if its open
-
-    allMatchingPosts.forEach(postElement => {
-   
-        let heartBtn = postElement.querySelector('.js-like-container .post-icons');
-        if (heartBtn) {
-            if (isLiked) {
-                heartBtn.classList.remove('bi-heart');
-                heartBtn.classList.add('bi-heart-fill', 'text-danger');
-            } else {
-                heartBtn.classList.add('bi-heart');
-                heartBtn.classList.remove('bi-heart-fill', 'text-danger');
-            }
-        }
-
-    
-        if (changeLike !== 0) {
-            let likeCounter = postElement.querySelector(".js-like-counter");
-            if (likeCounter) {
-                likeCounter.innerText = parseInt(likeCounter.innerText) + changeLike;
-            }
-            
-            let likedByCounter = postElement.querySelector(".js-liked-by-counter");
-            if (likedByCounter) {
-                likedByCounter.innerText = parseInt(likedByCounter.innerText) + changeLike;
-            }
-        }
+    // 3. Sync with server using URL parameter
+    await fetch(`/api/posts/like/${postId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUser })
     });
 }
 
-
-
-function savePost(button) {  // the function only update on database if the post were saved or unsaved and then call to other function to draw it
-    let idDiv = button.closest('[data-post-id]'); // find the id of the post
-    if (!idDiv) return; 
-    
+async function savePost(button) {
+    let idDiv = button.closest('[data-post-id]');
+    if (!idDiv) return;
     let postId = idDiv.dataset.postId;
+    let currentUser = "besteam_ever";
 
-    if (savedPosts[postId]) {
-        delete savedPosts[postId]; 
-    } else {
-        savedPosts[postId] = true; 
+    // 1. Optimistic local data update
+    let post = allPostsData.find(p => p._id === postId);
+    if (post) {
+        if (post.savedByUsers.includes(currentUser)) {
+            post.savedByUsers = post.savedByUsers.filter(u => u !== currentUser);
+        } else {
+            post.savedByUsers.push(currentUser);
+        }
     }
 
-    button.classList.add('button-pop-animation'); // make the button jump
+    button.classList.add('button-pop-animation');
     setTimeout(() => button.classList.remove('button-pop-animation'), 300);
 
-    syncSavePost(postId);
-}
+    // 2. Render UI based on updated local data
+    updatePostButtonsUI(postId);
 
-function syncSavePost(postId) {
-    let isSaved = savedPosts[postId] === true;
-    let allMatchingPosts = document.querySelectorAll(`[data-post-id="${postId}"]`);
-    
-    allMatchingPosts.forEach(postElement => {
-        let saveBtn = postElement.querySelector('.js-save-button');
-
-        if (saveBtn) {
-            if (isSaved) {
-                saveBtn.classList.remove('bi-bookmark');
-                saveBtn.classList.add('bi-bookmark-fill', 'text-dark');
-            } else {
-                saveBtn.classList.add('bi-bookmark');
-                saveBtn.classList.remove('bi-bookmark-fill', 'text-dark');
-            }
-        }
+    // 3. Sync with server using URL parameter
+    await fetch(`/api/posts/save/${postId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUser })
     });
 }
 

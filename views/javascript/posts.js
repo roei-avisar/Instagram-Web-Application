@@ -20,8 +20,6 @@ async function fetchPostsFromServer() {
     }
 }
 
-
-
 const filtersList = {
     mediaType: [ "image", "video", "text" ],
     searchString: ''
@@ -112,6 +110,25 @@ async function deletePostById(deleteId) {
     }
 }
 
+// Update a post's UI after a like/unlike or save/unsave action
+async function updatePostButtonsUI(postId) {
+    const post = allPostsData.find(p => p._id === postId);
+    const postElement = document.querySelector(`[data-post-id="${postId}"]`);
+    if (!post || !postElement) return;
+
+    const currentUser = "besteam_ever"; // Current active user
+
+    // Update heart icon & counter
+    const heartBtn = postElement.querySelector('.js-like-container .post-icons');
+    const isLiked = post.likedByUsers.includes(currentUser);
+    heartBtn.className = `bi ${isLiked ? 'bi-heart-fill text-danger' : 'bi-heart'} fs-4 fw-bold bg-transparent border-0 p-0 post-icons`;
+    postElement.querySelector(".js-like-counter").innerText = post.stats.likes;
+
+    // Update save icon
+    const saveBtn = postElement.querySelector('.js-save-button');
+    const isSaved = post.savedByUsers.includes(currentUser);
+    saveBtn.className = `js-save-button bi ${isSaved ? 'bi-bookmark-fill text-dark' : 'bi-bookmark'} fs-4 fw-bold bg-transparent border-0 p-0 post-icons`;
+}
 
 function createAuthorsHTML(post) {
     let authorsNamesHTML = '';
@@ -172,7 +189,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
     }
 
     let muteButtonHTML = '';
-    if (post.hasMuteButton) {
+    if (post.audioSource) {
         muteButtonHTML = `
         <div class="tiny-icon-background position-absolute bottom-0 end-0 m-3 bg-dark bg-opacity-50 rounded-circle d-flex justify-content-center align-items-center" style="z-index: 5;">
             <button class="bi bi-volume-mute-fill text-white bg-transparent border-0 p-0" onclick="togglePostAudio(this, '${post._id}')"></button>
@@ -264,21 +281,17 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
 }
 
 function createPostButtonsHTML(post) {
-    let heartClass = "bi-heart";
-    let heartTextColor = "";
+    const currentUser = "besteam_ever"; // Current active user
 
-    if (likedPosts[post._id]) {
-        heartClass = "bi-heart-fill";
-        heartTextColor = "text-danger";
-    }
+    // Check if the current user has liked or saved this post based on database arrays
+    let isLiked = post.likedByUsers && post.likedByUsers.includes(currentUser);
+    let isSaved = post.savedByUsers && post.savedByUsers.includes(currentUser);
 
-    let bookmarkClass = "bi-bookmark";
-    let bookmarkTextColor = "";
+    let heartClass = isLiked ? "bi-heart-fill" : "bi-heart";
+    let heartTextColor = isLiked ? "text-danger" : "";
 
-    if (savedPosts[post._id]) {
-        bookmarkClass = "bi-bookmark-fill";
-        bookmarkTextColor = "text-dark";
-    }
+    let bookmarkClass = isSaved ? "bi-bookmark-fill" : "bi-bookmark";
+    let bookmarkTextColor = isSaved ? "text-dark" : "";
 
     let postButtonsHTML = `
         <div class="d-flex justify-content-between js-icon-line">
