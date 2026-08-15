@@ -20,6 +20,6 @@
   "homepage": "https://gitlab.com/internet-web-applications/Internet-web-apps#readme",
   "dependencies": {
     "express": "^5.2.1",
-    "mongoose": "^9.9.1"
+    "mongoose": "^9.9.2"
   }
 }

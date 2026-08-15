@@ -2,139 +2,25 @@ const postsContainer = document.querySelector('.instagram-posts'); // Global var
 const commentPopupBackground = document.querySelector('.comment-popup-background');
 const textColour = {video: 'text-white', image: 'text-dark', text: 'text-dark'};
 
-let allPostsData = [
-    {
-        "id": 1,
-        "authors": [ "yardenaaa_", "haza.ofra" ], 
-        "isVerified": false, 
-        "timeAgo": "52m", 
-        "subHeader": "Ofra Haza &bull; שיר הפרחה", 
-        "mediaType": "image", 
-        "mediaSource": "./elements/media/posts/main-posts/ofra-and-yardena-post.jpeg", 
-        "audioSource": "./elements/media/posts/posts-audio/freha-song.mp3",
-        "hasMuteButton": true, 
-        "stats": {
-            "likes": "1342",
-            "comments": "7",
-            "shares": "133"
-        },
-        "likedByUsers": [ "gali_atari10", "nalin12", "ofra_fan99" ], 
-        "caption": "אתם טים עופרה או טים ירדנה? הצביעו בסקר של החדשות עכשיו!", 
-        "isSuggested": false
-    },
-    {
-        "id": 2,
-        "authors": [ "noa.kirel1" ], 
-        "isVerified": true, 
-        "timeAgo": "6h", 
-        "subHeader": "Noa Kirel &bull; מיליון דולר", 
-        "mediaType": "video", 
-        "mediaSource": "./elements/media/posts/main-posts/noa-kirel-post.mp4",
-        "audioSource": "./elements/media/posts/posts-audio/million-dollar-song.mp3", 
-        "hasMuteButton": true, 
-        "stats": {
-            "likes": "9989",
-            "comments": "3",
-            "shares": "328"
-        },
-        "likedByUsers": [ "donald.j.trump", "yardena.arazi.fanpage", "sara22" ], 
-        "caption": "מי שרוצה שיר חדש שיעשה לייק", 
-        "isSuggested": false
-    },
-    {
-        "id": 3,
-        "authors": [ "abba.band" ], 
-        "isVerified": true, 
-        "timeAgo": "1d", 
-        "subHeader": "Stockholm, Sweden", 
-        "mediaType": "image", 
-        "mediaSource": "./elements/media/posts/main-posts/abba-post.jpeg", 
-        "hasMuteButton": false, 
-        "stats": {
-            "likes": "788",
-            "comments": "4",
-            "shares": "98"
-        },
-        "likedByUsers": [ "john_len99" ], 
-        "caption": "Last night was SUPE-PER TROUPE-PER!", 
-        "isSuggested": false
-    },
-    {
-        "id": 4,
-        "authors": [ "louis_arm_strong" ], 
-        "isVerified": false, 
-        "timeAgo": "14h", 
-        "subHeader": "", 
-        "mediaType": "image", 
-        "mediaSource": "./elements/media/posts/main-posts/louis-armstrong-post.jpeg", 
-        "hasMuteButton": false, 
-        "stats": {
-            "likes": "941",
-            "comments": "2",
-            "shares": "3"
-        },
-        "likedByUsers": [ "jamil_jamal", "tomer19", "mrs.lady" ], 
-        "caption": "What a wonderful world! Love to all of my followers ❤️", 
-        "isSuggested": false
-    },
-    {
-        "id": 5,
-        "authors": [ "bonjovi_x" ], 
-        "isVerified": true, 
-        "timeAgo": "2d", 
-        "subHeader": "Suggested for you", 
-        "mediaType": "image", 
-        "mediaSource": "./elements/media/posts/main-posts/bon-jovi-post.png", 
-        "hasMuteButton": false, 
-        "stats": {
-            "likes": "4231",
-            "comments": "3",
-            "shares": "15"
-        },
-        "likedByUsers": [ "lihi_griner67" ], 
-        "caption": "My new track is out, listen now on Youtube!", 
-        "isSuggested": true
-    },
-    {
-        "id": 6,
-        "authors": [ "tina.terner111" ], 
-        "isVerified": false, 
-        "timeAgo": "2h", 
-        "subHeader": "Original audio", 
-        "mediaType": "video", 
-        "mediaSource": "./elements/media/posts/main-posts/tina-terner-post.mp4", 
-        "audioSource": "./elements/media/posts/posts-audio/proud-mary-song.mp3",
-        "hasMuteButton": true, 
-        "stats": {
-            "likes": "3842",
-            "comments": "3",
-            "shares": "15"
-        },
-        "likedByUsers": [ "galit_gg4", "liat.dell" ], 
-        "caption": "Proud Mary keep on burnin'🔥", 
-        "isSuggested": false
-    },
-    {
-        "id": 7,
-        "authors": [ "besteam_ever" ], 
-        "isVerified": true, 
-        "timeAgo": "55m", 
-        "subHeader": "The College Of Management, Israel", 
-        "mediaType": "text", 
-        "mediaSource": "אחרי הרבה עבודה קשה שמחים להגיש את המטלה בפיתוח אפליקציות אינטרנטיות. מקווים לקבל לא פחות מ100!",
-        "hasMuteButton": false, 
-        "stats": {
-            "likes": "5555",
-            "comments": "5",
-            "shares": "5"
-        },
-        "likedByUsers": [ "noa.kirel1", "abba.band", "gual.nefesh" ],
-        "caption": "תחזיקו לנו אצבעות",
-        "isSuggested": false
-    },
-];
+let allPostsData = []; // Start with an empty array
 
-let lastPostId = 7;
+// Fetch initial post data from the server
+async function fetchPostsFromServer() {
+    try {
+        const response = await fetch('/api/posts/getAllPosts', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        allPostsData = await response.json();
+        renderPosts(allPostsData);
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+    }
+}
+
+
 
 const filtersList = {
     mediaType: [ "image", "video", "text" ],
@@ -155,17 +41,38 @@ const filtersFunctions = {
     }
 };
 
-function addNewPost(newPost) {
-    lastPostId = lastPostId + 1
-    newPost.id = lastPostId
-    allPostsData.unshift(newPost);
-    renderPosts(allPostsData);
+// Create new post by sending a POST request to the server
+async function addNewPost(newPostData) {
+    try {
+        const response = await fetch('/api/posts/createPost', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newPostData)
+        });
 
-    const newPostElement = document.querySelector(`[data-post-id="${lastPostId}"]`);
-    newPostElement.classList.add('new-post-glow');
-    setTimeout(() => {
-            newPostElement.classList.remove('new-post-glow');
-        }, 5000);
+        if (response.ok) {
+            // Refresh the posts from the server after adding
+            await fetchPostsFromServer();
+            
+            // Re-apply the glow effect to the newest post (which is now at index 0)
+            if (allPostsData.length > 0) {
+                const newestId = allPostsData[0]._id;
+                setTimeout(() => {
+                    const newPostElement = document.querySelector(`[data-post-id="${newestId}"]`);
+                    if (newPostElement) {
+                        newPostElement.classList.add('new-post-glow');
+                        setTimeout(() => {
+                            newPostElement.classList.remove('new-post-glow');
+                        }, 5000);
+                    }
+                }, 100); // Small delay to allow DOM to render
+            }
+        }
+    } catch (error) {
+        console.error('Error adding new post:', error);
+    }
 }
 
 function applyFilters() {
@@ -188,10 +95,21 @@ function updateMediaFilter(mediaTypes) {
     applyFilters();
 }
 
-function deletePostById(deleteId) {
-    allPostsData = allPostsData.filter(post => post.id !== deleteId);
-    closePopupComment(null, true)
-    renderPosts(allPostsData);
+// Update the deletePostById function to send delete request to the server
+async function deletePostById(deleteId) {
+    try {
+        const response = await fetch(`/api/posts/deletePost/${deleteId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            closePopupComment(null, true);
+            // Refresh the posts from the server after deleting
+            await fetchPostsFromServer();
+        }
+    } catch (error) {
+        console.error('Error deleting post:', error);
+    }
 }
 
 
@@ -240,7 +158,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
         <button class="bi bi-three-dots fs-4 bg-transparent border-0 p-0 ${textColour[post.mediaType]} options-btn"></button>
 
         <div class="d-none post-options-dropdown">
-                <button class="delete-post-btn" data-id="${post.id}">
+                <button class="delete-post-btn" data-id="${post._id}">
                     Delete Post <span class="bi bi-trash"></span>
                 </button>
         </div>
@@ -250,14 +168,14 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
     let audioTagHTML = '';
     if (post.audioSource) {
         let isLoop = post.mediaType === "video" ? "" : "loop"; // if the media is a photo the sound is looped automaticlly if its a video then the sound will be looped with the video
-        audioTagHTML = `<audio id="audio-${post.id}" src="${post.audioSource}" autoplay muted ${isLoop}></audio>`;
+        audioTagHTML = `<audio id="audio-${post._id}" src="${post.audioSource}" autoplay muted ${isLoop}></audio>`;
     }
 
     let muteButtonHTML = '';
     if (post.hasMuteButton) {
         muteButtonHTML = `
         <div class="tiny-icon-background position-absolute bottom-0 end-0 m-3 bg-dark bg-opacity-50 rounded-circle d-flex justify-content-center align-items-center" style="z-index: 5;">
-            <button class="bi bi-volume-mute-fill text-white bg-transparent border-0 p-0" onclick="togglePostAudio(this, '${post.id}')"></button>
+            <button class="bi bi-volume-mute-fill text-white bg-transparent border-0 p-0" onclick="togglePostAudio(this, '${post._id}')"></button>
         </div>`;
     }
 
@@ -284,7 +202,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                 </div>
                 
                 <div class="js-post-media position-relative">
-                    <video id="video-${post.id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline onended="restartMedia(this)"></video>
+                    <video id="video-${post._id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline onended="restartMedia(this)"></video>
                     ${audioTagHTML}
                     ${muteButtonHTML}
                 </div>
@@ -349,7 +267,7 @@ function createPostButtonsHTML(post) {
     let heartClass = "bi-heart";
     let heartTextColor = "";
 
-    if (likedPosts[post.id]) {
+    if (likedPosts[post._id]) {
         heartClass = "bi-heart-fill";
         heartTextColor = "text-danger";
     }
@@ -357,7 +275,7 @@ function createPostButtonsHTML(post) {
     let bookmarkClass = "bi-bookmark";
     let bookmarkTextColor = "";
 
-    if (savedPosts[post.id]) {
+    if (savedPosts[post._id]) {
         bookmarkClass = "bi-bookmark-fill";
         bookmarkTextColor = "text-dark";
     }
@@ -446,7 +364,7 @@ function renderPosts(postsData) {
         let captionHTML = createCaptionHTML(post);
 
         const postHTML = `
-        <div class="card mb-2 border-0 js-all-post" data-post-id="${post.id}">
+        <div class="card mb-2 border-0 js-all-post" data-post-id="${post._id}">
         
             ${postContentHTML}
 
@@ -469,4 +387,4 @@ function renderPosts(postsData) {
     });
 }
 
-renderPosts(allPostsData);
+fetchPostsFromServer();
