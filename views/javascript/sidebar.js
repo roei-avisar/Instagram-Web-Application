@@ -25,3 +25,21 @@ async function handleLogout() {
     alert('Could not log out. Please try again.');
   }
 }
+
+// Fetch current user on load
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch('/api/user/me');
+    if (res.ok) {
+      const data = await res.json();
+      const username = data.username;
+      
+      // Update username displays
+      document.querySelectorAll('.current-user-name').forEach(el => {
+        el.textContent = username;
+      });
+    }
+  } catch (err) {
+    console.error('Error fetching current user:', err);
+  }
+});

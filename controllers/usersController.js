@@ -25,9 +25,9 @@ class UserController {
       }
       // Validate phone format if provided
       if (phone) {
-        const phoneRegex = /^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
+        const phoneRegex = /^\d{10,15}$/;
         if (!phoneRegex.test(phone)) {
-          return res.status(400).json({ error: 'Please enter a valid phone number.' });
+          return res.status(400).json({ error: 'Phone number must contain between 10 and 15 digits.' });
         }
       }
       if (!username) {
@@ -109,9 +109,9 @@ class UserController {
       }
       // Validate identifier format (must be a valid email or phone number)
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      const phoneRegex = /^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
+      const phoneRegex = /^\d{10,15}$/;
       if (!emailRegex.test(identifier) && !phoneRegex.test(identifier)) {
-        return res.status(400).json({ error: 'Please enter a valid email address or phone number.' });
+        return res.status(400).json({ error: 'Please enter a valid email address or a phone number containing only digits.' });
       }
       if (!password) {
         return res.status(400).json({ error: 'Password is required.' });
@@ -154,6 +154,15 @@ class UserController {
     } catch (err) {
       console.error('Login error:', err);
       return res.status(500).json({ error: 'Server error. Please try again.' });
+    }
+  }
+
+  // GET /api/user/me
+  me(req, res) {
+    if (req.session && req.session.username) {
+      return res.json({ username: req.session.username });
+    } else {
+      return res.status(401).json({ error: 'Not authenticated' });
     }
   }
 
