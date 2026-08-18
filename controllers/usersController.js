@@ -158,11 +158,122 @@ class UserController {
   }
 
   // GET /api/user/me
-  me(req, res) {
-    if (req.session && req.session.username) {
-      return res.json({ username: req.session.username });
-    } else {
+  async me(req, res) {
+    if (!req.session || !req.session.userId) {
       return res.status(401).json({ error: 'Not authenticated' });
+    }
+    try {
+      const user = await User.findById(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      return res.json({
+        username: req.session.username,
+        bio: user.bio || ''
+      });
+    } catch (err) {
+      console.error('Me error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+
+  // PUT /api/user/update
+  async updateProfile(req, res) {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const username = req.body.username;
+      const bio = req.body.bio;
+      const currentPassword = req.body.currentPassword;
+      const newPassword = req.body.newPassword;
+      const user = await User.findById(req.session.userId);
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+
+      // Validate and update username
+      if (username !== undefined && username !== '') {
+        const trimmedUsername = username.trim();
+
+        if (trimmedUsername.length > 30) {
+          return res.status(400).json({ error: 'Username cannot exceed 30 characters.' });
+        }
+
+        // Username: only allow letters, numbers, underscores, and dots (blocks XSS, injection attacks)
+        const usernameRegex = /^[a-zA-Z0-9_.]+$/;
+        if (!usernameRegex.test(trimmedUsername)) {
+          return res.status(400).json({ error: 'Username can only contain letters, numbers, underscores, and dots.' });
+        }
+
+        // Check if username is already taken by another user
+        const allUsers = await User.find({ _id: { $ne: user._id } }, 'username');
+        const usernameTaken = allUsers.some(u => {
+          try {
+            return u.decryptUsername().toLowerCase() === trimmedUsername.toLowerCase();
+          } catch {
+            return false;
+          }
+        });
+        if (usernameTaken) {
+          return res.status(409).json({ error: 'This username is already taken.' });
+        }
+
+        user.username = trimmedUsername; // will be encrypted by pre-save hook
+        req.session.username = trimmedUsername; // update session with new username
+      }
+
+      // Validate and update bio
+      if (bio !== undefined) {
+        if (bio.length > 150) {
+          return res.status(400).json({ error: 'Bio cannot exceed 150 characters.' });
+        }
+        // Block dangerous characters
+        const dangerousCharsRegex = /[<>"'`${};|\\]/;
+        if (dangerousCharsRegex.test(bio)) {
+          return res.status(400).json({ error: 'Bio contains characters that are not allowed.' });
+        }
+        user.bio = bio;
+      }
+
+      // Validate and update password
+      if (newPassword) {
+        if (!currentPassword) {
+          return res.status(400).json({ error: 'Current password is required to set a new password.' });
+        }
+
+        // Verify current password
+        const isMatch = await user.comparePassword(currentPassword);
+        if (!isMatch) {
+          return res.status(401).json({ error: 'Current password is incorrect.' });
+        }
+
+        if (newPassword.length < 6) {
+          return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+        }
+        if (newPassword.includes(' ')) {
+          return res.status(400).json({ error: 'Password cannot contain spaces.' });
+        }
+        const dangerousCharsRegex = /[<>"'`${};|\\]/;
+        if (dangerousCharsRegex.test(newPassword)) {
+          return res.status(400).json({ error: 'Password contains characters that are not allowed.' });
+        }
+
+        user.password = newPassword; // will be hashed by pre-save hook
+      }
+
+      await user.save();
+
+      return res.json({
+        message: 'Profile updated successfully.',
+        username: req.session.username,
+        bio: user.bio || ''
+      });
+    } catch (err) {
+      console.error('Update profile error:', err);
+      return res.status(500).json({ error: 'Server error. Please try again.' });
     }
   }
 

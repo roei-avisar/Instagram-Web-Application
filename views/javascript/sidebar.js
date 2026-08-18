@@ -33,10 +33,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (res.ok) {
       const data = await res.json();
       const username = data.username;
-      
-      // Update username displays
+
+      // Update username displays (for every instance)
       document.querySelectorAll('.current-user-name').forEach(el => {
         el.textContent = username;
+      });
+
+      // Update bio displays (for every instance)
+      document.querySelectorAll('.current-user-bio').forEach(el => {
+        if (data.bio) {
+          el.textContent = data.bio;
+        } else {
+          el.textContent = ''; // Clear the static placeholder if bio is empty
+        }
       });
     }
   } catch (err) {

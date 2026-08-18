@@ -10,4 +10,6 @@ router.get('/logout', userController.logout);
 
 router.get('/me', userController.me);
 
+router.put('/update', userController.updateProfile);
+
 module.exports = router; // export all the router functions to be used by server.js

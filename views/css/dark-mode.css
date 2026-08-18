@@ -201,3 +201,49 @@ body.dark-mode #storyModal .story-nav i {
 body.dark-mode #storyModal .bi-heart-fill.text-danger {
     color: #ed4956 !important;
 }
+
+/* Settings Modal */
+body.dark-mode .settings-box {
+    background-color: #0C1014 !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .settings-title {
+    color: white !important;
+}
+
+body.dark-mode .settings-label {
+    color: white !important;
+}
+
+body.dark-mode .settings-input,
+body.dark-mode .settings-textarea {
+    background-color: #262B33 !important;
+    border-color: #3a3f47 !important;
+    color: white !important;
+}
+
+body.dark-mode .settings-divider {
+    background-color: #262B33 !important;
+}
+
+body.dark-mode .settings-section-title {
+    color: white !important;
+}
+
+body.dark-mode .settings-close {
+    color: #a8a8a8 !important;
+}
+
+body.dark-mode .settings-close:hover {
+    color: white !important;
+}
+
+body.dark-mode .more-dropdown-menu {
+    background-color: #0C1014 !important;
+    border: 1px solid #262B33 !important;
+}
+
+body.dark-mode .more-dropdown-item:hover {
+    background-color: #262B33 !important;
+}
