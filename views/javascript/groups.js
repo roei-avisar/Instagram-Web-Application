@@ -8,7 +8,7 @@ function openGroupsPopup() {
     overlay.classList.add('d-flex'); // groups popup become visiable
     document.body.style.overflow = 'hidden';
     
-    fetch('http://localhost:3000/api/groups/getGroups') // get all the existing groups
+    fetch('/api/groups/getGroups') // get all the existing groups
         .then(res => res.json()) // make the response as an object
         .then(data => {
             if(data && data.success) { // success and data were given parameter by the controller response
@@ -45,7 +45,7 @@ function createGroup() {
         return;
     }
 
-    fetch('http://localhost:3000/api/groups/createGroup', { // create a new group
+    fetch('/api/groups/createGroup', { // create a new group
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -127,7 +127,7 @@ function renderGroups(groupsArray) {
 }
 
 function joinGroup(groupID, userID) { // join user to requested group
-    fetch(`http://localhost:3000/api/groups/joinExistingGroup/${groupID}`, {
+    fetch(`/api/groups/joinExistingGroup/${groupID}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: userID })
@@ -139,7 +139,7 @@ function joinGroup(groupID, userID) { // join user to requested group
 }
 
 function leaveGroup(groupId, userID) {
-    fetch(`http://localhost:3000/api/groups/leaveExistingGroup/${groupId}`, {
+    fetch(`/api/groups/leaveExistingGroup/${groupId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: userID })
@@ -151,7 +151,7 @@ function leaveGroup(groupId, userID) {
 }
 
 function deleteGroup(groupID, userID) { // delete the group if the user is the admin
-    fetch(`http://localhost:3000/api/groups/deleteSpecificGroup/${groupID}`, {
+    fetch(`/api/groups/deleteSpecificGroup/${groupID}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: userID })
@@ -202,7 +202,7 @@ function closeMembersPopup(event, forceClose = false) {
 }
 
 function removeUser(groupId, userIdToRemove) {
-    fetch(`http://localhost:3000/api/groups/removeUserFromGroup/${groupId}`, {
+    fetch(`/api/groups/removeUserFromGroup/${groupId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ adminId: CURRENT_USER_ID, userIdToRemove: userIdToRemove })
