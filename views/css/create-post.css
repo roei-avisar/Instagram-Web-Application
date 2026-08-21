@@ -105,10 +105,10 @@
 }
 
 .post-metadata {
-    width: 50%; 
-    background-color: white; 
-    display: flex; 
-    flex-direction: column; 
+    width: 50%;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
 }
 
 .caption-container {
@@ -125,16 +125,16 @@
 }
 
 .location-container {
-    border-top: 1px solid #dbdbdb; 
+    border-top: 1px solid #dbdbdb;
     padding: 8px;
-    display: flex; 
+    display: flex;
     align-items: center;
-    flex-shrink: 0; 
+    flex-shrink: 0;
 }
 
 .location-input {
-    border: none; 
-    box-shadow: none !important; 
+    border: none;
+    box-shadow: none !important;
 }
 
 .location-icon {
@@ -216,9 +216,9 @@
 .new-post-glow::before {
     content: '';
     position: absolute;
-    top: -4px; 
-    left: -4px; 
-    right: -4px; 
+    top: -4px;
+    left: -4px;
+    right: -4px;
     bottom: -4px;
     background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
     border-radius: 12px;
@@ -226,7 +226,7 @@
     z-index: -1;
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
-    
+
     animation: postGlowAnim 5s ease-in-out forwards;
 }
 

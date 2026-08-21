@@ -162,7 +162,7 @@ body.dark-mode .bi-heart-fill.text-danger { /* for the like icon still be red */
     color: #ed4956 !important;
 }
 body.dark-mode .js-posts-search-input {
-    background-color: #262B33 !important; 
+    background-color: #262B33 !important;
     color: white !important;
     border: none !important;
 }
@@ -182,12 +182,12 @@ body.dark-mode #storyModal input.story-reply::placeholder {
 }
 
 body.dark-mode .white-arrow {
-    background-color: #262B33 !important; 
-    border-color: #3a3f47 !important; 
+    background-color: #262B33 !important;
+    border-color: #3a3f47 !important;
 }
 
 body.dark-mode .white-arrow .bi {
-    color: #ffffff !important; 
+    color: #ffffff !important;
 }
 
 body.dark-mode #storyModal .story-nav {
