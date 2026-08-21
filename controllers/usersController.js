@@ -169,6 +169,14 @@ class UserController {
       return res.json({ message: 'Logged out successfully.' });
     });
   }
+
+  async getCurrentUser(req, res) {
+        if (req.session && req.session.username) {
+            res.status(200).json({ username: req.session.username });
+        } else {
+            res.status(401).json({ message: "Not logged in" });
+        }
+    }
 }
 
 module.exports = new UserController();

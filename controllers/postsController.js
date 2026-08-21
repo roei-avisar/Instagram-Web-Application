@@ -5,7 +5,7 @@ class PostController {
     async getAllPosts(req, res) {
         try {
             // Fetch all posts and sort them by MongoDB's built-in _id (newest first)
-            const posts = await Post.find().sort({ _id: -1 });
+            const posts = await Post.find().sort({ _id: -1 }).populate('comments');
             res.status(200).json(posts);
         } catch (error) {
             res.status(500).json({ message: "Error fetching posts from database", error });
@@ -47,7 +47,8 @@ class PostController {
 
     async addComment(req, res) {
         try {
-            const { username, text } = req.body;
+            const username = req.session.username;
+            const { text } = req.body;
             const postId = req.params.id;
             
             const newComment = await Comment.create({ postId, username, text });
@@ -62,10 +63,41 @@ class PostController {
         }
     }
 
+    // Handle liking/unliking a specific comment in a specific post
+    async manageCommentLike(req, res) {
+        try {
+            const username = req.session.username || req.body.username;
+            const commentId = req.params.id;
+
+            if (!username) {
+                return res.status(401).json({ message: "User not logged in" });
+            }
+
+            const comment = await Comment.findById(commentId);
+            if (!comment) {
+                return res.status(404).json({ message: "Comment not found" });
+            }
+
+            // Check if user already liked the comment
+            if (comment.likedBy.includes(username)) {
+                comment.likedBy.pull(username);
+                comment.likes = Math.max(0, comment.likes - 1);
+            } else {
+                comment.likedBy.push(username);
+                comment.likes += 1;
+            }
+            
+            await comment.save();
+            res.status(200).json(comment);
+        } catch (error) {
+            res.status(500).json({ message: "Error updating comment like", error });
+        }
+    }
+
     // Handle liking/unliking a post
     async managelikesPost(req, res) {
         try {
-            const { username } = req.body;
+            const username = req.session.username;
             const postId = req.params.id;
             const post = await Post.findById(postId);
             
@@ -86,7 +118,7 @@ class PostController {
     // Handle saving/unsaving a post
     async manageSavePost(req, res) {
         try {
-            const { username } = req.body;
+            const username = req.session.username;
             const postId = req.params.id;
             const post = await Post.findById(postId);
             

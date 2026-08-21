@@ -16,4 +16,7 @@ router.post('/like/:id', postController.managelikesPost);
 router.post('/save/:id', postController.manageSavePost);
 router.post('/addComment/:id', postController.addComment);
 
+// Route to like or unlike a comment
+router.post('/likeComment/:id', postController.manageCommentLike);
+
 module.exports = router;

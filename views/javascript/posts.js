@@ -1,8 +1,25 @@
 const postsContainer = document.querySelector('.instagram-posts'); // Global variable to store posts html elements
 const commentPopupBackground = document.querySelector('.comment-popup-background');
 const textColour = {video: 'text-white', image: 'text-dark', text: 'text-dark'};
-
+let currentUsername = ""; // Global variable to store the logged-in user
 let allPostsData = []; // Start with an empty array
+
+// Fetch current user and then load posts
+async function initPosts() {
+    try {
+        const userRes = await fetch('/api/user/currentUser');
+        if (userRes.ok) {
+            const userData = await userRes.json();
+            currentUsername = userData.username;
+            
+        }
+    } catch (error) {
+        console.error("Could not fetch current user", error);
+    }
+    
+    // Only fetch posts after we know who the current user is
+    fetchPostsFromServer();
+}
 
 // Fetch initial post data from the server
 async function fetchPostsFromServer() {
@@ -116,17 +133,15 @@ async function updatePostButtonsUI(postId) {
     const postElement = document.querySelector(`[data-post-id="${postId}"]`);
     if (!post || !postElement) return;
 
-    const currentUser = "besteam_ever"; // Current active user
-
     // Update heart icon & counter
     const heartBtn = postElement.querySelector('.js-like-container .post-icons');
-    const isLiked = post.likedByUsers.includes(currentUser);
+    const isLiked = post.likedByUsers.includes(currentUsername);
     heartBtn.className = `bi ${isLiked ? 'bi-heart-fill text-danger' : 'bi-heart'} fs-4 fw-bold bg-transparent border-0 p-0 post-icons`;
     postElement.querySelector(".js-like-counter").innerText = post.stats.likes;
 
     // Update save icon
     const saveBtn = postElement.querySelector('.js-save-button');
-    const isSaved = post.savedByUsers.includes(currentUser);
+    const isSaved = post.savedByUsers.includes(currentUsername);
     saveBtn.className = `js-save-button bi ${isSaved ? 'bi-bookmark-fill text-dark' : 'bi-bookmark'} fs-4 fw-bold bg-transparent border-0 p-0 post-icons`;
 }
 
@@ -284,8 +299,8 @@ function createPostButtonsHTML(post) {
     const currentUser = "besteam_ever"; // Current active user
 
     // Check if the current user has liked or saved this post based on database arrays
-    let isLiked = post.likedByUsers && post.likedByUsers.includes(currentUser);
-    let isSaved = post.savedByUsers && post.savedByUsers.includes(currentUser);
+    let isLiked = post.likedByUsers && post.likedByUsers.includes(currentUsername);
+    let isSaved = post.savedByUsers && post.savedByUsers.includes(currentUsername);
 
     let heartClass = isLiked ? "bi-heart-fill" : "bi-heart";
     let heartTextColor = isLiked ? "text-danger" : "";
@@ -318,12 +333,20 @@ function createPostButtonsHTML(post) {
 function createLikedByHTML(likedByUsers, likes) {
     let likedByProfilesHTML = '';
     let likedByHTML = '';
-    likedByUsers.forEach(user => {
+
+    const otherUsers = likedByUsers.filter(user => user !== currentUsername);
+    
+    const usersToShow = otherUsers.slice(0, 3);
+
+    usersToShow.forEach(user => {
         likedByProfilesHTML += `
             <img src="elements/media/profile-pictures/${user}.jpg" class="liked-by-profile-pic rounded-circle" alt="Image">
         `;
     });
-    if (likedByUsers.length > 0) {
+
+    if (usersToShow.length > 0) {
+        let displayUserName = usersToShow[0];
+
         likedByHTML = `
         <div class="d-flex align-items-center mt-2 js-liked-by">
             <div class="d-flex">
@@ -331,7 +354,7 @@ function createLikedByHTML(likedByUsers, likes) {
             </div>
             <div class="ms-1 fs-6">
                 Liked by
-                <a href="#!" class="fw-semibold fs-6 ms-1 text-decoration-none text-dark">${likedByUsers[0]}</a>
+                <a href="#!" class="fw-semibold fs-6 ms-1 text-decoration-none text-dark">${displayUserName}</a>
                 and
                 <button class="fw-semibold fs-6 ms-1 bg-transparent border-0 p-0"><span class="js-liked-by-counter">${likes - 1}</span> others</button>
             </div>
@@ -360,44 +383,38 @@ function createCaptionHTML(post) {
 }
 
 function renderPosts(postsData) {
-    postsContainer.innerHTML = ''; 
+    let allPostsHTML = ''; // Accumulate all HTML here
 
     postsData.forEach(post => {
-        
         let profilePicsHTML = createProfilePicsHTML(post);
-
         let authorsNamesHTML = createAuthorsHTML(post);
-
         let postContentHTML = createPostContentHTML(post, profilePicsHTML, authorsNamesHTML);
-
         let postButtonsHTML = createPostButtonsHTML(post);
-
         let likedByHTML = createLikedByHTML(post.likedByUsers, post.stats.likes);
-
         let captionHTML = createCaptionHTML(post);
 
         const postHTML = `
         <div class="card mb-2 border-0 js-all-post" data-post-id="${post._id}">
-        
             ${postContentHTML}
-
             <div class="card-body border-0 js-card-body">
                 ${postButtonsHTML}
-
                 ${likedByHTML}  
-            
                 ${captionHTML}
             </div>
         </div>
         `;
 
-        postsContainer.innerHTML += postHTML;
-
+        allPostsHTML += postHTML; // Append to the string, not the html directly to avoid multiple reflows
     });
-    document.querySelectorAll('video, audio').forEach(media => { // mute all audios
-    media.muted = true;
-    media.currentTime = 0;
+
+    // Update the html only once
+    postsContainer.innerHTML = allPostsHTML;
+
+    // Mute all audios
+    document.querySelectorAll('video, audio').forEach(media => { 
+        media.muted = true;
+        media.currentTime = 0;
     });
 }
 
-fetchPostsFromServer();
+initPosts(); // Call the initPosts function to fetch current user and then load posts
