@@ -1,140 +1,41 @@
 const postsContainer = document.querySelector('.instagram-posts'); // Global variable to store posts html elements
 const commentPopupBackground = document.querySelector('.comment-popup-background');
 const textColour = {video: 'text-white', image: 'text-dark', text: 'text-dark'};
+let currentUsername = ""; // Global variable to store the logged-in user
+let allPostsData = []; // Start with an empty array
 
-let allPostsData = [
-    {
-        "id": 1,
-        "authors": [ "yardenaaa_", "haza.ofra" ], 
-        "isVerified": false, 
-        "timeAgo": "52m", 
-        "subHeader": "Ofra Haza &bull; שיר הפרחה", 
-        "mediaType": "image", 
-        "mediaSource": "./elements/media/posts/main-posts/ofra-and-yardena-post.jpeg", 
-        "audioSource": "./elements/media/posts/posts-audio/freha-song.mp3",
-        "hasMuteButton": true, 
-        "stats": {
-            "likes": "1342",
-            "comments": "7",
-            "shares": "133"
-        },
-        "likedByUsers": [ "gali_atari10", "nalin12", "ofra_fan99" ], 
-        "caption": "אתם טים עופרה או טים ירדנה? הצביעו בסקר של החדשות עכשיו!", 
-        "isSuggested": false
-    },
-    {
-        "id": 2,
-        "authors": [ "noa.kirel1" ], 
-        "isVerified": true, 
-        "timeAgo": "6h", 
-        "subHeader": "Noa Kirel &bull; מיליון דולר", 
-        "mediaType": "video", 
-        "mediaSource": "./elements/media/posts/main-posts/noa-kirel-post.mp4",
-        "audioSource": "./elements/media/posts/posts-audio/million-dollar-song.mp3", 
-        "hasMuteButton": true, 
-        "stats": {
-            "likes": "9989",
-            "comments": "3",
-            "shares": "328"
-        },
-        "likedByUsers": [ "donald.j.trump", "yardena.arazi.fanpage", "sara22" ], 
-        "caption": "מי שרוצה שיר חדש שיעשה לייק", 
-        "isSuggested": false
-    },
-    {
-        "id": 3,
-        "authors": [ "abba.band" ], 
-        "isVerified": true, 
-        "timeAgo": "1d", 
-        "subHeader": "Stockholm, Sweden", 
-        "mediaType": "image", 
-        "mediaSource": "./elements/media/posts/main-posts/abba-post.jpeg", 
-        "hasMuteButton": false, 
-        "stats": {
-            "likes": "788",
-            "comments": "4",
-            "shares": "98"
-        },
-        "likedByUsers": [ "john_len99" ], 
-        "caption": "Last night was SUPE-PER TROUPE-PER!", 
-        "isSuggested": false
-    },
-    {
-        "id": 4,
-        "authors": [ "louis_arm_strong" ], 
-        "isVerified": false, 
-        "timeAgo": "14h", 
-        "subHeader": "", 
-        "mediaType": "image", 
-        "mediaSource": "./elements/media/posts/main-posts/louis-armstrong-post.jpeg", 
-        "hasMuteButton": false, 
-        "stats": {
-            "likes": "941",
-            "comments": "2",
-            "shares": "3"
-        },
-        "likedByUsers": [ "jamil_jamal", "tomer19", "mrs.lady" ], 
-        "caption": "What a wonderful world! Love to all of my followers ❤️", 
-        "isSuggested": false
-    },
-    {
-        "id": 5,
-        "authors": [ "bonjovi_x" ], 
-        "isVerified": true, 
-        "timeAgo": "2d", 
-        "subHeader": "Suggested for you", 
-        "mediaType": "image", 
-        "mediaSource": "./elements/media/posts/main-posts/bon-jovi-post.png", 
-        "hasMuteButton": false, 
-        "stats": {
-            "likes": "4231",
-            "comments": "3",
-            "shares": "15"
-        },
-        "likedByUsers": [ "lihi_griner67" ], 
-        "caption": "My new track is out, listen now on Youtube!", 
-        "isSuggested": true
-    },
-    {
-        "id": 6,
-        "authors": [ "tina.terner111" ], 
-        "isVerified": false, 
-        "timeAgo": "2h", 
-        "subHeader": "Original audio", 
-        "mediaType": "video", 
-        "mediaSource": "./elements/media/posts/main-posts/tina-terner-post.mp4", 
-        "audioSource": "./elements/media/posts/posts-audio/proud-mary-song.mp3",
-        "hasMuteButton": true, 
-        "stats": {
-            "likes": "3842",
-            "comments": "3",
-            "shares": "15"
-        },
-        "likedByUsers": [ "galit_gg4", "liat.dell" ], 
-        "caption": "Proud Mary keep on burnin'🔥", 
-        "isSuggested": false
-    },
-    {
-        "id": 7,
-        "authors": [ "besteam_ever" ], 
-        "isVerified": true, 
-        "timeAgo": "55m", 
-        "subHeader": "The College Of Management, Israel", 
-        "mediaType": "text", 
-        "mediaSource": "אחרי הרבה עבודה קשה שמחים להגיש את המטלה בפיתוח אפליקציות אינטרנטיות. מקווים לקבל לא פחות מ100!",
-        "hasMuteButton": false, 
-        "stats": {
-            "likes": "5555",
-            "comments": "5",
-            "shares": "5"
-        },
-        "likedByUsers": [ "noa.kirel1", "abba.band", "gual.nefesh" ],
-        "caption": "תחזיקו לנו אצבעות",
-        "isSuggested": false
-    },
-];
+// Fetch current user and then load posts
+async function initPosts() {
+    try {
+        const userRes = await fetch('/api/user/currentUser');
+        if (userRes.ok) {
+            const userData = await userRes.json();
+            currentUsername = userData.username;
+            
+        }
+    } catch (error) {
+        console.error("Could not fetch current user", error);
+    }
+    
+    // Only fetch posts after we know who the current user is
+    fetchPostsFromServer();
+}
 
-let lastPostId = 7;
+// Fetch initial post data from the server
+async function fetchPostsFromServer() {
+    try {
+        const response = await fetch('/api/posts/getAllPosts', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        allPostsData = await response.json();
+        renderPosts(allPostsData);
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+    }
+}
 
 const filtersList = {
     mediaType: [ "image", "video", "text" ],
@@ -155,17 +56,38 @@ const filtersFunctions = {
     }
 };
 
-function addNewPost(newPost) {
-    lastPostId = lastPostId + 1
-    newPost.id = lastPostId
-    allPostsData.unshift(newPost);
-    renderPosts(allPostsData);
+// Create new post by sending a POST request to the server
+async function addNewPost(newPostData) {
+    try {
+        const response = await fetch('/api/posts/createPost', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newPostData)
+        });
 
-    const newPostElement = document.querySelector(`[data-post-id="${lastPostId}"]`);
-    newPostElement.classList.add('new-post-glow');
-    setTimeout(() => {
-            newPostElement.classList.remove('new-post-glow');
-        }, 5000);
+        if (response.ok) {
+            // Refresh the posts from the server after adding
+            await fetchPostsFromServer();
+            
+            // Re-apply the glow effect to the newest post (which is now at index 0)
+            if (allPostsData.length > 0) {
+                const newestId = allPostsData[0]._id;
+                setTimeout(() => {
+                    const newPostElement = document.querySelector(`[data-post-id="${newestId}"]`);
+                    if (newPostElement) {
+                        newPostElement.classList.add('new-post-glow');
+                        setTimeout(() => {
+                            newPostElement.classList.remove('new-post-glow');
+                        }, 5000);
+                    }
+                }, 100); // Small delay to allow DOM to render
+            }
+        }
+    } catch (error) {
+        console.error('Error adding new post:', error);
+    }
 }
 
 function applyFilters() {
@@ -188,12 +110,53 @@ function updateMediaFilter(mediaTypes) {
     applyFilters();
 }
 
-function deletePostById(deleteId) {
-    allPostsData = allPostsData.filter(post => post.id !== deleteId);
-    closePopupComment(null, true)
-    renderPosts(allPostsData);
+// Update the deletePostById function to send delete request to the server
+async function deletePostById(deleteId) {
+    try {
+        const response = await fetch(`/api/posts/deletePost/${deleteId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            closePopupComment(null, true);
+            // Refresh the posts from the server after deleting
+            await fetchPostsFromServer();
+        }
+    } catch (error) {
+        console.error('Error deleting post:', error);
+    }
 }
 
+// Update a post's UI after a like/unlike or save/unsave action
+async function updatePostButtonsUI(postId) {
+    const post = allPostsData.find(p => p._id === postId);
+    if (!post) return;
+
+    const isLiked = post.likedByUsers.includes(currentUsername);
+    const isSaved = post.savedByUsers.includes(currentUsername);
+
+    // Update both the main post and any popups that might be open for this post (for example, the comment popup)
+    const postElements = document.querySelectorAll(`[data-post-id="${postId}"]`);
+    postElements.forEach(postElement => {
+        // Update heart icon & counter
+        const heartBtn = postElement.querySelector('.js-like-container .post-icons');
+        if (heartBtn) {
+            heartBtn.className = `bi ${isLiked ? 'bi-heart-fill text-danger' : 'bi-heart'} fs-4 fw-bold bg-transparent border-0 p-0 post-icons`;
+        }
+
+        // Counter might not exist in the popup HTML structure, so we check if it exists
+        const likeCounter = postElement.querySelector(".js-like-counter");
+        if (likeCounter) {
+            likeCounter.innerText = post.stats.likes;
+        }
+
+        // Update save icon
+        const saveBtn = postElement.querySelector('.js-save-button');
+        if (saveBtn) {
+            saveBtn.className = `js-save-button bi ${isSaved ? 'bi-bookmark-fill text-dark' : 'bi-bookmark'} fs-4 fw-bold bg-transparent border-0 p-0 post-icons`;
+        }
+    });
+}
 
 function createAuthorsHTML(post) {
     let authorsNamesHTML = '';
@@ -240,7 +203,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
         <button class="bi bi-three-dots fs-4 bg-transparent border-0 p-0 ${textColour[post.mediaType]} options-btn"></button>
 
         <div class="d-none post-options-dropdown">
-                <button class="delete-post-btn" data-id="${post.id}">
+                <button class="delete-post-btn" data-id="${post._id}">
                     Delete Post <span class="bi bi-trash"></span>
                 </button>
         </div>
@@ -250,14 +213,14 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
     let audioTagHTML = '';
     if (post.audioSource) {
         let isLoop = post.mediaType === "video" ? "" : "loop"; // if the media is a photo the sound is looped automaticlly if its a video then the sound will be looped with the video
-        audioTagHTML = `<audio id="audio-${post.id}" src="${post.audioSource}" autoplay muted ${isLoop}></audio>`;
+        audioTagHTML = `<audio id="audio-${post._id}" src="${post.audioSource}" autoplay muted ${isLoop}></audio>`;
     }
 
     let muteButtonHTML = '';
-    if (post.hasMuteButton) {
+    if (post.audioSource) {
         muteButtonHTML = `
         <div class="tiny-icon-background position-absolute bottom-0 end-0 m-3 bg-dark bg-opacity-50 rounded-circle d-flex justify-content-center align-items-center" style="z-index: 5;">
-            <button class="bi bi-volume-mute-fill text-white bg-transparent border-0 p-0" onclick="togglePostAudio(this, '${post.id}')"></button>
+            <button class="bi bi-volume-mute-fill text-white bg-transparent border-0 p-0" onclick="togglePostAudio(this, '${post._id}')"></button>
         </div>`;
     }
 
@@ -284,7 +247,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                 </div>
                 
                 <div class="js-post-media position-relative">
-                    <video id="video-${post.id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline onended="restartMedia(this)"></video>
+                    <video id="video-${post._id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline onended="restartMedia(this)"></video>
                     ${audioTagHTML}
                     ${muteButtonHTML}
                 </div>
@@ -346,21 +309,17 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
 }
 
 function createPostButtonsHTML(post) {
-    let heartClass = "bi-heart";
-    let heartTextColor = "";
+    const currentUser = "besteam_ever"; // Current active user
 
-    if (likedPosts[post.id]) {
-        heartClass = "bi-heart-fill";
-        heartTextColor = "text-danger";
-    }
+    // Check if the current user has liked or saved this post based on database arrays
+    let isLiked = post.likedByUsers && post.likedByUsers.includes(currentUsername);
+    let isSaved = post.savedByUsers && post.savedByUsers.includes(currentUsername);
 
-    let bookmarkClass = "bi-bookmark";
-    let bookmarkTextColor = "";
+    let heartClass = isLiked ? "bi-heart-fill" : "bi-heart";
+    let heartTextColor = isLiked ? "text-danger" : "";
 
-    if (savedPosts[post.id]) {
-        bookmarkClass = "bi-bookmark-fill";
-        bookmarkTextColor = "text-dark";
-    }
+    let bookmarkClass = isSaved ? "bi-bookmark-fill" : "bi-bookmark";
+    let bookmarkTextColor = isSaved ? "text-dark" : "";
 
     let postButtonsHTML = `
         <div class="d-flex justify-content-between js-icon-line">
@@ -387,12 +346,20 @@ function createPostButtonsHTML(post) {
 function createLikedByHTML(likedByUsers, likes) {
     let likedByProfilesHTML = '';
     let likedByHTML = '';
-    likedByUsers.forEach(user => {
+
+    const otherUsers = likedByUsers.filter(user => user !== currentUsername);
+    
+    const usersToShow = otherUsers.slice(0, 3);
+
+    usersToShow.forEach(user => {
         likedByProfilesHTML += `
             <img src="elements/media/profile-pictures/${user}.jpg" class="liked-by-profile-pic rounded-circle" alt="Image">
         `;
     });
-    if (likedByUsers.length > 0) {
+
+    if (usersToShow.length > 0) {
+        let displayUserName = usersToShow[0];
+
         likedByHTML = `
         <div class="d-flex align-items-center mt-2 js-liked-by">
             <div class="d-flex">
@@ -400,7 +367,7 @@ function createLikedByHTML(likedByUsers, likes) {
             </div>
             <div class="ms-1 fs-6">
                 Liked by
-                <a href="#!" class="fw-semibold fs-6 ms-1 text-decoration-none text-dark">${likedByUsers[0]}</a>
+                <a href="#!" class="fw-semibold fs-6 ms-1 text-decoration-none text-dark">${displayUserName}</a>
                 and
                 <button class="fw-semibold fs-6 ms-1 bg-transparent border-0 p-0"><span class="js-liked-by-counter">${likes - 1}</span> others</button>
             </div>
@@ -429,44 +396,38 @@ function createCaptionHTML(post) {
 }
 
 function renderPosts(postsData) {
-    postsContainer.innerHTML = ''; 
+    let allPostsHTML = ''; // Accumulate all HTML here
 
     postsData.forEach(post => {
-        
         let profilePicsHTML = createProfilePicsHTML(post);
-
         let authorsNamesHTML = createAuthorsHTML(post);
-
         let postContentHTML = createPostContentHTML(post, profilePicsHTML, authorsNamesHTML);
-
         let postButtonsHTML = createPostButtonsHTML(post);
-
         let likedByHTML = createLikedByHTML(post.likedByUsers, post.stats.likes);
-
         let captionHTML = createCaptionHTML(post);
 
         const postHTML = `
-        <div class="card mb-2 border-0 js-all-post" data-post-id="${post.id}">
-        
+        <div class="card mb-2 border-0 js-all-post" data-post-id="${post._id}">
             ${postContentHTML}
-
             <div class="card-body border-0 js-card-body">
                 ${postButtonsHTML}
-
                 ${likedByHTML}  
-            
                 ${captionHTML}
             </div>
         </div>
         `;
 
-        postsContainer.innerHTML += postHTML;
-
+        allPostsHTML += postHTML; // Append to the string, not the html directly to avoid multiple reflows
     });
-    document.querySelectorAll('video, audio').forEach(media => { // mute all audios
-    media.muted = true;
-    media.currentTime = 0;
+
+    // Update the html only once
+    postsContainer.innerHTML = allPostsHTML;
+
+    // Mute all audios
+    document.querySelectorAll('video, audio').forEach(media => { 
+        media.muted = true;
+        media.currentTime = 0;
     });
 }
 
-renderPosts(allPostsData);
+initPosts(); // Call the initPosts function to fetch current user and then load posts
