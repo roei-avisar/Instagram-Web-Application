@@ -136,7 +136,7 @@ class GroupsController {
             res.status(500).json({ success: false });
         }
     }
-    
+
     async getGroupMembers(req, res) { // get all the group members
         try {
             const groupId = req.params.groupId;
@@ -150,6 +150,33 @@ class GroupsController {
             res.status(200).json({ success: true, data: group.users });
         } catch (error) {
             res.status(500).json({ success: false });
+        }
+    }
+    async renameGroup(req, res) { // rename the group by admin user
+        try {
+            const { newName } = req.body;
+            const groupId = req.params.id;
+            const userId = req.session.userId;
+
+            if (!newName || newName.length > 60) {
+                return res.status(400).json({ error: 'Invalid group name' });
+            }
+            const group = await Group.findById(groupId);
+            if (!group) {
+                return res.status(404).json({ error: 'Group not found' });
+            }
+
+            if (group.admin.toString() !== userId) {
+                return res.status(403).json({ error: 'Unauthorized' });
+            }
+
+            group.name = newName;
+            await group.save();
+
+            res.json(group);
+        } 
+        catch (error) {
+            res.status(500).json({ error: 'Server error' });
         }
     }
 }

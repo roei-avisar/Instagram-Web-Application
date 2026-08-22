@@ -1,4 +1,4 @@
-const CURRENT_USER_ID = "64e7c3f15d2a7a0017a12345"; //should be the real USER ID from users MODEL
+
 let globalGroups = [];
 let currentOpenGroupId = null;
 
@@ -102,16 +102,78 @@ function renderGroups(groupsArray) {
         const usersBtn = document.createElement('button'); // members button HTML
         usersBtn.className = 'btn btn-sm btn-light border fw-semibold rounded-pill px-3';
         usersBtn.textContent = 'Members';
-        usersBtn.onclick = () => openMembersPopup(group._id, isAdmin, usersArray);
+        usersBtn.onclick = () => openMembersPopup(group._id, isAdmin, usersArray, group.admin);
 
         btnGroup.appendChild(usersBtn);
 
-        if (isAdmin) { // if is admin then create a delete group button if not then create a join/leave group button
+        if (isAdmin) { // if is admin then create a 'delete group' and a 'renme' button if not then create a join/leave group button
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-sm btn-outline-secondary ms-2';
+            editBtn.textContent = 'Edit Name';
+            
+            editBtn.onclick = () => {
+                nameSpan.classList.add('d-none');
+                editBtn.classList.add('d-none');
+
+                const editContainer = document.createElement('div');
+                editContainer.className = 'd-flex align-items-center flex-grow-1';
+
+                const editInput = document.createElement('input');
+                editInput.type = 'text';
+                editInput.className = 'form-control form-control-sm w-75';
+                editInput.value = group.name;
+
+                const saveBtn = document.createElement('button');
+                saveBtn.className = 'btn btn-sm btn-success ms-2';
+                saveBtn.textContent = 'Save';
+
+                editContainer.appendChild(editInput);
+                editContainer.appendChild(saveBtn);
+                
+                row.insertBefore(editContainer, btnGroup);
+
+                saveBtn.onclick = () => {
+                    const newName = editInput.value.trim();
+
+                    if (newName === '' || newName.length > 20 || newName === group.name) {
+                        nameSpan.classList.remove('d-none');
+                        editBtn.classList.remove('d-none');
+                        editContainer.remove();
+                        return;
+                    }
+
+                    fetch(`/api/groups/renameGroup/${group._id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ newName: newName })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            nameSpan.textContent = newName;
+                            group.name = newName;
+                            nameSpan.classList.remove('d-none');
+                            editBtn.classList.remove('d-none');
+                            editContainer.remove();
+                        } else {
+                            alert('Failed to update group name');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                };
+            };
+            
+            btnGroup.appendChild(editBtn);
+
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'btn btn-sm btn-danger fw-semibold rounded-pill px-3';
             deleteBtn.textContent = 'Delete';
             deleteBtn.onclick = () => deleteGroup(group._id, CURRENT_USER_ID);
             btnGroup.appendChild(deleteBtn);
+
         } else {
             const toggleBtn = document.createElement('button');
             toggleBtn.className = isMember ? 'btn btn-sm btn-secondary fw-semibold rounded-pill px-3' : 'btn btn-sm btn-primary fw-semibold rounded-pill px-3';
@@ -162,7 +224,7 @@ function deleteGroup(groupID, userID) { // delete the group if the user is the a
     });
 }
 
-function openMembersPopup(groupId, isAdmin, usersArray) {
+function openMembersPopup(groupId, isAdmin, usersArray, adminId) {
     currentOpenGroupId = groupId;
     const overlay = document.getElementById('membersOverlay');
     overlay.classList.remove('d-none');
@@ -175,10 +237,21 @@ function openMembersPopup(groupId, isAdmin, usersArray) {
         const row = document.createElement('div');
         row.className = 'd-flex justify-content-between align-items-center mb-2';
 
+        const userContainer = document.createElement('div');
+        
         const userSpan = document.createElement('span');
         userSpan.textContent = userId === CURRENT_USER_ID ? 'You' : `User: ${userId.substring(0,6)}...`; // change it to username from users model
+        
+        userContainer.appendChild(userSpan);
 
-        row.appendChild(userSpan);
+        if (userId === adminId) {
+            const adminBadge = document.createElement('span');
+            adminBadge.className = 'badge bg-primary ms-2 rounded-pill';
+            adminBadge.textContent = 'Admin';
+            userContainer.appendChild(adminBadge);
+        }
+
+        row.appendChild(userContainer);
 
         if (isAdmin && userId !== CURRENT_USER_ID) {
             const removeBtn = document.createElement('button'); // make remove button for admins
@@ -213,5 +286,31 @@ function removeUser(groupId, userIdToRemove) {
             closeMembersPopup(null, true);
             openGroupsPopup(); // refreshing the groups render
         }
+    });
+}
+
+function renameGroup(groupId, currentName) {
+    const newName = prompt('Enter new group name:', currentName);
+    
+    if (!newName || newName.trim() === '' || newName.length > 60 || newName === currentName) { // check validiation of new name
+        return; 
+    }
+
+    fetch(`/api/groups/renameGroup/${groupId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ newName: newName.trim() })
+    })
+    .then(response => {
+        if (response.ok) {
+            openGroupsPopup()
+        } else {
+            alert('Failed to rename group');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
     });
 }
