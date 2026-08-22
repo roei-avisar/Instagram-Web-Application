@@ -1,4 +1,5 @@
 require('dotenv').config(); // load .env variables
+
 const express = require('express'); // import to express framework
 const path = require('path'); // import to path library
 const session = require('express-session');
@@ -61,5 +62,6 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'views'))); // serves only non-html assets (css, js, images) since .html is blocked above
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`); // runing the server by "node server.js" on console
+  // Running the server by "node server.js" on console
+  console.log(`Server is running on port ${port}`); 
 });

@@ -58,7 +58,7 @@ body {
     z-index: 1;
 }
 .liked-by-profile-pic:hover {
-    opacity: 0.8; 
+    opacity: 0.8;
 }
 .liked-by-profile-pic + .liked-by-profile-pic {
     margin-left: -6px;
@@ -98,7 +98,7 @@ transform: scale(1.05);
     transition: none;
 }
 .btn-gray:hover {
-    background-color: #dbdbdb; 
+    background-color: #dbdbdb;
 }
 .verified-icon{
     font-size: 12px;
@@ -165,7 +165,7 @@ transform: scale(1.05);
 .text-post-container {
     width: 100%;
     min-height: 400px;
-    background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); 
+    background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
     box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
 }
 
@@ -178,16 +178,16 @@ transform: scale(1.05);
     max-width: 90%;
 }
 @keyframes press-button-pop { /*animation to the like button when the user press like*/
-  0% 
+  0%
   {
     transform: scale(1);
   }
-  50% 
+  50%
   {
-    transform: scale(1.3);  }
-  100% 
+    transform: scale(1.3);
+  }
+  100%
   {
-  
     transform: scale(1);
   }
 }
@@ -208,7 +208,7 @@ transform: scale(1.05);
     width: 65vw;
     height: 95vh;
     background-color: white;
-    border-radius: 0 8px 8px 0; 
+    border-radius: 0 8px 8px 0;
     z-index: 11;
 }
 .comment-popup-post{
@@ -216,7 +216,7 @@ transform: scale(1.05);
     min-width: 50%;
 }
 .comment-popup-post .js-post-media {
-    width: 100%; 
+    width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
@@ -226,7 +226,6 @@ transform: scale(1.05);
     width: 100%;
     height: 100%;
     object-fit: contain;
-    
 }
 .comment-popup-comments{
     min-width: 40%;
