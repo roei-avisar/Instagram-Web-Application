@@ -48,11 +48,11 @@
 }
 
 .hover-extend {
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease; 
 }
 
 .hover-extend:hover {
-    transform: scale(1.05);
+    transform: scale(1.05); 
 }
 
 .instagram-blue {
@@ -185,13 +185,16 @@ body.dark-mode .right-sidebar .text-muted {
     color: white;
     cursor: pointer;
     z-index: 20;
+    
 }
 
 
 .instagram-logo {
     position: fixed;
+
     top: -18px !important;
     left: -15px;
+
     z-index: 18;
 }
 

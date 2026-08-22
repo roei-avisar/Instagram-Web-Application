@@ -39,7 +39,7 @@ userSchema.pre('save', async function () {
   if (this.isModified('username')) {
     this.username = encrypt(this.username);
   }
-  // Importent to check if the password is modified because this function works for update
+  // Importent to check if the password is modified because this function works for update 
   // operations too and we don't want to hash the password again, do we :)
   if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(10);

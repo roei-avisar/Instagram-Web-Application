@@ -22,11 +22,11 @@ function encrypt(text) {
   if (!text) return text;
   const key = getKey();
   const iv = crypto.randomBytes(IV_LENGTH); // Random IV every time!
-
+  
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
   let encrypted = cipher.update(text, 'utf8', 'hex');
   encrypted += cipher.final('hex');
-
+  
   // Combine the IV and encrypted text so we can decrypt it later
   return iv.toString('hex') + ':' + encrypted;
 }
@@ -34,21 +34,21 @@ function encrypt(text) {
 // Decrypt a string formatted as "ivHex:encryptedHex" back to plaintext
 function decrypt(textWithIV) {
   if (!textWithIV) return textWithIV;
-
+  
   // Split the string to get the IV and the encrypted text
   const parts = textWithIV.split(':');
-
+  
   // If it doesn't have a ':', it is not formatted correctly. Just return the raw text.
   if (parts.length !== 2) return textWithIV;
-
+  
   const iv = Buffer.from(parts[0], 'hex');
   const encryptedText = parts[1];
   const key = getKey();
-
+  
   const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
   let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
-
+  
   return decrypted;
 }
 

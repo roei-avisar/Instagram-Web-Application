@@ -1,3 +1,5 @@
+      
+
 const newPostNotification = document.querySelector('.js-new-post-notification');
 const notificationsBtn = document.querySelector('.js-notifications-btn');
 const notificationsPanel = document.querySelector('.js-notifications-panel');
@@ -43,6 +45,7 @@ let allNotificationsData = [
         time: "55m",
         messageMedia: "אחרי הרבה עבודה קשה שמחים להגיש את המטלה בפיתוח אפליקציות אינטרנטיות. מקווים לקבל לא פחות מ100!",
         messageMediaType: "text"
+  
     },
      {
         id: 6,
@@ -51,6 +54,7 @@ let allNotificationsData = [
         time: "55m",
         messageMedia: "אחרי הרבה עבודה קשה שמחים להגיש את המטלה בפיתוח אפליקציות אינטרנטיות. מקווים לקבל לא פחות מ100!",
         messageMediaType: "text"
+ 
     },
     {
         id: 7,
@@ -84,7 +88,7 @@ function uploadNewPostNotification(postMedia, postMediaType) {
 
 function renderNotifications(notificationsData) {
     notificationsList.innerHTML = '';
-
+    
     notificationsData.forEach(notif => {
         let messageMediaHTML = ''
         if (notif.messageMedia) {
@@ -103,7 +107,7 @@ function renderNotifications(notificationsData) {
                 </div>`
             }
         }
-
+        
 
         const notifHTML = `
             <div class="notification-item">
