@@ -8,4 +8,6 @@ router.post('/login', userController.login);
 
 router.get('/logout', userController.logout);
 
+router.get('/getUserDetails', userController.getUserDetails);
+
 module.exports = router; // export all the router functions to be used by server.js
