@@ -195,8 +195,16 @@ fileInput.addEventListener('change', function(event) {
     const selectedFile = event.target.files[0];
 
     if (selectedFile) {
+        // Create virtual path for fast UI preview
         const tempVirtualPath = URL.createObjectURL(selectedFile);
-        currentMediaSource = tempVirtualPath;
+        
+        // Read the actual file to send to the server
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            currentMediaSource = e.target.result; // This holds the actual Base64 data
+        };
+        reader.readAsDataURL(selectedFile);
+
         previewText.classList.add('d-none');
 
         if (selectedFile.type.startsWith('image/')) {
@@ -213,7 +221,6 @@ fileInput.addEventListener('change', function(event) {
             previewImg.classList.add('d-none');
         }
 
-        // Switch between the difference creation form stages (media upload and details) 
         switchCreatePostFormState();
     }
 });
@@ -250,6 +257,7 @@ postFormBackBtn.addEventListener('click', function(event) {
     discardOverlay.classList.remove('d-none');
 });
 
+// Upload the new post when clicking on the share button, and show a notification about it
 postShareBtn.addEventListener('click', function(event) {
     let captionText = document.querySelector('.js-caption-input').value;
     let locationText = document.querySelector('.js-location-input').value;

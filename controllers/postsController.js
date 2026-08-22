@@ -1,4 +1,5 @@
 const { Post, Comment } = require('../models/postsModel');
+const gitService = require('../utils/gitService');
 
 class PostController {
     // Controller method to handle fetching all posts
@@ -17,10 +18,30 @@ class PostController {
         try {
             const newPostData = req.body;
             
-            // Create a new Mongoose document and save it to the database
+            // Check if media needs to be saved
+            if (newPostData.mediaSource && newPostData.mediaSource.startsWith('data:')) {
+                const extension = newPostData.mediaType === 'video' ? 'mp4' : 'jpg';
+                const filename = `post_${Date.now()}.${extension}`;
+                
+                // Keep the original Base64 data for the background task
+                const base64Data = newPostData.mediaSource;
+                
+                // The path to be saved in the database (used by the frontend)
+                const dbMediaPath = `elements/media/posts/main-posts/${filename}`;
+                newPostData.mediaSource = dbMediaPath;
+                
+                // The full relative path to be passed to the Git Service
+                const fullRelativePath = `../views/${dbMediaPath}`;
+                
+                // Send the save and Git operation to the background using the relative path
+                gitService.saveMediaAndPushToGit(base64Data, fullRelativePath);
+            }
+
+            // Create and save to the database immediately
             const newPost = new Post(newPostData);
             const createdPost = await newPost.save();
             
+            // Return response to client without waiting for files or Git
             res.status(201).json(createdPost);
         } catch (error) {
             res.status(500).json({ message: "Error creating post in database", error });
@@ -36,6 +57,13 @@ class PostController {
             const deletedPost = await Post.findByIdAndDelete(postId);
             
             if (deletedPost) {
+                // If post has a media file (not a text post), trigger background deletion
+                if (deletedPost.mediaType !== 'text' && deletedPost.mediaSource) {
+                    // Create the full relative path to pass to the Git Service
+                    const fullRelativePath = `../views/${deletedPost.mediaSource}`;
+                    gitService.deleteMediaAndPushToGit(fullRelativePath);
+                }
+
                 res.status(200).json({ message: "Post deleted successfully" });
             } else {
                 res.status(404).json({ message: "Post not found" });
