@@ -9,7 +9,7 @@ router.patch('/joinExistingGroup/:groupId', groupsController.joinGroup);
 router.patch('/leaveExistingGroup/:groupId', groupsController.leaveGroup);
 router.patch('/removeUserFromGroup/:groupId', groupsController.removeUser);
 router.get('/viewGroupMembers/:groupId', groupsController.getGroupMembers);
-router.patch('/renameGroup/:id', groupsController.renameGroup);
+router.patch('/renameGroup/:groupId', groupsController.renameGroup);
 
 
 module.exports = router; // export all the router functions to be used by server.js

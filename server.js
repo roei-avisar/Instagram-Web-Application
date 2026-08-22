@@ -1,7 +1,6 @@
 require('dotenv').config(); // load .env variables
 const express = require('express'); // import to express framework
 const path = require('path'); // import to path library
-const cors = require('cors');
 const session = require('express-session');
 const connectMongo = require('connect-mongo'); //allows you to save user session in mongodb
 const MongoStore = connectMongo.default || connectMongo; 
@@ -17,13 +16,6 @@ connectDB();
 // Middleware
 app.use(express.json()); // parse JSON bodies from fetch requests
 app.use(express.urlencoded({ extended: true })); // parse form data
-
-// CORS Configuration
-const corsOptions = {
-    origin: ['http://localhost:3000','http://127.0.0.1:3000', 'http://127.0.0.1:5500', 'http://localhost:5500'],
-    optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
 
 // Session configuration
 app.use(session({

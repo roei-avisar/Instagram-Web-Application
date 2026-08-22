@@ -1,12 +1,14 @@
 let CURRENT_USER_ID = null;
+let CURRENT_USERNAME = null
 
-fetch('/api/user/getUserID') // load userID unto gloable variable CURRENT_USER_ID and then make the main page shown
+fetch('/api/user/getUserDetails') // load user details into gloable variables and then make the main page visible
     .then(response => {
         if (!response.ok) throw new Error('Not logged in');
         return response.json();
     })
     .then(data => {
         CURRENT_USER_ID = data.userId;
+        CURRENT_USERNAME = data.username;
         
         document.getElementById('loadingScreen').classList.remove('d-flex');
         document.getElementById('loadingScreen').classList.add('d-none');

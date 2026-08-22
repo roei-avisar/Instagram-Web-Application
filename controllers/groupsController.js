@@ -28,15 +28,9 @@ class GroupsController {
         }
     }
 
-    async getAllGroups (req, res) { // get all groups in DB or get only my user group (by given user id as a parameter)
+    async getAllGroups (req, res) { // get all groups in DB
         try {
-            let filter = {};
-
-            if (req.query.userId) { // if user id were given
-                filter.users = req.query.userId;
-            }
-
-            const groups = await Group.find(filter); //choose only the groups of the given id user if given if not show all the groups
+            const groups = await Group.find();
 
             res.status(200).json({ success: true, count: groups.length, data: groups });
         } catch (error) {
@@ -44,7 +38,7 @@ class GroupsController {
         }
     }
 
-    async deleteGroup(req, res) { // delete the group if the use is the admin
+    async deleteGroup(req, res) { // delete the group if the user is the admin
         try {
             const groupId = req.params.groupId;
             const userId = req.body.userId;
@@ -56,10 +50,10 @@ class GroupsController {
             }
 
             if (group.admin.toString() !== userId) { // check if the user who deleting the group is the admin
-                return res.status(403).json({ success: false });
+                return res.status(403).json({ success: false, message: "Only admin can delete the group"});
             }
 
-            await Group.findByIdAndDelete(groupId); //  find tnd deleting the group
+            await Group.findByIdAndDelete(groupId); //  find and deleting the group
 
             res.status(200).json({ success: true });
         } catch (error) {
@@ -155,7 +149,7 @@ class GroupsController {
     async renameGroup(req, res) { // rename the group by admin user
         try {
             const { newName } = req.body;
-            const groupId = req.params.id;
+            const groupId = req.params.groupId;
             const userId = req.session.userId;
 
             if (!newName || newName.length > 60) {

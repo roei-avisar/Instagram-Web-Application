@@ -170,12 +170,12 @@ class UserController {
     });
   }
 
-  // GET /api/user/getUserID
-  getUserID(req, res) {
-    if (!req.session || !req.session.userId) {
+  // GET /api/user/getUserDetails
+  getUserDetails(req, res) {
+    if (!req.session || !req.session.userId || !req.session.username) {
         return res.status(401).json({ error: 'Not authenticated' });
     }
-    res.json({ userId: req.session.userId }); //respond with user ID that added aotumaticlly by session 
+    res.json({ userId: req.session.userId, username: req.session.username }); //respond with user details that added aotumaticlly by session 
   }
 }
 

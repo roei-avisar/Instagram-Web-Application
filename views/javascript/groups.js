@@ -106,7 +106,7 @@ function renderGroups(groupsArray) {
 
         btnGroup.appendChild(usersBtn);
 
-        if (isAdmin) { // if is admin then create a 'delete group' and a 'renme' button if not then create a join/leave group button
+        if (isAdmin) { // if is admin then create a 'delete group' and a 'rename' buttons if not then create a join/leave group button
             const editBtn = document.createElement('button');
             editBtn.className = 'btn btn-sm btn-outline-secondary ms-2';
             editBtn.textContent = 'Edit Name';
@@ -196,7 +196,7 @@ function joinGroup(groupID, userID) { // join user to requested group
     })
     .then(res => res.json())
     .then(data => {
-        if(data.success) openGroupsPopup(); // it will rnder all the groups from start
+        if(data.success) openGroupsPopup(); // it will render all the groups from start
     });
 }
 
@@ -228,7 +228,7 @@ function openMembersPopup(groupId, isAdmin, usersArray, adminId) {
     currentOpenGroupId = groupId;
     const overlay = document.getElementById('membersOverlay');
     overlay.classList.remove('d-none');
-    overlay.classList.add('d-flex'); // make the members popup visiable
+    overlay.classList.add('d-flex'); // make the members popup visible
     
     const listContainer = document.getElementById('membersList');
     listContainer.innerHTML = ''; // reset the content
