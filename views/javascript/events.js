@@ -160,7 +160,7 @@ document.addEventListener('click', function(event) {
 
     const deleteBtn = event.target.closest('.delete-post-btn');
     if (deleteBtn) {
-        const deleteId = deleteBtn.getAttribute('data-id');
+        const deleteId = Number(deleteBtn.getAttribute('data-id'));
         deletePostById(deleteId);
     }
 });
