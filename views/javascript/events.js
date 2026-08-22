@@ -1,7 +1,7 @@
 const menusConfig = [
     {
         menuClass: '.post-options-dropdown',
-        dontRemoveOn: '.options-btn, .post-options-dropdown' 
+        dontRemoveOn: '.options-btn, .post-options-dropdown'
     },
     {
         menuClass: '.js-search-container',
@@ -115,11 +115,11 @@ function discardPost() {
 
 // Global listener usef for closing all open menu's when clicking on elements not in their 'safe zone'
 document.addEventListener('click', function(event) {
-    
+
     menusConfig.forEach(config => {
-        
+
         const clickedInsideSafeZone = event.target.closest(config.dontRemoveOn);
-        
+
         if (!clickedInsideSafeZone) {
             const openElements = document.querySelectorAll(`${config.menuClass}:not(.d-none)`);
             openElements.forEach(element => {
@@ -135,14 +135,14 @@ document.addEventListener('click', function(event) {
 
 // Generate event listener on all suggested Follow/Followign buttons that changes their state between Follow and Following
 followButtons.forEach(button => {
-    button.addEventListener('click', function(event) {        
-        if (this.textContent.trim() === 'Follow') {            
-            this.textContent = 'Following';            
+    button.addEventListener('click', function(event) {
+        if (this.textContent.trim() === 'Follow') {
+            this.textContent = 'Following';
             this.classList.remove('instagram-blue');
             this.classList.add('following-state-btn');
-            
+
         } else {
-            this.textContent = 'Follow';            
+            this.textContent = 'Follow';
             this.classList.remove('following-state-btn');
             this.classList.add('instagram-blue');
         }
@@ -151,7 +151,7 @@ followButtons.forEach(button => {
 
 // Open the 'delete post' menu when clicking on the post options button, and deleting the post when the delete button is clicked
 document.addEventListener('click', function(event) {
-    
+
     if (event.target.classList.contains('options-btn')) {
         const parentContainer = event.target.closest('.position-relative');
         const dropdownMenu = parentContainer.querySelector('.post-options-dropdown');
@@ -169,9 +169,9 @@ document.addEventListener('click', function(event) {
 menuCreateBtn.addEventListener('click', function(event) {
     createFormOverlay.classList.toggle('d-none');
     if (createFormOverlay.classList.contains('d-none')) {
-        document.body.style.overflow = ''; 
+        document.body.style.overflow = '';
     } else {
-        document.body.style.overflow = 'hidden'; 
+        document.body.style.overflow = 'hidden';
     }
 });
 createTextPostBtn.addEventListener('click', function(event) {
@@ -195,8 +195,16 @@ fileInput.addEventListener('change', function(event) {
     const selectedFile = event.target.files[0];
 
     if (selectedFile) {
+        // Create virtual path for fast UI preview
         const tempVirtualPath = URL.createObjectURL(selectedFile);
-        currentMediaSource = tempVirtualPath;
+
+        // Read the actual file to send to the server
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            currentMediaSource = e.target.result; // This holds the actual Base64 data
+        };
+        reader.readAsDataURL(selectedFile);
+
         previewText.classList.add('d-none');
 
         if (selectedFile.type.startsWith('image/')) {
@@ -213,7 +221,6 @@ fileInput.addEventListener('change', function(event) {
             previewImg.classList.add('d-none');
         }
 
-        // Switch between the difference creation form stages (media upload and details) 
         switchCreatePostFormState();
     }
 });
@@ -250,6 +257,7 @@ postFormBackBtn.addEventListener('click', function(event) {
     discardOverlay.classList.remove('d-none');
 });
 
+// Upload the new post when clicking on the share button, and show a notification about it
 postShareBtn.addEventListener('click', function(event) {
     let captionText = document.querySelector('.js-caption-input').value;
     let locationText = document.querySelector('.js-location-input').value;
@@ -319,22 +327,22 @@ function triggerFilterUpdate() {
 // Mark or un-mark every checkbox in accordance to the 'all' checkbox mark
 filterAllCheckboxes.addEventListener('change', function(event) {
     const isChecked = event.target.checked;
-    
+
     filterSingleCheckbox.forEach(cb => {
         cb.checked = isChecked;
     });
-    
+
     triggerFilterUpdate();
 });
 
 // Upon 'change' event in the regular checkboxes (all checkboxes other then 'all'), change the 'all' checkbox accordingly, and trigger the mediaFilterUpdate
 filterSingleCheckbox.forEach(checkbox => {
     checkbox.addEventListener('change', function() {
-        
+
         const areAllChecked = Array.from(filterSingleCheckbox).every(cb => cb.checked);
-        
+
         filterAllCheckboxes.checked = areAllChecked;
-        
+
         triggerFilterUpdate();
     });
 });
@@ -343,16 +351,16 @@ function togglePostAudio(button, postId) {
     let postContainer = button.closest('.js-post-media');
     let audioElement = postContainer.querySelector('audio');
     let videoElement = postContainer.querySelector('video');
-    
+
     let mediaToToggle = audioElement ? audioElement : videoElement; // if there are any audio use it if not then use the video audio
-    
+
     if (!mediaToToggle) return;
 
     if (mediaToToggle.muted) {
         document.querySelectorAll('audio, video').forEach(media => { // turn off all the sounds that turn on right now
             media.muted = true;
         });
-        
+
         document.querySelectorAll('.bi-volume-up-fill').forEach(btn => {
             btn.classList.remove('bi-volume-up-fill');
             btn.classList.add('bi-volume-mute-fill');
@@ -360,13 +368,13 @@ function togglePostAudio(button, postId) {
 
         mediaToToggle.muted = false; // turn on our sound
         mediaToToggle.play();
-        
+
         if (videoElement && audioElement) {
             audioElement.muted = false;
             audioElement.currentTime = videoElement.currentTime;
             audioElement.play();
         }
-        
+
         button.classList.remove('bi-volume-mute-fill');
         button.classList.add('bi-volume-up-fill');
     } else {
@@ -382,10 +390,10 @@ function togglePostAudio(button, postId) {
 function restartMedia(videoElement) { // function that restart the video and the sound and sync it if the video were ended
     let postContainer = videoElement.closest('.js-post-media');
     let audioElement = postContainer.querySelector('audio');
-    
+
     videoElement.currentTime = 0;
     videoElement.play();
-    
+
     if (audioElement) {
         audioElement.currentTime = 0;
         audioElement.play();
