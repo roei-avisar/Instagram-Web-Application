@@ -130,19 +130,32 @@ async function deletePostById(deleteId) {
 // Update a post's UI after a like/unlike or save/unsave action
 async function updatePostButtonsUI(postId) {
     const post = allPostsData.find(p => p._id === postId);
-    const postElement = document.querySelector(`[data-post-id="${postId}"]`);
-    if (!post || !postElement) return;
+    if (!post) return;
 
-    // Update heart icon & counter
-    const heartBtn = postElement.querySelector('.js-like-container .post-icons');
     const isLiked = post.likedByUsers.includes(currentUsername);
-    heartBtn.className = `bi ${isLiked ? 'bi-heart-fill text-danger' : 'bi-heart'} fs-4 fw-bold bg-transparent border-0 p-0 post-icons`;
-    postElement.querySelector(".js-like-counter").innerText = post.stats.likes;
-
-    // Update save icon
-    const saveBtn = postElement.querySelector('.js-save-button');
     const isSaved = post.savedByUsers.includes(currentUsername);
-    saveBtn.className = `js-save-button bi ${isSaved ? 'bi-bookmark-fill text-dark' : 'bi-bookmark'} fs-4 fw-bold bg-transparent border-0 p-0 post-icons`;
+
+    // Update both the main post and any popups that might be open for this post (for example, the comment popup)
+    const postElements = document.querySelectorAll(`[data-post-id="${postId}"]`);
+    postElements.forEach(postElement => {
+        // Update heart icon & counter
+        const heartBtn = postElement.querySelector('.js-like-container .post-icons');
+        if (heartBtn) {
+            heartBtn.className = `bi ${isLiked ? 'bi-heart-fill text-danger' : 'bi-heart'} fs-4 fw-bold bg-transparent border-0 p-0 post-icons`;
+        }
+
+        // Counter might not exist in the popup HTML structure, so we check if it exists
+        const likeCounter = postElement.querySelector(".js-like-counter");
+        if (likeCounter) {
+            likeCounter.innerText = post.stats.likes;
+        }
+
+        // Update save icon
+        const saveBtn = postElement.querySelector('.js-save-button');
+        if (saveBtn) {
+            saveBtn.className = `js-save-button bi ${isSaved ? 'bi-bookmark-fill text-dark' : 'bi-bookmark'} fs-4 fw-bold bg-transparent border-0 p-0 post-icons`;
+        }
+    });
 }
 
 function createAuthorsHTML(post) {
