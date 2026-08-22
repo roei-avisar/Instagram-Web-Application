@@ -63,5 +63,5 @@ app.use(express.static(path.join(__dirname, 'views'))); // serves only non-html 
 
 app.listen(port, () => {
   // Running the server by "node server.js" on console
-  console.log(`Server is running on port ${port}`); 
+  console.log(`Server is running on port ${port}`);
 });

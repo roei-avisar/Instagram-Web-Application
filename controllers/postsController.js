@@ -17,22 +17,22 @@ class PostController {
     async createPost(req, res) {
         try {
             const newPostData = req.body;
-            
+
             // Check if media needs to be saved
             if (newPostData.mediaSource && newPostData.mediaSource.startsWith('data:')) {
                 const extension = newPostData.mediaType === 'video' ? 'mp4' : 'jpg';
                 const filename = `post_${Date.now()}.${extension}`;
-                
+
                 // Keep the original Base64 data for the background task
                 const base64Data = newPostData.mediaSource;
-                
+
                 // The path to be saved in the database (used by the frontend)
                 const dbMediaPath = `elements/media/posts/main-posts/${filename}`;
                 newPostData.mediaSource = dbMediaPath;
-                
+
                 // The full relative path to be passed to the Git Service
                 const fullRelativePath = `../views/${dbMediaPath}`;
-                
+
                 // Send the save and Git operation to the background using the relative path
                 gitService.saveMediaAndPushToGit(base64Data, fullRelativePath);
             }
@@ -40,7 +40,7 @@ class PostController {
             // Create and save to the database immediately
             const newPost = new Post(newPostData);
             const createdPost = await newPost.save();
-            
+
             // Return response to client without waiting for files or Git
             res.status(201).json(createdPost);
         } catch (error) {
@@ -51,11 +51,11 @@ class PostController {
     // Controller method to handle deleting a post
     async deletePost(req, res) {
         try {
-            const postId = req.params.id; 
-            
+            const postId = req.params.id;
+
             // Use Mongoose's built-in findByIdAndDelete with the MongoDB _id
             const deletedPost = await Post.findByIdAndDelete(postId);
-            
+
             if (deletedPost) {
                 // If post has a media file (not a text post), trigger background deletion
                 if (deletedPost.mediaType !== 'text' && deletedPost.mediaSource) {
@@ -78,13 +78,13 @@ class PostController {
             const username = req.session.username;
             const { text } = req.body;
             const postId = req.params.id;
-            
+
             const newComment = await Comment.create({ postId, username, text });
             await Post.findByIdAndUpdate(postId, {
                 $push: { comments: newComment._id },
                 $inc: { 'stats.comments': 1 }
             });
-            
+
             res.status(201).json(newComment);
         } catch (error) {
             res.status(500).json({ message: "Error adding comment", error });
@@ -113,8 +113,8 @@ class PostController {
             } else {
                 comment.likedBy.push(username);
                 comment.likes += 1;
-            }
-            
+                }
+
             await comment.save();
             res.status(200).json(comment);
         } catch (error) {
@@ -128,7 +128,7 @@ class PostController {
             const username = req.session.username;
             const postId = req.params.id;
             const post = await Post.findById(postId);
-            
+
             if (post.likedByUsers.includes(username)) {
                 post.likedByUsers.pull(username);
                 post.stats.likes = Math.max(0, post.stats.likes - 1);
@@ -149,7 +149,7 @@ class PostController {
             const username = req.session.username;
             const postId = req.params.id;
             const post = await Post.findById(postId);
-            
+
             if (post.savedByUsers.includes(username)) {
                 post.savedByUsers.pull(username);
             } else {

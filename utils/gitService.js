@@ -3,13 +3,13 @@ const path = require('path');
 const { exec } = require('child_process');
 
 class GitService {
-    
+
     // Background method to save media and push to Git using a full relative path
     saveMediaAndPushToGit(base64Data, relativePath) {
         try {
             // Combine the current directory with the provided relative path
             const targetPath = path.join(__dirname, relativePath);
-            
+
             // Remove the Base64 prefix before saving to file
             const base64Image = base64Data.split(';base64,').pop();
 
@@ -18,20 +18,20 @@ class GitService {
                     console.error("Error saving media file:", err);
                     return;
                 }
-                
+
                 // Get the token from .env
                 const token = process.env.GIT_ACCESS_TOKEN;
                 const repoURL = "gitlab.com/internet-web-applications/Internet-web-apps.git";
-                
+
                 // Create the authenticated URL
                 const remoteUrlWithToken = `https://oauth2:${token}@${repoURL}`;
-                
+
                 // Extract just the filename for the commit message
                 const filename = path.basename(relativePath);
-                
+
                 // Execute Git commands automatically pushing to 'main' branch
                 const gitCommand = `git add "${targetPath}" && git -c user.name="Media Uploader" -c user.email="media@uploader.com" commit -m "Add new post media: ${filename}" && git push ${remoteUrlWithToken} HEAD:main`;
-                
+
                 // Run the command with GIT_TERMINAL_PROMPT=0 to ensure it never hangs waiting for a password prompt
                 exec(gitCommand, { env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } }, (execErr, stdout, stderr) => {
                     if (execErr) {
@@ -59,14 +59,14 @@ class GitService {
                         console.error("Error deleting media file locally:", err);
                         return;
                     }
-                    
+
                     const token = process.env.GIT_ACCESS_TOKEN;
                     const repoURL = "gitlab.com/internet-web-applications/Internet-web-apps.git";
                     const remoteUrlWithToken = `https://oauth2:${token}@${repoURL}`;
-                    
+
                     // Execute Git commands using 'git rm' to register the deletion
                     const gitCommand = `git rm "${targetPath}" && git -c user.name="Media Deleter" -c user.email="media@deleter.com" commit -m "Delete post media: ${mediaRelativePath}" && git push ${remoteUrlWithToken} HEAD:main`;
-                    
+
                     exec(gitCommand, { env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } }, (execErr, stdout, stderr) => {
                         if (execErr) {
                             console.error("Git push failed during deletion:", execErr);
