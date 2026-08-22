@@ -148,6 +148,9 @@ function popupCommentMaker(comment) {
     addLikedByToPopupComment(commentPopupBackground, allPost);
     addCommentsToPopupComment(commentPopupBackground, allPost);
     addTypingLineToPopupComment(commentPopupBackground, allPost);
+
+    // Sync the buttons in the popup to the current state of the post
+    updatePostButtonsUI(postId);
 }
 
 // Copy post media to the post comments popup
