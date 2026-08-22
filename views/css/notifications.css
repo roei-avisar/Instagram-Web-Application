@@ -40,7 +40,7 @@
 
 .new-post-notification-bubble {
     position: fixed;
-    top: 325px;
+    top: 325px; 
     left: 80px;
     background-color: #ff3040;
     color: white;
