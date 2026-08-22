@@ -6,10 +6,14 @@ async function openSettings() {
   // Hide messages from previous opens
   document.getElementById('settings-error-box').style.display = 'none';
   document.getElementById('settings-success-box').style.display = 'none';
+  document.getElementById('settings-pic-error').textContent = '';
 
   // Clear password fields
   document.getElementById('settings-current-password').value = '';
   document.getElementById('settings-new-password').value = '';
+
+  // Clear the file input so the same file can be re-selected if needed
+  document.getElementById('settings-profile-pic-input').value = '';
 
   // Fetch current user data from server
   try {
@@ -19,6 +23,9 @@ async function openSettings() {
       document.getElementById('settings-username').value = data.username || '';
       document.getElementById('settings-bio').value = data.bio || '';
       updateBioCharCount(); // update the character counter
+
+      // Load the current profile picture into the settings preview
+      document.getElementById('settings-profile-pic-preview').src = data.profilePic || '/images/profiles/Default_pfp.jpg';
     }
   } catch (err) {
     console.error('Error fetching user data for settings:', err);
@@ -170,4 +177,62 @@ async function handleSaveSettings() {
     saveBtn.disabled = false;
     saveBtn.textContent = 'Save changes';
   }
+}
+
+// Handle profile picture upload
+async function handleProfilePicUpload(input) {
+  const errorSpan = document.getElementById('settings-pic-error');
+  errorSpan.textContent = ''; // Clear previous error
+
+  // Check if a file was selected
+  if (!input.files || !input.files[0]) {
+    return;
+  }
+
+  const file = input.files[0];
+
+  // Check if the file is a JPG (client-side check — server also validates (cyber :))
+  if (file.type !== 'image/jpeg') {
+    errorSpan.textContent = 'Only JPG files are allowed.';
+    input.value = ''; // Clear the file input
+    return;
+  }
+
+  // Check file size (5MB limit)
+  if (file.size > 5 * 1024 * 1024) {
+    errorSpan.textContent = 'Image is too large. Please upload a file smaller than 5MB.';
+    input.value = ''; // Clear the file input
+    return;
+  }
+
+  // Build a FormData object to send the file to the server
+  const formData = new FormData();
+  formData.append('profilePic', file);
+
+  try {
+    const res = await fetch('/api/user/uploadProfilePic', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // Update the settings preview image
+      document.getElementById('settings-profile-pic-preview').src = data.profilePic;
+
+      // Update all profile pictures across the page
+      const profileImages = document.querySelectorAll('.current-user-pic');
+      for (const img of profileImages) {
+        img.src = data.profilePic;
+      }
+    } else {
+      errorSpan.textContent = data.error || 'Upload failed.';
+    }
+  } catch (err) {
+    errorSpan.textContent = 'Connection error. Please try again.';
+  }
+
+  // Clear the file input so the same file can be re-selected
+  input.value = '';
 }

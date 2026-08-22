@@ -1,5 +1,35 @@
 const User = require('../models/usersModel');
 const { encrypt, decrypt } = require('../utils/encryption');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
+
+// Configure multer for profile picture uploads
+// Files are saved to images/profiles/ and named by the user's ID
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '..', 'images', 'profiles'));
+  },
+  filename: function (req, file, cb) {
+    // Name the file as <userId>.jpg so we can find it later
+    cb(null, req.session.userId + '.jpg');
+  }
+});
+
+// Only allow JPG files — reject everything else (PNG, GIF, etc.)
+const fileFilter = function (req, file, cb) {
+  if (file.mimetype === 'image/jpeg') {
+    cb(null, true); // Accept the file
+  } else {
+    cb(new Error('Only JPG files are allowed.'), false); // Reject the file
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 } // Max file size: 5MB
+});
 
 // Controller class that handles all authntication logic (register, login, logout)
 class UserController {
@@ -167,14 +197,56 @@ class UserController {
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
+
+      // Check if the user has a custom profile picture file on disk
+      const profilePicPath = path.join(__dirname, '..', 'images', 'profiles', req.session.userId + '.jpg');
+      let profilePic = '/images/profiles/Default_pfp.jpg'; // default picture
+      if (fs.existsSync(profilePicPath)) {
+        // Add a timestamp to the URL so the browser doesn't show a cached old picture
+        profilePic = '/images/profiles/' + req.session.userId + '.jpg?t=' + Date.now();
+      }
+
       return res.json({
         username: req.session.username,
-        bio: user.bio || ''
+        bio: user.bio || '',
+        profilePic: profilePic
       });
     } catch (err) {
       console.error('Me error:', err);
       return res.status(500).json({ error: 'Server error.' });
     }
+  }
+
+  // POST /api/user/uploadProfilePic
+  // Handles profile picture upload — only accepts JPG files
+  uploadProfilePic(req, res) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    // Use multer to handle the file upload (the field name in the form is 'profilePic')
+    const uploadSingle = upload.single('profilePic');
+
+    uploadSingle(req, res, function (err) {
+      // If multer rejected the file (e.g. not a JPG or too large)
+      if (err) {
+        if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ error: 'Image is too large. Please upload a file smaller than 5MB.' });
+        }
+        // Our fileFilter already sets err.message to 'Only JPG files are allowed.'
+        return res.status(400).json({ error: err.message || 'Upload failed.' });
+      }
+
+      // If no file was sent at all
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded.' });
+      }
+
+      // The file is already saved as <userId>.jpg by multer's storage config
+      // (if an old file existed, multer overwrites it automatically)
+      const profilePicUrl = '/images/profiles/' + req.session.userId + '.jpg?t=' + Date.now();
+      return res.json({ message: 'Profile picture updated.', profilePic: profilePicUrl });
+    });
   }
 
   // PUT /api/user/update

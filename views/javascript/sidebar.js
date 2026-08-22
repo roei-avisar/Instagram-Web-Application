@@ -47,6 +47,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           el.textContent = ''; // Clear the static placeholder if bio is empty
         }
       });
+
+      // Update profile picture displays (for every instance)
+      if (data.profilePic) {
+        document.querySelectorAll('.current-user-pic').forEach(img => {
+          img.src = data.profilePic;
+        });
+      }
     }
   } catch (err) {
     console.error('Error fetching current user:', err);
