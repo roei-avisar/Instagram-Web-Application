@@ -187,35 +187,7 @@ class UserController {
     }
   }
 
-  // GET /api/user/me
-  async me(req, res) {
-    if (!req.session || !req.session.userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    try {
-      const user = await User.findById(req.session.userId);
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
 
-      // Check if the user has a custom profile picture file on disk
-      const profilePicPath = path.join(__dirname, '..', 'images', 'profiles', req.session.userId + '.jpg');
-      let profilePic = '/images/profiles/Default_pfp.jpg'; // default picture
-      if (fs.existsSync(profilePicPath)) {
-        // Add a timestamp to the URL so the browser doesn't show a cached old picture
-        profilePic = '/images/profiles/' + req.session.userId + '.jpg?t=' + Date.now();
-      }
-
-      return res.json({
-        username: req.session.username,
-        bio: user.bio || '',
-        profilePic: profilePic
-      });
-    } catch (err) {
-      console.error('Me error:', err);
-      return res.status(500).json({ error: 'Server error.' });
-    }
-  }
 
   // POST /api/user/uploadProfilePic
   // Handles profile picture upload — only accepts JPG files
@@ -338,10 +310,18 @@ class UserController {
 
       await user.save();
 
+      // Build the current profile picture URL so the client can update its global
+      const profilePicPath = path.join(__dirname, '..', 'images', 'profiles', req.session.userId + '.jpg');
+      let profilePic = '/images/profiles/Default_pfp.jpg';
+      if (fs.existsSync(profilePicPath)) {
+        profilePic = '/images/profiles/' + req.session.userId + '.jpg?t=' + Date.now();
+      }
+
       return res.json({
         message: 'Profile updated successfully.',
         username: req.session.username,
-        bio: user.bio || ''
+        bio: user.bio || '',
+        profilePic: profilePic
       });
     } catch (err) {
       console.error('Update profile error:', err);
@@ -363,11 +343,34 @@ class UserController {
   }
 
   // GET /api/user/getUserDetails
-  getUserDetails(req, res) {
+  async getUserDetails(req, res) {
     if (!req.session || !req.session.userId || !req.session.username) {
         return res.status(401).json({ error: 'Not authenticated' });
     }
-    res.json({ userId: req.session.userId, username: req.session.username }); //respond with user details that added aotumaticlly by session 
+
+    try {
+      const user = await User.findById(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Check if the user has a custom profile picture file on disk
+      const profilePicPath = path.join(__dirname, '..', 'images', 'profiles', req.session.userId + '.jpg');
+      let profilePic = '/images/profiles/Default_pfp.jpg'; // default picture
+      if (fs.existsSync(profilePicPath)) {
+        profilePic = '/images/profiles/' + req.session.userId + '.jpg?t=' + Date.now();
+      }
+
+      res.json({
+        userId: req.session.userId,
+        username: req.session.username,
+        bio: user.bio || '',
+        profilePic: profilePic
+      });
+    } catch (err) {
+      console.error('getUserDetails error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
   }
 }
 

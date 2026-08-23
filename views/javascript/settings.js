@@ -1,5 +1,5 @@
 // Open the settings modal and load current user data
-async function openSettings() {
+function openSettings() {
   const modal = document.getElementById('settingsModal');
   modal.classList.add('active');
 
@@ -15,21 +15,13 @@ async function openSettings() {
   // Clear the file input so the same file can be re-selected if needed
   document.getElementById('settings-profile-pic-input').value = '';
 
-  // Fetch current user data from server
-  try {
-    const res = await fetch('/api/user/me');
-    if (res.ok) {
-      const data = await res.json();
-      document.getElementById('settings-username').value = data.username || '';
-      document.getElementById('settings-bio').value = data.bio || '';
-      updateBioCharCount(); // update the character counter
+  // Populate form from global variables (loaded by initApp.js)
+  document.getElementById('settings-username').value = CURRENT_USERNAME || '';
+  document.getElementById('settings-bio').value = CURRENT_USER_BIO || '';
+  updateBioCharCount(); // update the character counter
 
-      // Load the current profile picture into the settings preview
-      document.getElementById('settings-profile-pic-preview').src = data.profilePic || '/images/profiles/Default_pfp.jpg';
-    }
-  } catch (err) {
-    console.error('Error fetching user data for settings:', err);
-  }
+  // Load the current profile picture into the settings preview
+  document.getElementById('settings-profile-pic-preview').src = CURRENT_USER_PIC || '/images/profiles/Default_pfp.jpg';
 }
 
 // Close the settings modal
@@ -149,19 +141,15 @@ async function handleSaveSettings() {
       successBox.style.display = 'flex';
       errorBox.style.display = 'none';
 
-      // Update username displays across the page
-      document.querySelectorAll('.current-user-name').forEach(el => {
-        el.textContent = data.username;
-      });
+      // Update global variables so they always hold the latest data
+      CURRENT_USERNAME = data.username;
+      CURRENT_USER_BIO = data.bio || '';
+      if (data.profilePic) {
+        CURRENT_USER_PIC = data.profilePic;
+      }
 
-      // Update bio displays across the page
-      document.querySelectorAll('.current-user-bio').forEach(el => {
-        if (data.bio) {
-          el.textContent = data.bio;
-        } else {
-          el.textContent = ''; // Clear if bio is empty
-        }
-      });
+      // Push updated data to all DOM elements across the page
+      updateCurrentUserUI();
 
       // Clear password fields after successful save
       document.getElementById('settings-current-password').value = '';
@@ -221,11 +209,9 @@ async function handleProfilePicUpload(input) {
       // Update the settings preview image
       document.getElementById('settings-profile-pic-preview').src = data.profilePic;
 
-      // Update all profile pictures across the page
-      const profileImages = document.querySelectorAll('.current-user-pic');
-      for (const img of profileImages) {
-        img.src = data.profilePic;
-      }
+      // Update global variable and all profile pictures across the page
+      CURRENT_USER_PIC = data.profilePic;
+      updateCurrentUserUI();
     } else {
       errorSpan.textContent = data.error || 'Upload failed.';
     }

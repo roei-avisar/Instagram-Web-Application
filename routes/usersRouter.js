@@ -8,8 +8,6 @@ router.post('/login', userController.login);
 
 router.get('/logout', userController.logout);
 
-router.get('/me', userController.me);
-
 router.put('/update', userController.updateProfile);
 
 router.post('/uploadProfilePic', userController.uploadProfilePic);
