@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="./css/notifications.css">
     <link rel="stylesheet" href="./css/dark-mode.css">
     <link rel="stylesheet" href="./css/settings.css">
+    <link rel="stylesheet" href="./css/follow.css">
 </head>
 
 <body id="top">
@@ -466,7 +467,7 @@
             <div class="suggestions-container">
                 <div class="suggestions-header d-flex justify-content-between mb-3">
                     <span class="fw-bold fs-7">Suggested for you</span>
-                    <button
+                    <button onclick="openAllUsersPopup()"
                         class="small-transparent-btn fw-semibold link-dark link-underline-opacity-0 link-opacity-50-hover">See
                         All</button>
                 </div>
@@ -928,6 +929,19 @@
         </div>
     </div>
 
+    <!-- All Users Modal -->
+    <div class="all-users-overlay" id="allUsersModal">
+        <div class="all-users-box">
+            <div class="all-users-header">
+                <h2 class="all-users-title">All Users</h2>
+                <button class="all-users-close" onclick="closeAllUsersPopup()">&times;</button>
+            </div>
+            <div class="all-users-list" id="allUsersList">
+                <!-- User rows will be inserted here dynamically -->
+            </div>
+        </div>
+    </div>
+
     </div>
 <script src="javascript/initApp.js"></script> // important to be first, this is loading the userID
 <script src="javascript/userViewUtils.js"></script> // user UI helper functions (must be after initApp.js globals)
@@ -940,6 +954,7 @@
     <script src="javascript/groups.js"></script>
     <script src="javascript/sidebar.js"></script>
     <script src="javascript/settings.js"></script>
+    <script src="javascript/follow.js"></script>
 </body>
 
 </html>

@@ -345,7 +345,7 @@ class UserController {
   // GET /api/user/getUserDetails
   async getUserDetails(req, res) {
     if (!req.session || !req.session.userId || !req.session.username) {
-        return res.status(401).json({ error: 'Not authenticated' });
+      return res.status(401).json({ error: 'Not authenticated' });
     }
 
     try {
@@ -369,6 +369,147 @@ class UserController {
       });
     } catch (err) {
       console.error('getUserDetails error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+
+  // GET /api/user/allUsers
+  // Returns all users from the DB (except the current user) with follow status
+  async getAllUsers(req, res) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+      // Get the current user to check who they follow
+      const currentUser = await User.findById(req.session.userId);
+      if (!currentUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Get all users except the current user
+      const allUsers = await User.find({ _id: { $ne: req.session.userId } });
+
+      // Build a list of user objects to send to the client
+      const usersList = [];
+
+      for (const user of allUsers) {
+        // Decrypt the username (it is stored encrypted in the DB)
+        let username = '';
+        try {
+          username = user.decryptUsername();
+        } catch {
+          username = 'Unknown';
+        }
+
+        // Check if this user has a custom profile picture on disk
+        const profilePicPath = path.join(__dirname, '..', 'images', 'profiles', user._id.toString() + '.jpg');
+        let profilePic = '/images/profiles/Default_pfp.jpg';
+        if (fs.existsSync(profilePicPath)) {
+          profilePic = '/images/profiles/' + user._id.toString() + '.jpg?t=' + Date.now();
+        }
+
+        // Check if the current user is already following this user
+        const isFollowing = currentUser.following.includes(user._id.toString());
+
+        usersList.push({
+          userId: user._id,
+          username: username,
+          bio: user.bio || '',
+          profilePic: profilePic,
+          isFollowing: isFollowing
+        });
+      }
+
+      return res.json({ users: usersList });
+    } catch (err) {
+      console.error('getAllUsers error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+
+  // POST /api/user/follow
+  // Follow another user — adds to both users' arrays
+  async followUser(req, res) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const targetUserId = req.body.targetUserId;
+
+    if (!targetUserId) {
+      return res.status(400).json({ error: 'Target user ID is required.' });
+    }
+
+    // Cannot follow yourself (not saposed to happen but it for data integrety reasons)
+    if (targetUserId === req.session.userId) {
+      return res.status(400).json({ error: 'You cannot follow yourself.' });
+    }
+
+    try {
+      const currentUser = await User.findById(req.session.userId);
+      const targetUser = await User.findById(targetUserId);
+
+      if (!currentUser || !targetUser) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+
+      // Check if already following (prevent duplicates)
+      if (currentUser.following.includes(targetUserId)) {
+        return res.status(400).json({ error: 'You are already following this user.' });
+      }
+
+      // Add targetUserId to my "following" list
+      currentUser.following.push(targetUserId);
+      // Add my ID to the target user's "followers" list
+      targetUser.followers.push(req.session.userId);
+
+      await currentUser.save();
+      await targetUser.save();
+
+      return res.json({ message: 'Followed successfully.' });
+    } catch (err) {
+      console.error('Follow error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+
+  // POST /api/user/unfollow
+  // Unfollow another user — removes from both users' arrays
+  async unfollowUser(req, res) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const targetUserId = req.body.targetUserId;
+
+    if (!targetUserId) {
+      return res.status(400).json({ error: 'Target user ID is required.' });
+    }
+
+    try {
+      const currentUser = await User.findById(req.session.userId);
+      const targetUser = await User.findById(targetUserId);
+
+      if (!currentUser || !targetUser) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+
+      // Remove targetUserId from my "following" list
+      currentUser.following = currentUser.following.filter(
+        id => id.toString() !== targetUserId
+      );
+      // Remove my ID from the target user's "followers" list
+      targetUser.followers = targetUser.followers.filter(
+        id => id.toString() !== req.session.userId
+      );
+
+      await currentUser.save();
+      await targetUser.save();
+
+      return res.json({ message: 'Unfollowed successfully.' });
+    } catch (err) {
+      console.error('Unfollow error:', err);
       return res.status(500).json({ error: 'Server error.' });
     }
   }

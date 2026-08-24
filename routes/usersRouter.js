@@ -14,4 +14,10 @@ router.post('/uploadProfilePic', userController.uploadProfilePic);
 
 router.get('/getUserDetails', userController.getUserDetails);
 
+router.get('/allUsers', userController.getAllUsers);
+
+router.post('/follow', userController.followUser);
+
+router.post('/unfollow', userController.unfollowUser);
+
 module.exports = router; // export all the router functions to be used by server.js
