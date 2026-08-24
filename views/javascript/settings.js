@@ -27,6 +27,12 @@ function openSettings() {
 // Close the settings modal
 function closeSettings() {
   document.getElementById('settingsModal').classList.remove('active');
+
+  // Discard any unsaved profile picture selection
+  pendingProfilePicFile = null;
+  document.getElementById('settings-profile-pic-input').value = '';
+  // Reset preview back to the current saved picture
+  document.getElementById('settings-profile-pic-preview').src = CURRENT_USER_PIC || '/images/profiles/Default_pfp.jpg';
 }
 
 // Close modal when clicking on the dark overlay (outside the box)
@@ -151,6 +157,36 @@ async function handleSaveSettings() {
       // Push updated data to all DOM elements across the page
       updateCurrentUserUI();
 
+      // Upload pending profile picture if one was selected
+      if (pendingProfilePicFile) {
+        const formData = new FormData();
+        formData.append('profilePic', pendingProfilePicFile);
+
+        try {
+          const picRes = await fetch('/api/user/uploadProfilePic', {
+            method: 'POST',
+            body: formData
+          });
+
+          const picData = await picRes.json();
+
+          if (picRes.ok) {
+            CURRENT_USER_PIC = picData.profilePic;
+            updateCurrentUserUI();
+            document.getElementById('settings-profile-pic-preview').src = picData.profilePic;
+          } else {
+            errorText.textContent = picData.error || 'Profile picture upload failed.';
+            errorBox.style.display = 'flex';
+          }
+        } catch (picErr) {
+          errorText.textContent = 'Profile picture upload failed. Please try again.';
+          errorBox.style.display = 'flex';
+        }
+
+        pendingProfilePicFile = null;
+        document.getElementById('settings-profile-pic-input').value = '';
+      }
+
       // Clear password fields after successful save
       document.getElementById('settings-current-password').value = '';
       document.getElementById('settings-new-password').value = '';
@@ -167,8 +203,11 @@ async function handleSaveSettings() {
   }
 }
 
-// Handle profile picture upload
-async function handleProfilePicUpload(input) {
+// Variable to hold a pending (not yet uploaded) profile picture file
+let pendingProfilePicFile = null;
+
+// Handle profile picture selection — only show a local preview, don't upload yet
+function handleProfilePicUpload(input) {
   const errorSpan = document.getElementById('settings-pic-error');
   errorSpan.textContent = ''; // Clear previous error
 
@@ -193,32 +232,14 @@ async function handleProfilePicUpload(input) {
     return;
   }
 
-  // Build a FormData object to send the file to the server
-  const formData = new FormData();
-  formData.append('profilePic', file);
+  // Store the file for later upload (when user clicks Save)
+  pendingProfilePicFile = file;
 
-  try {
-    const res = await fetch('/api/user/uploadProfilePic', {
-      method: 'POST',
-      body: formData
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      // Update the settings preview image
-      document.getElementById('settings-profile-pic-preview').src = data.profilePic;
-
-      // Update global variable and all profile pictures across the page
-      CURRENT_USER_PIC = data.profilePic;
-      updateCurrentUserUI();
-    } else {
-      errorSpan.textContent = data.error || 'Upload failed.';
-    }
-  } catch (err) {
-    errorSpan.textContent = 'Connection error. Please try again.';
-  }
-
-  // Clear the file input so the same file can be re-selected
-  input.value = '';
+  // Show a local preview using FileReader (no server request yet)
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    // update the profile picture preview in html
+    document.getElementById('settings-profile-pic-preview').src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
