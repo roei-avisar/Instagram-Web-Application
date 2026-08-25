@@ -199,7 +199,7 @@ class UserController {
     // Use multer to handle the file upload (the field name in the form is 'profilePic')
     const uploadSingle = upload.single('profilePic');
 
-    uploadSingle(req, res, function (err) {
+    uploadSingle(req, res, async function (err) {
       // If multer rejected the file (e.g. not a JPG or too large)
       if (err) {
         if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
@@ -217,7 +217,18 @@ class UserController {
       // The file is already saved as <userId>.jpg by multer's storage config
       // (if an old file existed, multer overwrites it automatically)
       const profilePicUrl = '/images/profiles/' + req.session.userId + '.jpg?t=' + Date.now();
-      return res.json({ message: 'Profile picture updated.', profilePic: profilePicUrl });
+      
+      try {
+        const user = await User.findById(req.session.userId);
+        if (user) {
+          user.profilePic = profilePicUrl;
+          await user.save();
+        }
+        return res.json({ message: 'Profile picture updated.', profilePic: profilePicUrl });
+      } catch (dbErr) {
+        console.error('Error saving profile picture to DB:', dbErr);
+        return res.status(500).json({ error: 'Database error while saving profile picture.' });
+      }
     });
   }
 
@@ -310,12 +321,8 @@ class UserController {
 
       await user.save();
 
-      // Build the current profile picture URL so the client can update its global
-      const profilePicPath = path.join(__dirname, '..', 'images', 'profiles', req.session.userId + '.jpg');
-      let profilePic = '/images/profiles/Default_pfp.jpg';
-      if (fs.existsSync(profilePicPath)) {
-        profilePic = '/images/profiles/' + req.session.userId + '.jpg?t=' + Date.now();
-      }
+      // Use the current profile picture URL from the database
+      let profilePic = user.profilePic || '/images/profiles/Default_pfp.jpg';
 
       return res.json({
         message: 'Profile updated successfully.',
@@ -354,12 +361,8 @@ class UserController {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      // Check if the user has a custom profile picture file on disk
-      const profilePicPath = path.join(__dirname, '..', 'images', 'profiles', req.session.userId + '.jpg');
-      let profilePic = '/images/profiles/Default_pfp.jpg'; // default picture
-      if (fs.existsSync(profilePicPath)) {
-        profilePic = '/images/profiles/' + req.session.userId + '.jpg?t=' + Date.now();
-      }
+      // Use the profile picture from the database
+      let profilePic = user.profilePic || '/images/profiles/Default_pfp.jpg';
 
       res.json({
         userId: req.session.userId,
@@ -402,12 +405,8 @@ class UserController {
           username = 'Unknown';
         }
 
-        // Check if this user has a custom profile picture on disk
-        const profilePicPath = path.join(__dirname, '..', 'images', 'profiles', user._id.toString() + '.jpg');
-        let profilePic = '/images/profiles/Default_pfp.jpg';
-        if (fs.existsSync(profilePicPath)) {
-          profilePic = '/images/profiles/' + user._id.toString() + '.jpg?t=' + Date.now();
-        }
+        // Use the profile picture from the database
+        let profilePic = user.profilePic || '/images/profiles/Default_pfp.jpg';
 
         // Check if the current user is already following this user
         const isFollowing = currentUser.following.includes(user._id.toString());
