@@ -1,5 +1,6 @@
 const User = require('../models/usersModel');
 const { encrypt, decrypt } = require('../utils/encryption');
+const { GetUsernameByUserID } = require('../utils/userHelper');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
@@ -91,11 +92,7 @@ class UserController {
       if (password.includes(' ')) {
         return res.status(400).json({ error: 'Password cannot contain spaces.' });
       }
-      // Block dangerous characters that could be used for XSS, NoSQL injection, or command injection
-      const dangerousCharsRegex = /[<>"'`${};|\\]/;
-      if (dangerousCharsRegex.test(password)) {
-        return res.status(400).json({ error: 'Password contains characters that are not allowed: < > \" \' ` $ { } ; | \\' });
-      }
+
 
       // Check if email is already taken
       if (email) {
@@ -152,11 +149,7 @@ class UserController {
       if (password.includes(' ')) {
         return res.status(400).json({ error: 'Password cannot contain spaces.' });
       }
-      // Block dangerous characters that could be used for XSS, NoSQL injection, or command injection
-      const dangerousCharsRegex = /[<>"'`${};|\\]/;
-      if (dangerousCharsRegex.test(password)) {
-        return res.status(400).json({ error: 'Password contains characters that are not allowed: < > \" \' ` $ { } ; | \\' });
-      }
+
 
       // Find user by email or phone
       const user = await User.findOne({
@@ -232,7 +225,7 @@ class UserController {
     });
   }
 
-  // PUT /api/user/update
+  // PATCH /api/user/update
   async updateProfile(req, res) {
     try {
       if (!req.session || !req.session.userId) {
@@ -285,11 +278,7 @@ class UserController {
         if (bio.length > 150) {
           return res.status(400).json({ error: 'Bio cannot exceed 150 characters.' });
         }
-        // Block dangerous characters
-        const dangerousCharsRegex = /[<>"'`${};|\\]/;
-        if (dangerousCharsRegex.test(bio)) {
-          return res.status(400).json({ error: 'Bio contains characters that are not allowed.' });
-        }
+
         user.bio = bio;
       }
 
@@ -311,10 +300,7 @@ class UserController {
         if (newPassword.includes(' ')) {
           return res.status(400).json({ error: 'Password cannot contain spaces.' });
         }
-        const dangerousCharsRegex = /[<>"'`${};|\\]/;
-        if (dangerousCharsRegex.test(newPassword)) {
-          return res.status(400).json({ error: 'Password contains characters that are not allowed.' });
-        }
+
 
         user.password = newPassword; // will be hashed by pre-save hook
       }
@@ -427,7 +413,7 @@ class UserController {
     }
   }
 
-  // POST /api/user/follow
+  // PATCH /api/user/follow
   // Follow another user — adds to both users' arrays
   async followUser(req, res) {
     if (!req.session || !req.session.userId) {
@@ -473,7 +459,7 @@ class UserController {
     }
   }
 
-  // POST /api/user/unfollow
+  // PATCH /api/user/unfollow
   // Unfollow another user — removes from both users' arrays
   async unfollowUser(req, res) {
     if (!req.session || !req.session.userId) {
@@ -509,6 +495,38 @@ class UserController {
       return res.json({ message: 'Unfollowed successfully.' });
     } catch (err) {
       console.error('Unfollow error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+  // POST /api/user/username
+  // Exposes the GetUsernameByUserID helper to the frontend
+  // Accepts either { userId: "singleId" } or { userIds: ["id1", "id2"] }
+  async getUsername(req, res) {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const { userId, userIds } = req.body;
+
+      // If an array of IDs was sent
+      if (Array.isArray(userIds)) {
+        const results = await GetUsernameByUserID(userIds);
+        return res.json({ usernames: results });
+      }
+
+      // If a single ID was sent
+      if (userId) {
+        const username = await GetUsernameByUserID(userId);
+        if (!username) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+        return res.json({ username: username });
+      }
+
+      return res.status(400).json({ error: 'Please provide userId (string) or userIds (array).' });
+    } catch (err) {
+      console.error('getUsername error:', err);
       return res.status(500).json({ error: 'Server error.' });
     }
   }

@@ -116,7 +116,7 @@ async function handleFollowToggle(targetUserId, btnElement) {
 
   try {
     const res = await fetch(endpoint, {
-      method: 'POST',
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ targetUserId: targetUserId })
     });

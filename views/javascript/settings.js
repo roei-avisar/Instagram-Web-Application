@@ -135,7 +135,7 @@ async function handleSaveSettings() {
 
   try {
     const res = await fetch('/api/user/update', {
-      method: 'PUT',
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
