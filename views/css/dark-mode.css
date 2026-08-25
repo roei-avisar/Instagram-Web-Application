@@ -201,3 +201,101 @@ body.dark-mode #storyModal .story-nav i {
 body.dark-mode #storyModal .bi-heart-fill.text-danger {
     color: #ed4956 !important;
 }
+
+/* Settings Modal */
+body.dark-mode .settings-box {
+    background-color: #0C1014 !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .settings-title {
+    color: white !important;
+}
+
+body.dark-mode .settings-label {
+    color: white !important;
+}
+
+body.dark-mode .settings-input,
+body.dark-mode .settings-textarea {
+    background-color: #262B33 !important;
+    border-color: #3a3f47 !important;
+    color: white !important;
+}
+
+body.dark-mode .settings-divider {
+    background-color: #262B33 !important;
+}
+
+body.dark-mode .settings-section-title {
+    color: white !important;
+}
+
+body.dark-mode .settings-close {
+    color: #a8a8a8 !important;
+}
+
+body.dark-mode .settings-close:hover {
+    color: white !important;
+}
+
+body.dark-mode .more-dropdown-menu {
+    background-color: #0C1014 !important;
+    border: 1px solid #262B33 !important;
+}
+
+body.dark-mode .more-dropdown-item:hover {
+    background-color: #262B33 !important;
+}
+
+/* Settings — keep success/error box text colors correct in dark mode */
+body.dark-mode .settings-error-box {
+    background: #2d1215 !important;
+    border-color: #5c2127 !important;
+    color: #ff6b6b !important;
+}
+
+body.dark-mode .settings-error-box span,
+body.dark-mode .settings-error-box i {
+    color: #ff6b6b !important;
+}
+
+body.dark-mode .settings-success-box {
+    background: #0d2818 !important;
+    border-color: #1a5c2e !important;
+    color: #4ade80 !important;
+}
+
+body.dark-mode .settings-success-box span,
+body.dark-mode .settings-success-box i {
+    color: #4ade80 !important;
+}
+
+/* Settings — profile picture section in dark mode */
+body.dark-mode .settings-profile-pic-label {
+    color: white !important;
+}
+
+body.dark-mode .settings-change-photo-btn {
+    color: #0095f6 !important;
+}
+
+body.dark-mode .settings-change-photo-btn:hover {
+    color: #4db8ff !important;
+}
+
+body.dark-mode .settings-pic-error {
+    color: #ff6b6b !important;
+}
+
+body.dark-mode .settings-char-count {
+    color: #a8a8a8 !important;
+}
+
+body.dark-mode .settings-char-count.over-limit {
+    color: #ff6b6b !important;
+}
+
+body.dark-mode .settings-profile-pic-img {
+    border-color: #3a3f47 !important;
+}

@@ -56,6 +56,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// Serve profile pictures and other images from the images folder
+// Protected with requireLogin so only authenticated users can access the images
+app.use('/images', requireLogin, express.static(path.join(__dirname, 'images')));
+
 // Serve static files from views folder (css, js, images etc.)
 app.use(express.static(path.join(__dirname, 'views'))); // serves only non-html assets (css, js, images) since .html is blocked above
 
