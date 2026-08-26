@@ -3,11 +3,11 @@ require('dotenv').config(); // load .env variables
 const express = require('express'); // import to express framework
 const path = require('path'); // import to path library
 const session = require('express-session');
-const { MongoStore } = require('connect-mongo'); //allows you to save user session in mongodb
+const connectMongo = require('connect-mongo'); //allows you to save user session in mongodb
+const MongoStore = connectMongo.default || connectMongo; 
 const { connectDB, getMongoURI } = require('./config/db');
 const apiRouter = require('./routes'); // central router that combines all API routers (user, post, etc.)
 const { requireLogin } = require('./middleware/userMiddleware');
-
 const app = express(); // app is our server
 const port = 3301;
 
@@ -32,7 +32,7 @@ app.use(session({
   }
 }));
 
-// API routes - all routers are combined in routes/index.js
+// API routes
 app.use('/api', apiRouter); // mounts all API routes under /api (e.g. /api/user/login, /api/user/register)
 
 // Login page — publicly accessible
@@ -50,7 +50,6 @@ app.get('/main', requireLogin, (req, res) => {
 });
 
 // Block direct access to .html files — prevents IDOR bypass via static file serving
-// Without this, anyone could access /main-page.html directly and skip the requireLogin middleware
 app.use((req, res, next) => {
   if (req.path.endsWith('.html')) {
     return res.redirect('/');
