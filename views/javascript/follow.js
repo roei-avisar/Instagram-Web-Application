@@ -2,6 +2,7 @@
 async function openAllUsersPopup() {
   const modal = document.getElementById('allUsersModal');
   modal.classList.add('active');
+  document.body.classList.add('overflow-hidden'); // make the scrolling behind the popup to unavailable 
 
   // add loading message to the empty modal while loading
   const listContainer = document.getElementById('allUsersList');
@@ -25,6 +26,7 @@ async function openAllUsersPopup() {
 // Close the All Users modal
 function closeAllUsersPopup() {
   document.getElementById('allUsersModal').classList.remove('active');
+  document.body.classList.remove('overflow-hidden'); // make scrolling available again
 }
 
 // Close modal when clicking on the dark overlay (outside the box)

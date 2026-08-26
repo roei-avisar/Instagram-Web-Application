@@ -301,3 +301,13 @@ transform: scale(1.05);
 .white-back{
 background-color: #fafafa;
 }
+
+.weather-container{
+cursor: pointer;
+z-index: 10;
+background-color: #ffffff;
+transition: background-color 0.2s ease-in-out;
+}
+.weather-container:hover {
+    background-color: #efefef;
+}

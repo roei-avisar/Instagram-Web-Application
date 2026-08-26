@@ -162,12 +162,6 @@
                         <span>Groups</span>
                     </button>
 
-                    <!-- Reels -->
-                    <button class="menu-item">
-                        <i class="bi bi-camera-reels"></i>
-                        <span>Reels</span>
-                    </button>
-
                     <!-- Messages -->
                     <button class="menu-item" onclick="openMessagesPopup()">
                         <i class="bi bi-send"></i>
@@ -199,7 +193,7 @@
                     </button>
 
                     <!-- Profile -->
-                    <button class="menu-item">
+                    <button class="menu-item" onclick="openSettings()">
                         <img src="elements/media/profile-pictures/besteam_ever.jpg"
                             class="right-sidebar-avatar rounded-circle profile-avatar current-user-pic">
                         <span>Profile</span>
@@ -610,8 +604,8 @@
                     <span class="text-muted fs-8">&copy; 2026 INSTAGRAM FROM BEST TEAM EVER :)</span>
                 </div>
             </div>
-            <div class="position-absolute top-0 end-0 m-3 bg-white rounded-3 shadow-sm border p-2 d-flex align-items-center gap-2 user-select-none"
-                style="z-index: 10; cursor: pointer;" onclick="loadWeatherWidget()">
+            <div class="weather-container position-absolute top-0 end-0 m-3 rounded-3 shadow-sm border p-2 d-flex align-items-center gap-2 user-select-none"
+                onclick="loadWeatherWidget()">
                 <div class="fs-5">☀️</div>
                 <div class="d-flex flex-column text-start" style="line-height: 1.2;">
                     <strong class="text-primary"><span id="weatherTemp">--</span>°C</strong>
