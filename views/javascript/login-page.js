@@ -145,6 +145,14 @@ function handleSignup() {
     }
   }
 
+  if (phone) {
+    if (!/^\d{10,15}$/.test(phone)) {
+      errorText.textContent = 'Phone number must contain between 10 and 15 digits.';
+      errorBox.style.display = 'flex';
+      return;
+    }
+  }
+
   if (!username) {
     errorText.textContent = 'Username is required.';
     errorBox.style.display = 'flex';

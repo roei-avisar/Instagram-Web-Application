@@ -128,6 +128,13 @@
     left: 230px;
 }
 
+/* MORE MENU CONTAINER */
+#more-menu-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 /* MORE DROPDOWN MENU */
 .more-dropdown-menu {
     background-color: white;

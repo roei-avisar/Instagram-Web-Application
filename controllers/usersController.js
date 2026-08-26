@@ -1,5 +1,36 @@
 const User = require('../models/usersModel');
 const { encrypt, decrypt } = require('../utils/encryption');
+const { GetUsernameByUserID } = require('../utils/userHelper');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
+
+// Configure multer for profile picture uploads
+// Files are saved to images/profiles/ and named by the user's ID
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '..', 'images', 'profiles'));
+  },
+  filename: function (req, file, cb) {
+    // Name the file as <userId>.jpg so we can find it later
+    cb(null, req.session.userId + '.jpg');
+  }
+});
+
+// Only allow JPG files — reject everything else (PNG, GIF, etc.)
+const fileFilter = function (req, file, cb) {
+  if (file.mimetype === 'image/jpeg') {
+    cb(null, true); // Accept the file
+  } else {
+    cb(new Error('Only JPG files are allowed.'), false); // Reject the file
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 } // Max file size: 5MB
+});
 
 // Controller class that handles all authntication logic (register, login, logout)
 class UserController {
@@ -25,9 +56,9 @@ class UserController {
       }
       // Validate phone format if provided
       if (phone) {
-        const phoneRegex = /^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
+        const phoneRegex = /^\d{10,15}$/;
         if (!phoneRegex.test(phone)) {
-          return res.status(400).json({ error: 'Please enter a valid phone number.' });
+          return res.status(400).json({ error: 'Phone number must contain between 10 and 15 digits.' });
         }
       }
       if (!username) {
@@ -61,11 +92,7 @@ class UserController {
       if (password.includes(' ')) {
         return res.status(400).json({ error: 'Password cannot contain spaces.' });
       }
-      // Block dangerous characters that could be used for XSS, NoSQL injection, or command injection
-      const dangerousCharsRegex = /[<>"'`${};|\\]/;
-      if (dangerousCharsRegex.test(password)) {
-        return res.status(400).json({ error: 'Password contains characters that are not allowed: < > \" \' ` $ { } ; | \\' });
-      }
+
 
       // Check if email is already taken
       if (email) {
@@ -109,9 +136,9 @@ class UserController {
       }
       // Validate identifier format (must be a valid email or phone number)
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      const phoneRegex = /^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
+      const phoneRegex = /^\d{10,15}$/;
       if (!emailRegex.test(identifier) && !phoneRegex.test(identifier)) {
-        return res.status(400).json({ error: 'Please enter a valid email address or phone number.' });
+        return res.status(400).json({ error: 'Please enter a valid email address or a phone number containing only digits.' });
       }
       if (!password) {
         return res.status(400).json({ error: 'Password is required.' });
@@ -122,11 +149,7 @@ class UserController {
       if (password.includes(' ')) {
         return res.status(400).json({ error: 'Password cannot contain spaces.' });
       }
-      // Block dangerous characters that could be used for XSS, NoSQL injection, or command injection
-      const dangerousCharsRegex = /[<>"'`${};|\\]/;
-      if (dangerousCharsRegex.test(password)) {
-        return res.status(400).json({ error: 'Password contains characters that are not allowed: < > \" \' ` $ { } ; | \\' });
-      }
+
 
       // Find user by email or phone
       const user = await User.findOne({
@@ -157,6 +180,148 @@ class UserController {
     }
   }
 
+
+
+  // POST /api/user/uploadProfilePic
+  // Handles profile picture upload — only accepts JPG files
+  uploadProfilePic(req, res) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    // Use multer to handle the file upload (the field name in the form is 'profilePic')
+    const uploadSingle = upload.single('profilePic');
+
+    uploadSingle(req, res, async function (err) {
+      // If multer rejected the file (e.g. not a JPG or too large)
+      if (err) {
+        if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ error: 'Image is too large. Please upload a file smaller than 5MB.' });
+        }
+        // Our fileFilter already sets err.message to 'Only JPG files are allowed.'
+        return res.status(400).json({ error: err.message || 'Upload failed.' });
+      }
+
+      // If no file was sent at all
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded.' });
+      }
+
+      // The file is already saved as <userId>.jpg by multer's storage config
+      // (if an old file existed, multer overwrites it automatically)
+      const profilePicUrl = '/images/profiles/' + req.session.userId + '.jpg?t=' + Date.now();
+      
+      try {
+        const user = await User.findById(req.session.userId);
+        if (user) {
+          user.profilePic = profilePicUrl;
+          await user.save();
+        }
+        return res.json({ message: 'Profile picture updated.', profilePic: profilePicUrl });
+      } catch (dbErr) {
+        console.error('Error saving profile picture to DB:', dbErr);
+        return res.status(500).json({ error: 'Database error while saving profile picture.' });
+      }
+    });
+  }
+
+  // PATCH /api/user/update
+  async updateProfile(req, res) {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const username = req.body.username;
+      const bio = req.body.bio;
+      const currentPassword = req.body.currentPassword;
+      const newPassword = req.body.newPassword;
+      const user = await User.findById(req.session.userId);
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+
+      // Validate and update username
+      if (username !== undefined && username !== '') {
+        const trimmedUsername = username.trim();
+
+        if (trimmedUsername.length > 30) {
+          return res.status(400).json({ error: 'Username cannot exceed 30 characters.' });
+        }
+
+        // Username: only allow letters, numbers, underscores, and dots (blocks XSS, injection attacks)
+        const usernameRegex = /^[a-zA-Z0-9_.]+$/;
+        if (!usernameRegex.test(trimmedUsername)) {
+          return res.status(400).json({ error: 'Username can only contain letters, numbers, underscores, and dots.' });
+        }
+
+        // Check if username is already taken by another user
+        const allUsers = await User.find({ _id: { $ne: user._id } }, 'username');
+        const usernameTaken = allUsers.some(u => {
+          try {
+            return u.decryptUsername().toLowerCase() === trimmedUsername.toLowerCase();
+          } catch {
+            return false;
+          }
+        });
+        if (usernameTaken) {
+          return res.status(409).json({ error: 'This username is already taken.' });
+        }
+
+        user.username = trimmedUsername; // will be encrypted by pre-save hook
+        req.session.username = trimmedUsername; // update session with new username
+      }
+
+      // Validate and update bio
+      if (bio !== undefined) {
+        if (bio.length > 150) {
+          return res.status(400).json({ error: 'Bio cannot exceed 150 characters.' });
+        }
+
+        user.bio = bio;
+      }
+
+      // Validate and update password
+      if (newPassword) {
+        if (!currentPassword) {
+          return res.status(400).json({ error: 'Current password is required to set a new password.' });
+        }
+
+        // Verify current password
+        const isMatch = await user.comparePassword(currentPassword);
+        if (!isMatch) {
+          return res.status(401).json({ error: 'Current password is incorrect.' });
+        }
+
+        if (newPassword.length < 6) {
+          return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+        }
+        if (newPassword.includes(' ')) {
+          return res.status(400).json({ error: 'Password cannot contain spaces.' });
+        }
+
+
+        user.password = newPassword; // will be hashed by pre-save hook
+      }
+
+      await user.save();
+
+      // Use the current profile picture URL from the database
+      let profilePic = user.profilePic || '/images/profiles/Default_pfp.jpg';
+
+      return res.json({
+        message: 'Profile updated successfully.',
+        username: req.session.username,
+        bio: user.bio || '',
+        profilePic: profilePic
+      });
+    } catch (err) {
+      console.error('Update profile error:', err);
+      return res.status(500).json({ error: 'Server error. Please try again.' });
+    }
+  }
+
   // GET /api/user/logout
   logout(req, res) {
     req.session.destroy((err) => {
@@ -171,11 +336,199 @@ class UserController {
   }
 
   // GET /api/user/getUserDetails
-  getUserDetails(req, res) {
+  async getUserDetails(req, res) {
     if (!req.session || !req.session.userId || !req.session.username) {
-        return res.status(401).json({ error: 'Not authenticated' });
+      return res.status(401).json({ error: 'Not authenticated' });
     }
-    res.json({ userId: req.session.userId, username: req.session.username }); //respond with user details that added automatically by session 
+
+    try {
+      const user = await User.findById(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Use the profile picture from the database
+      let profilePic = user.profilePic || '/images/profiles/Default_pfp.jpg';
+
+      res.json({
+        userId: req.session.userId,
+        username: req.session.username,
+        bio: user.bio || '',
+        profilePic: profilePic
+      });
+    } catch (err) {
+      console.error('getUserDetails error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+
+  // GET /api/user/allUsers
+  // Returns all users from the DB (except the current user) with follow status
+  async getAllUsers(req, res) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+      // Get the current user to check who they follow
+      const currentUser = await User.findById(req.session.userId);
+      if (!currentUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Get all users except the current user
+      const allUsers = await User.find({ _id: { $ne: req.session.userId } });
+
+      // Build a list of user objects to send to the client
+      const usersList = [];
+
+      for (const user of allUsers) {
+        // Decrypt the username (it is stored encrypted in the DB)
+        let username = '';
+        try {
+          username = user.decryptUsername();
+        } catch {
+          username = 'Unknown';
+        }
+
+        // Use the profile picture from the database
+        let profilePic = user.profilePic || '/images/profiles/Default_pfp.jpg';
+
+        // Check if the current user is already following this user
+        const isFollowing = currentUser.following.includes(user._id.toString());
+
+        usersList.push({
+          userId: user._id,
+          username: username,
+          bio: user.bio || '',
+          profilePic: profilePic,
+          isFollowing: isFollowing
+        });
+      }
+
+      return res.json({ users: usersList });
+    } catch (err) {
+      console.error('getAllUsers error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+
+  // PATCH /api/user/follow
+  // Follow another user — adds to both users' arrays
+  async followUser(req, res) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const targetUserId = req.body.targetUserId;
+
+    if (!targetUserId) {
+      return res.status(400).json({ error: 'Target user ID is required.' });
+    }
+
+    // Cannot follow yourself (not saposed to happen but it for data integrety reasons)
+    if (targetUserId === req.session.userId) {
+      return res.status(400).json({ error: 'You cannot follow yourself.' });
+    }
+
+    try {
+      const currentUser = await User.findById(req.session.userId);
+      const targetUser = await User.findById(targetUserId);
+
+      if (!currentUser || !targetUser) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+
+      // Check if already following (prevent duplicates)
+      if (currentUser.following.includes(targetUserId)) {
+        return res.status(400).json({ error: 'You are already following this user.' });
+      }
+
+      // Add targetUserId to my "following" list
+      currentUser.following.push(targetUserId);
+      // Add my ID to the target user's "followers" list
+      targetUser.followers.push(req.session.userId);
+
+      await currentUser.save();
+      await targetUser.save();
+
+      return res.json({ message: 'Followed successfully.' });
+    } catch (err) {
+      console.error('Follow error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+
+  // PATCH /api/user/unfollow
+  // Unfollow another user — removes from both users' arrays
+  async unfollowUser(req, res) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const targetUserId = req.body.targetUserId;
+
+    if (!targetUserId) {
+      return res.status(400).json({ error: 'Target user ID is required.' });
+    }
+
+    try {
+      const currentUser = await User.findById(req.session.userId);
+      const targetUser = await User.findById(targetUserId);
+
+      if (!currentUser || !targetUser) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+
+      // Remove targetUserId from my "following" list
+      currentUser.following = currentUser.following.filter(
+        id => id.toString() !== targetUserId
+      );
+      // Remove my ID from the target user's "followers" list
+      targetUser.followers = targetUser.followers.filter(
+        id => id.toString() !== req.session.userId
+      );
+
+      await currentUser.save();
+      await targetUser.save();
+
+      return res.json({ message: 'Unfollowed successfully.' });
+    } catch (err) {
+      console.error('Unfollow error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+  // POST /api/user/username
+  // Exposes the GetUsernameByUserID helper to the frontend
+  // Accepts either { userId: "singleId" } or { userIds: ["id1", "id2"] }
+  async getUsername(req, res) {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const { userId, userIds } = req.body;
+
+      // If an array of IDs was sent
+      if (Array.isArray(userIds)) {
+        const results = await GetUsernameByUserID(userIds);
+        return res.json({ usernames: results });
+      }
+
+      // If a single ID was sent
+      if (userId) {
+        const username = await GetUsernameByUserID(userId);
+        if (!username) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+        return res.json({ username: username });
+      }
+
+      return res.status(400).json({ error: 'Please provide userId (string) or userIds (array).' });
+    } catch (err) {
+      console.error('getUsername error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
   }
 }
 

@@ -1,10 +1,10 @@
 const crypto = require('crypto');
 
 // AES-256-CBC encryption for sensitive fields like usernames
-// We use a RANDOM IV for each encryption so that even if two users have the same username,
+// We use a RANDOM IV (initialization vector) for each encryption so that even if two users have the same username,
 // their encrypted strings in the database will be completely different!
 const ALGORITHM = 'aes-256-cbc';
-const IV_LENGTH = 16; // AES uses 16-byte IVs
+const IV_LENGTH = 16; // AES uses 16-byte IVs (initialization vector)
 
 // Get the encryption key from .env and derive a 32-byte key from it
 function getKey() {
@@ -17,11 +17,11 @@ function getKey() {
 }
 
 // Encrypt a plaintext string
-// Returns a string containing the random IV and the encrypted text: "ivHex:encryptedHex"
+// Returns a string containing the random IV (initialization vector) and the encrypted text: "ivHex:encryptedHex"
 function encrypt(text) {
   if (!text) return text;
   const key = getKey();
-  const iv = crypto.randomBytes(IV_LENGTH); // Random IV every time!
+  const iv = crypto.randomBytes(IV_LENGTH); // Random IV (initialization vector) every time!
 
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
   let encrypted = cipher.update(text, 'utf8', 'hex');

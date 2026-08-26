@@ -27,6 +27,23 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 6
   },
+  bio: {
+    type: String,
+    default: '',
+    maxlength: 150
+  },
+  profilePic: {
+    type: String,
+    default: '/images/profiles/Default_pfp.jpg'
+  },
+  followers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  following: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
   createdAt: {
     type: Date,
     default: Date.now
