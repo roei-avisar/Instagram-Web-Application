@@ -4,8 +4,8 @@ function toggleMoreMenu() {
   dropdown.classList.toggle('d-none');
 }
 
-// Close dropdown when mouse leaves it
-document.getElementById('more-dropdown').addEventListener('mouseleave', () => {
+// Close dropdown when mouse leaves the More button + dropdown area
+document.getElementById('more-menu-container').addEventListener('mouseleave', () => {
   document.getElementById('more-dropdown').classList.add('d-none');
 });
 
@@ -25,3 +25,4 @@ async function handleLogout() {
     alert('Could not log out. Please try again.');
   }
 }
+
