@@ -9,7 +9,7 @@ const statsSchema = new mongoose.Schema({
 
 // Post schema definition
 const postSchema = new mongoose.Schema({
-    authors: [{ type: String, required: true }],
+    authors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
     isVerified: { type: Boolean, default: false },
     timeAgo: { type: String, required: true },
     subHeader: { type: String, default: "" },
@@ -17,8 +17,8 @@ const postSchema = new mongoose.Schema({
     mediaSource: { type: String, required: true },
     audioSource: { type: String, default: null },
     stats: { type: statsSchema, default: () => ({}) },
-    likedByUsers: [{ type: String }],
-    savedByUsers: [{ type: String }],
+    likedByUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    savedByUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
     caption: { type: String, default: "" },
     isSuggested: { type: Boolean, default: false },
@@ -28,10 +28,10 @@ const postSchema = new mongoose.Schema({
 // Comment schema definition
 const commentSchema = new mongoose.Schema({
     postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post', required: true },
-    username: { type: String, required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     text: { type: String, required: true },
     likes: { type: Number, default: 0 },
-    likedBy: [{ type: String }],
+    likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     createdAt: { type: Date, default: Date.now }
 });
 

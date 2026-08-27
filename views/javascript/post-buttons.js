@@ -76,14 +76,14 @@ async function likePost(button) {
     if (!idDiv) return;
     let postId = idDiv.dataset.postId;
 
-    // 1. Optimistic local data update
+    // 1. Optimistic local data update using user ID
     let post = allPostsData.find(p => p._id === postId);
     if (post) {
-        if (post.likedByUsers.includes(currentUsername)) {
-            post.likedByUsers = post.likedByUsers.filter(u => u !== currentUsername);
+        if (post.likedByUsers.some(u => (u._id || u) === currentUserId)) {
+            post.likedByUsers = post.likedByUsers.filter(u => (u._id || u) !== currentUserId);
             post.stats.likes = Math.max(0, post.stats.likes - 1);
         } else {
-            post.likedByUsers.push(currentUsername);
+            post.likedByUsers.push(currentUserId);
             post.stats.likes += 1;
         }
     }
@@ -94,11 +94,11 @@ async function likePost(button) {
     // 2. Render UI based on updated local data
     updatePostButtonsUI(postId);
 
-    // 3. Sync with server using URL parameter
+    // 3. Sync with server using userId parameter
     await fetch(`/api/posts/like/${postId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: currentUsername })
+        body: JSON.stringify({ userId: currentUserId })
     });
 }
 
@@ -107,13 +107,13 @@ async function savePost(button) {
     if (!idDiv) return;
     let postId = idDiv.dataset.postId;
 
-    // 1. Optimistic local data update
+    // 1. Optimistic local data update using user ID
     let post = allPostsData.find(p => p._id === postId);
     if (post) {
-        if (post.savedByUsers.includes(currentUsername)) {
-            post.savedByUsers = post.savedByUsers.filter(u => u !== currentUsername);
+        if (post.savedByUsers.some(u => (u._id || u) === currentUserId)) {
+            post.savedByUsers = post.savedByUsers.filter(u => (u._id || u) !== currentUserId);
         } else {
-            post.savedByUsers.push(currentUsername);
+            post.savedByUsers.push(currentUserId);
         }
     }
 
@@ -123,11 +123,11 @@ async function savePost(button) {
     // 2. Render UI based on updated local data
     updatePostButtonsUI(postId);
 
-    // 3. Sync with server using URL parameter
+    // 3. Sync with server using userId parameter
     await fetch(`/api/posts/save/${postId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: currentUsername })
+        body: JSON.stringify({ userId: currentUserId })
     });
 }
 
@@ -223,7 +223,8 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
     let commentPopupList = commentPopupBackground.querySelector(".js-popup-comments-slot");
     commentPopupList.innerHTML = "";
     
-    let authorProfilePic = allPost.querySelector(".js-post-header img")?.src || "";
+    // Fetch populated author profile picture
+    let authorProfilePic = currentPost && currentPost.authors.length > 0 ? currentPost.authors[0].profilePic : "";
     let captionHTML = allPost.querySelector(".js-post-caption");
     
     let commentPopupHeader = commentPopupBackground.querySelector(".js-popup-header-slot");
@@ -254,10 +255,14 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
             // Guard clause: if comments aren't populated from DB, skip rendering to prevent errors
             if (typeof comment === 'string') return;
 
-            let isLiked = comment.likedBy && comment.likedBy.includes(currentUsername);
+            // Check if liked by matching user ID
+            let isLiked = comment.likedBy && comment.likedBy.some(u => (u._id || u) === currentUserId);
             let heartClass = isLiked ? "bi-heart-fill text-danger" : "bi-heart text-muted";
             let commentLikes = comment.likes || 0;
-            let commentUsername = comment.username || "Unknown";
+            
+            // Extract username and profile picture from populated userId object
+            let commentUsername = comment.userId && comment.userId.username ? comment.userId.username : "Unknown";
+            let commentProfilePic = comment.userId && comment.userId.profilePic ? comment.userId.profilePic : "elements/media/profile-pictures/default.jpg";
             let commentText = comment.text || "";
             
             // Format comment date if available
@@ -266,7 +271,7 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
             let commentHTML = `
                 <div class="d-flex m-3 align-items-start js-comment-row">
                     <div class="flex-shrink-0">
-                        <img src="elements/media/profile-pictures/${commentUsername}.jpg" onerror="this.src='elements/media/profile-pictures/default.jpg'" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                        <img src="${commentProfilePic}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                     </div>
                     <div class="w-100 ms-2 text-break" style="min-width: 0;">
                         <a href="#!" class="username fw-semibold text-decoration-none text-dark">${commentUsername}</a>
@@ -410,19 +415,19 @@ async function toggleCommentLike(postId, commentIndex, buttonElement) {
     // Ensure likedBy array exists
     if (!comment.likedBy) comment.likedBy = [];
 
-    // Check if current user already liked this comment
-    let isLiked = comment.likedBy.includes(currentUsername);
+    // Check if current user ID is in likedBy array
+    let isLiked = comment.likedBy.some(u => (u._id || u) === currentUserId);
 
     // Optimistic UI update
     if (isLiked) {
         // Unlike the comment
-        comment.likedBy = comment.likedBy.filter(u => u !== currentUsername);
+        comment.likedBy = comment.likedBy.filter(u => (u._id || u) !== currentUserId);
         comment.likes = Math.max(0, comment.likes - 1);
         buttonElement.classList.remove("bi-heart-fill", "text-danger");
         buttonElement.classList.add("bi-heart", "text-muted");
     } else {
         // Like the comment
-        comment.likedBy.push(currentUsername);
+        comment.likedBy.push(currentUserId);
         comment.likes += 1;
         buttonElement.classList.remove("bi-heart", "text-muted");
         buttonElement.classList.add("bi-heart-fill", "text-danger");
@@ -435,12 +440,12 @@ async function toggleCommentLike(postId, commentIndex, buttonElement) {
     let likesCountSpan = commentRow.querySelector('.js-comment-likes-count');
     likesCountSpan.innerText = comment.likes + " likes";
 
-    // Sync with the server
+    // Sync with the server using userId
     try {
         await fetch(`/api/posts/likeComment/${comment._id}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: currentUsername })
+            body: JSON.stringify({ userId: currentUserId })
         });
     } catch (error) {
         console.error("Error updating comment like on server:", error);

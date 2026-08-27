@@ -2,6 +2,7 @@ const postsContainer = document.querySelector('.instagram-posts'); // Global var
 const commentPopupBackground = document.querySelector('.comment-popup-background');
 const textColour = {video: 'text-white', image: 'text-dark', text: 'text-dark'};
 let currentUsername = ""; // Global variable to store the logged-in user
+let currentUserId = ""; // Global variable to store the logged-in user ID
 let allPostsData = []; // Start with an empty array
 
 // Fetch current user and then load posts
@@ -11,7 +12,7 @@ async function initPosts() {
         if (userRes.ok) {
             const userData = await userRes.json();
             currentUsername = userData.username;
-            
+            currentUserId = userData._id; // Store current user ID
         }
     } catch (error) {
         console.error("Could not fetch current user", error);
@@ -49,7 +50,8 @@ const filtersFunctions = {
     searchString: function(postsData, value) {
         return postsData.filter(post => {
             const inCaption = post.caption.toLowerCase().includes(value.toLowerCase());
-            const inAuthors = post.authors.some(author => author.toLowerCase().includes(value.toLowerCase()));
+            // Checking against populated username object
+            const inAuthors = post.authors.some(author => author.username.toLowerCase().includes(value.toLowerCase()));
             const inText = post.mediaType === 'text' && post.mediaSource.toLowerCase().includes(value.toLowerCase());
             return inCaption || inAuthors || inText;
         });
@@ -132,8 +134,9 @@ async function updatePostButtonsUI(postId) {
     const post = allPostsData.find(p => p._id === postId);
     if (!post) return;
 
-    const isLiked = post.likedByUsers.includes(currentUsername);
-    const isSaved = post.savedByUsers.includes(currentUsername);
+    // Use currentUserId to check if the user liked or saved the post
+    const isLiked = post.likedByUsers.some(u => (u._id || u) === currentUserId);
+    const isSaved = post.savedByUsers.some(u => (u._id || u) === currentUserId);
 
     // Update both the main post and any popups that might be open for this post (for example, the comment popup)
     const postElements = document.querySelectorAll(`[data-post-id="${postId}"]`);
@@ -161,14 +164,15 @@ async function updatePostButtonsUI(postId) {
 function createAuthorsHTML(post) {
     let authorsNamesHTML = '';
     if (post.authors.length > 1) {
+        // Access populated username
         authorsNamesHTML = `
-            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[0]}</a>
+            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[0].username}</a>
             <span class="ms-1">and</span>
-            <a href="#!" class="username ms-1 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[1]}</a>
+            <a href="#!" class="username ms-1 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[1].username}</a>
         `;
     } else {
         authorsNamesHTML = `
-            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[0]}</a>
+            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[0].username}</a>
         `;
     }
     return authorsNamesHTML;
@@ -177,20 +181,21 @@ function createAuthorsHTML(post) {
 function createProfilePicsHTML(post) {
     let profilePicsHTML = '';
     if (post.authors.length > 1) {
+        // Access populated profilePic
         profilePicsHTML = `
             <div>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="elements/media/profile-pictures/${post.authors[0]}.jpg" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" alt="Image">
+                    <img src="${post.authors[0].profilePic}" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" alt="Image">
                 </a>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="elements/media/profile-pictures/${post.authors[1]}.jpg" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" alt="Image">
+                    <img src="${post.authors[1].profilePic}" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" alt="Image">
                 </a>
             </div>
         `;
     } else {
         profilePicsHTML = `
             <a href="#!" class="text-decoration-none text-dark profile-circle">
-                <img src="elements/media/profile-pictures/${post.authors[0]}.jpg" class="img-fluid rounded-circle post-profile-pic" alt="Image">
+                <img src="${post.authors[0].profilePic}" class="img-fluid rounded-circle post-profile-pic" alt="Image">
             </a>
         `;
     }
@@ -309,11 +314,9 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
 }
 
 function createPostButtonsHTML(post) {
-    const currentUser = "besteam_ever"; // Current active user
-
-    // Check if the current user has liked or saved this post based on database arrays
-    let isLiked = post.likedByUsers && post.likedByUsers.includes(currentUsername);
-    let isSaved = post.savedByUsers && post.savedByUsers.includes(currentUsername);
+    // Check if the current user ID is in the liked or saved arrays
+    let isLiked = post.likedByUsers && post.likedByUsers.some(u => (u._id || u) === currentUserId);
+    let isSaved = post.savedByUsers && post.savedByUsers.some(u => (u._id || u) === currentUserId);
 
     let heartClass = isLiked ? "bi-heart-fill" : "bi-heart";
     let heartTextColor = isLiked ? "text-danger" : "";
@@ -347,18 +350,20 @@ function createLikedByHTML(likedByUsers, likes) {
     let likedByProfilesHTML = '';
     let likedByHTML = '';
 
-    const otherUsers = likedByUsers.filter(user => user !== currentUsername);
+    // Filter out current user based on user ID
+    const otherUsers = likedByUsers.filter(user => (user._id || user) !== currentUserId);
     
     const usersToShow = otherUsers.slice(0, 3);
 
     usersToShow.forEach(user => {
+        // Access populated profile picture directly
         likedByProfilesHTML += `
-            <img src="elements/media/profile-pictures/${user}.jpg" class="liked-by-profile-pic rounded-circle" alt="Image">
+            <img src="${user.profilePic}" class="liked-by-profile-pic rounded-circle" alt="Image">
         `;
     });
 
     if (usersToShow.length > 0) {
-        let displayUserName = usersToShow[0];
+        let displayUserName = usersToShow[0].username;
 
         likedByHTML = `
         <div class="d-flex align-items-center mt-2 js-liked-by">
@@ -386,7 +391,7 @@ function createLikedByHTML(likedByUsers, likes) {
 function createCaptionHTML(post) {
     let captionHTML = `
     <div class="js-post-caption">
-        <a href="#!" class="username fw-semibold text-decoration-none text-dark">${post.authors[0]}</a>
+        <a href="#!" class="username fw-semibold text-decoration-none text-dark">${post.authors[0].username}</a>
         ${post.isVerified ? '<span class="bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
         <span>${post.caption}</span>
     </div>
