@@ -6,7 +6,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 20px 0;
+  padding: 10px 0;
   position: fixed;
   overflow: hidden;
   top: 0;
@@ -45,7 +45,7 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   margin-top: auto; 
   margin-bottom: auto; 
   box-sizing: border-box;
@@ -61,7 +61,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 0;
+  padding: 10px 0;
   padding-left: 12px;
   margin: 0 12px;
   justify-content: flex-start;
@@ -133,17 +133,20 @@
     width: 100%;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 /* MORE DROPDOWN MENU */
 .more-dropdown-menu {
+    position: absolute;
+    bottom: 100%;
+    left: 12px;
+    width: 200px;
     background-color: white;
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     padding: 6px;
-    margin: 4px 12px;
-    width: calc(100% - 24px);
-    z-index: 10;
+    z-index: 15;
 }
 
 .more-dropdown-item {

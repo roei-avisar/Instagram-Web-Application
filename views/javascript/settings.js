@@ -2,6 +2,7 @@
 function openSettings() {
   const modal = document.getElementById('settingsModal');
   modal.classList.add('active');
+  document.body.classList.add('overflow-hidden'); // make the scrolling behind the popup to unavailable 
 
   // Hide messages from previous opens
   document.getElementById('settings-error-box').style.display = 'none';
@@ -33,6 +34,7 @@ function closeSettings() {
   document.getElementById('settings-profile-pic-input').value = '';
   // Reset preview back to the current saved picture
   document.getElementById('settings-profile-pic-preview').src = CURRENT_USER_PIC || '/images/profiles/Default_pfp.jpg';
+  document.body.classList.remove('overflow-hidden'); // make scrolling available again
 }
 
 // Close modal when clicking on the dark overlay (outside the box)

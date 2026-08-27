@@ -393,7 +393,7 @@ function popupCommentMaker(comment)
     commentPopupBackground.classList.remove('d-none');
     commentPopupBackground.classList.add('d-flex'); // display the pop up window (changing from d-none to d-flex) 
     commentPopupBackground.querySelector(".comment-popup-container").classList.add('comment-popup-animation'); // adding animation class to the pop up window 
-    document.body.classList.add('overflow-hidden'); // make the scrolling behins the popup to unavailable 
+    document.body.classList.add('overflow-hidden'); // make the scrolling behind the popup to unavailable 
     let allPost = comment.closest(".js-all-post");
     commentPopupBackground.dataset.postId = allPost.dataset.postId;
     let postId = allPost.dataset.postId;
