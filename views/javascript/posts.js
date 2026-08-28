@@ -493,6 +493,11 @@ function renderPosts(postsData) {
         media.muted = true;
         media.currentTime = 0;
     });
+
+    // Hide the loading screen and show the main app after rendering posts
+    document.getElementById('loadingScreen').classList.remove('d-flex');
+    document.getElementById('loadingScreen').classList.add('d-none');
+    document.getElementById('mainApp').classList.remove('d-none');
 }
 
 initPosts(); // Call the initPosts function to fetch current user and then load posts
