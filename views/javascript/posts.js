@@ -131,6 +131,34 @@ async function deletePostById(deleteId) {
     }
 }
 
+async function editPostData(postId, newCaption, newSubHeader) {
+    try {
+        const response = await fetch(`/api/posts/updatePost/${postId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ caption: newCaption, subHeader: newSubHeader })
+        });
+
+        if (response.ok) {
+            // Update the local array to avoid the need for a fresh fetch of the entire feed
+            const postIndex = allPostsData.findIndex(p => p._id === postId);
+            if (postIndex !== -1) {
+                allPostsData[postIndex].caption = newCaption;
+                allPostsData[postIndex].subHeader = newSubHeader;
+            }
+            applyFilters(); // Re-render the posts with the updated data
+            closeEditModal();
+        } else {
+            const errData = await response.json();
+            alert(errData.message || "Failed to update post");
+        }
+    } catch (error) {
+        console.error('Error updating post:', error);
+    }
+}
+
 // Update a post's UI after a like/unlike or save/unsave action
 async function updatePostButtonsUI(postId) {
     const post = allPostsData.find(p => p._id === postId);
@@ -215,13 +243,16 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
         <div class="position-relative">
             <button class="bi bi-three-dots fs-4 bg-transparent border-0 p-0 ${textColour[post.mediaType]} options-btn"></button>
 
-        <div class="d-none post-options-dropdown">
+            <div class="d-none post-options-dropdown">
+                <button class="edit-post-btn" data-id="${post._id}">
+                    Edit Post <span class="bi bi-pencil"></span>
+                </button>
                 <button class="delete-post-btn" data-id="${post._id}">
                     Delete Post <span class="bi bi-trash"></span>
                 </button>
+            </div>
         </div>
-    </div>
-    `;
+        `;
     } else {
         // If the current user is not an author leave it empty
         optionsMenuHTML = `<div></div>`;

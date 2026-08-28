@@ -22,4 +22,7 @@ router.post('/addComment/:id', postController.addComment);
 // Route to like or unlike a comment
 router.post('/likeComment/:id', postController.manageCommentLike);
 
+// Route to update a post's text fields (PATCH /api/posts/updatePost/:id)
+router.patch('/updatePost/:id', postController.updatePost);
+
 module.exports = router;

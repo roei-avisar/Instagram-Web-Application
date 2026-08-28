@@ -153,7 +153,7 @@ followButtons.forEach(button => {
     });
 });
 
-// Open the 'delete post' menu when clicking on the post options button, and deleting the post when the delete button is clicked
+// Open the 'delete post' or 'edit post' menu when clicking on the post options button, and deleting the post when the delete button is clicked
 document.addEventListener('click', function(event) {
 
     if (event.target.classList.contains('options-btn')) {
@@ -166,6 +166,12 @@ document.addEventListener('click', function(event) {
     if (deleteBtn) {
         const deleteId = deleteBtn.getAttribute('data-id');
         deletePostById(deleteId);
+    }
+
+    const editBtn = event.target.closest('.edit-post-btn');
+    if (editBtn) {
+        const editId = editBtn.getAttribute('data-id');
+        openEditModal(editId);
     }
 });
 
@@ -464,4 +470,32 @@ function restartMedia(videoElement) { // function that restart the video and the
         audioElement.currentTime = 0;
         audioElement.play();
     }
+}
+
+function openEditModal(postId) {
+    const post = allPostsData.find(p => p._id === postId);
+    if (!post) return;
+
+    document.getElementById('editPostId').value = postId;
+    document.getElementById('editSubHeaderInput').value = post.subHeader || '';
+    document.getElementById('editCaptionInput').value = post.caption || '';
+
+    const modal = document.getElementById('editPostModal');
+    modal.classList.replace('d-none', 'd-flex');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeEditModal() {
+    const modal = document.getElementById('editPostModal');
+    modal.classList.replace('d-flex', 'd-none');
+    document.body.style.overflow = '';
+}
+
+function saveEditedPost() {
+    const postId = document.getElementById('editPostId').value;
+    const newSubHeader = document.getElementById('editSubHeaderInput').value;
+    const newCaption = document.getElementById('editCaptionInput').value;
+    
+    // Call the function to update the post data on the server
+    editPostData(postId, newCaption, newSubHeader);
 }

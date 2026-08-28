@@ -105,6 +105,26 @@ transform: scale(1.05);
     background: radial-gradient(circle, white 45%, transparent 50%);
 }
 
+.edit-post-btn {
+    background: none;
+    border: none;
+    color: #262626;
+    width: 100%;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.edit-post-btn:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
 .post-options-dropdown {
 
     position: absolute;

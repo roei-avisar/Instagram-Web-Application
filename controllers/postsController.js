@@ -342,6 +342,50 @@ class PostController {
             res.status(500).json({ message: "Error fetching feed posts from database", error });
         }
     }
+
+    // Controller method to handle updating an existing post
+    async updatePost(req, res) {
+        try {
+            const postId = req.params.id;
+            const userId = req.session.userId;
+            const { caption, subHeader } = req.body;
+
+            if (!userId) {
+                return res.status(401).json({ message: "User not logged in" });
+            }
+
+            // Fetch the post to check if it exists and if the user is authorized to update it
+            const postToUpdate = await Post.findById(postId);
+            
+            if (!postToUpdate) {
+                return res.status(404).json({ message: "Post not found" });
+            }
+
+            // Check if the user is one of the authors of the post
+            const isAuthor = postToUpdate.authors.some(authorId => authorId.toString() === userId);
+            
+            if (!isAuthor) {
+                return res.status(403).json({ message: "You don't have permission to edit this post" });
+            }
+
+            // Create an object with the fields that need to be updated
+            const updateFields = {};
+            if (caption !== undefined) updateFields.caption = caption;
+            if (subHeader !== undefined) updateFields.subHeader = subHeader;
+
+            // Perform the update in the database
+            const updatedPost = await Post.findByIdAndUpdate(
+                postId,
+                { $set: updateFields },
+                { new: true } // Return the updated document
+            );
+
+            res.status(200).json({ message: "Post updated successfully", post: updatedPost });
+        } catch (error) {
+            console.error("Error updating post:", error);
+            res.status(500).json({ message: "Error updating post in database", error });
+        }
+    }
 }
 
 module.exports = new PostController();
