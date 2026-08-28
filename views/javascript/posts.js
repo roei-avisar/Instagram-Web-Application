@@ -260,7 +260,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
 
     let audioTagHTML = '';
     if (post.audioSource) {
-        let isLoop = post.mediaType === "video" ? "" : "loop"; // if the media is a photo the sound is looped automaticlly if its a video then the sound will be looped with the video
+        let isLoop = post.mediaType === "video" ? "" : "loop"; 
         audioTagHTML = `<audio id="audio-${post._id}" src="${post.audioSource}" autoplay muted ${isLoop}></audio>`;
     }
 
@@ -270,6 +270,20 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
         <div class="tiny-icon-background position-absolute bottom-0 end-0 m-3 bg-dark bg-opacity-50 rounded-circle d-flex justify-content-center align-items-center" style="z-index: 5;">
             <button class="bi bi-volume-mute-fill text-white bg-transparent border-0 p-0" onclick="togglePostAudio(this, '${post._id}')"></button>
         </div>`;
+    }
+
+    let combinedSubHeaderText = '';
+    
+    if (post.group && post.group.name) {
+        // Combine the group name and subHeader if both exist, otherwise just use the group name
+        if (post.subHeader && post.subHeader.trim() !== "") {
+            combinedSubHeaderText = `<span class="fw-bold">${post.group.name}</span> &bull; ${post.subHeader}`;
+        } else {
+            combinedSubHeaderText = `<span class="fw-bold">${post.group.name}</span>`;
+        }
+    } else {
+        // If there's no group, just use the subHeader as is (or empty if it's not set)
+        combinedSubHeaderText = post.subHeader ? post.subHeader : '';
     }
 
     let postContentHTML = '';
@@ -288,7 +302,8 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                                     <span class="text-white ms-1 small-text">${post.timeAgo}</span>
                                 </div>
                             </div>
-                            <a href="#!" class="ms-2 text-decoration-none text-white text-12">${post.subHeader}</a>
+                            <!-- תיקון: שימוש במשתנה המשולב -->
+                            <a href="#!" class="ms-2 text-decoration-none text-white text-12 text-start">${combinedSubHeaderText}</a>
                         </div>
                     </div>
                     ${optionsMenuHTML}
@@ -316,7 +331,8 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                                 <span class="text-muted ms-1 small-text">${post.timeAgo}</span>
                             </span>
                         </div>
-                        <button class="bg-transparent border-0 p-0 ms-2 text-12">${post.subHeader}</button>
+                        <!-- תיקון: שימוש במשתנה המשולב -->
+                        <button class="bg-transparent border-0 p-0 ms-2 text-12 text-start">${combinedSubHeaderText}</button>
                     </div>
                 </div>
                 ${optionsMenuHTML}
@@ -342,7 +358,8 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                                 <span class="text-muted ms-1 small-text">${post.timeAgo}</span>
                             </span>
                         </div>
-                        <button class="bg-transparent border-0 p-0 ms-2 text-12">${post.subHeader}</button>
+                        <!-- תיקון: שימוש במשתנה המשולב -->
+                        <button class="bg-transparent border-0 p-0 ms-2 text-12 text-start">${combinedSubHeaderText}</button>
                     </div>
                 </div>
                 ${optionsMenuHTML}

@@ -305,6 +305,7 @@ class PostController {
                 .populate('authors')
                 .populate('likedByUsers')
                 .populate('savedByUsers')
+                .populate('group')
                 .populate({
                     path: 'comments',
                     populate: { path: 'userId' }
