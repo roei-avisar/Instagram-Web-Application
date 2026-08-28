@@ -274,3 +274,148 @@
   color: #ed4956;
   font-weight: 500;
 }
+
+/* ========== DANGER ZONE / DELETE ACCOUNT ========== */
+.settings-danger-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-danger-desc {
+  font-size: 13px;
+  color: #737373;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.settings-delete-btn {
+  width: 100%;
+  padding: 12px;
+  background: #fff;
+  color: #ed4956;
+  border: 1.5px solid #ed4956;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.settings-delete-btn:hover {
+  background: #ed4956;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(237, 73, 86, 0.25);
+}
+
+/* ========== DELETE CONFIRMATION MODAL ========== */
+.delete-account-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 1100;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(5px);
+}
+
+.delete-account-overlay.active {
+  display: flex;
+}
+
+.delete-account-box {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 36px;
+  width: 400px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  animation: settingsSlideIn 0.25s ease;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+}
+
+.delete-account-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #ed4956;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.delete-account-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #262626;
+  margin: 0 0 8px 0;
+}
+
+.delete-account-text {
+  font-size: 14px;
+  color: #737373;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.delete-account-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.delete-account-cancel-btn {
+  flex: 1;
+  padding: 12px;
+  background: #efefef;
+  color: #262626;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.delete-account-cancel-btn:hover {
+  background: #dbdbdb;
+}
+
+.delete-account-confirm-btn {
+  flex: 1.2;
+  padding: 12px;
+  background: #ed4956;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.delete-account-confirm-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.delete-account-confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

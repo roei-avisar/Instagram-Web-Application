@@ -26,4 +26,10 @@ router.patch('/follow', userController.followUser);
 
 router.patch('/unfollow', userController.unfollowUser);
 
+router.get('/check_followers', userController.check_followers);
+
+router.get('/check_following', userController.check_following);
+
+router.delete('/delete', userController.deleteUser);
+
 module.exports = router; // export all the router functions to be used by server.js

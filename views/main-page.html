@@ -955,6 +955,49 @@
                 <!-- Save button -->
                 <button class="settings-save-btn" id="settings-save-btn" onclick="handleSaveSettings()">Save
                     changes</button>
+
+                <div class="settings-divider"></div>
+
+                <!-- Danger Zone / Delete Account -->
+                <div class="settings-danger-zone">
+                    <div class="settings-section-title text-danger">
+                        <i class="bi bi-trash3 text-danger"></i>
+                        Delete Account
+                    </div>
+                    <p class="settings-danger-desc">
+                        Permanently delete your account.
+                    </p>
+                    <button type="button" class="settings-delete-btn" id="settings-delete-btn"
+                        onclick="openDeleteAccountConfirm()">
+                        Delete Account
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Account Confirmation Modal -->
+        <div class="delete-account-overlay" id="deleteAccountModal">
+            <div class="delete-account-box">
+                <div class="delete-account-icon">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <h3 class="delete-account-title">Delete Account?</h3>
+                <p class="delete-account-text">
+                    Are you sure you want to permanently delete your account? This action cannot be undone.
+                </p>
+                <div id="delete-account-error" class="settings-error-box mb-3" style="display:none">
+                    <i class="bi bi-exclamation-circle" style="font-size:18px; flex-shrink:0;"></i>
+                    <span id="delete-account-error-text"></span>
+                </div>
+                <div class="delete-account-actions">
+                    <button type="button" class="delete-account-cancel-btn" onclick="closeDeleteAccountConfirm()">
+                        Cancel
+                    </button>
+                    <button type="button" class="delete-account-confirm-btn" id="delete-account-confirm-btn"
+                        onclick="handleConfirmDeleteAccount()">
+                        Yes, Delete My Account
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -973,7 +1016,8 @@
 
     </div>
     <script src="javascript/initApp.js"></script> <!-- important to be first, this is loading the userID -->
-    <script src="javascript/userViewUtils.js"></script> <!-- user UI helper functions (must be after initApp.js globals) -->
+    <script src="javascript/userViewUtils.js"></script>
+    <!-- user UI helper functions (must be after initApp.js globals) -->
     <script src="javascript/stories.js"></script>
     <script src="javascript/events.js"></script>
     <script src="javascript/notifications.js"></script>

@@ -13,7 +13,7 @@ function handleLogin() {
     return;
   }
 
-  const phoneRegex = /^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
+  const phoneRegex = /^(?:\+?972[- ]?(?:5[0-9]|[23489]|7[1-9])|0(?:5[0-9]|[23489]|7[1-9]))[- ]?\d{3}[- ]?\d{4}$|^\+?[1-9]\d{9,14}$/;
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const isPhone = phoneRegex.test(username);
@@ -130,27 +130,30 @@ function handleSignup() {
   successBox.style.display = 'none';
 
   // Validation
-  if (!email && !phone) {
-    errorText.textContent = 'Please provide at least an email or phone number.';
+  if (!email) {
+    errorText.textContent = 'Email address is required.';
     errorBox.style.display = 'flex';
     return;
   }
 
-  if (email) {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email)) {
-      errorText.textContent = 'Please enter a valid email address.';
-      errorBox.style.display = 'flex';
-      return;
-    }
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email)) {
+    errorText.textContent = 'Please enter a valid email address.';
+    errorBox.style.display = 'flex';
+    return;
   }
 
-  if (phone) {
-    if (!/^\d{10,15}$/.test(phone)) {
-      errorText.textContent = 'Phone number must contain between 10 and 15 digits.';
-      errorBox.style.display = 'flex';
-      return;
-    }
+  if (!phone) {
+    errorText.textContent = 'Phone number is required.';
+    errorBox.style.display = 'flex';
+    return;
+  }
+
+  const phoneRegex = /^(?:\+?972[- ]?(?:5[0-9]|[23489]|7[1-9])|0(?:5[0-9]|[23489]|7[1-9]))[- ]?\d{3}[- ]?\d{4}$|^\+?[1-9]\d{9,14}$/;
+  if (!phoneRegex.test(phone)) {
+    errorText.textContent = 'Please enter a valid phone number like(050-1234567 or +972-50-1234567).';
+    errorBox.style.display = 'flex';
+    return;
   }
 
   if (!username) {
