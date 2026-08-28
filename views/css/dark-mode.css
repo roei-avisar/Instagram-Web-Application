@@ -299,3 +299,34 @@ body.dark-mode .settings-char-count.over-limit {
 body.dark-mode .settings-profile-pic-img {
     border-color: #3a3f47 !important;
 }
+
+body.dark-mode .weather-container,
+body.dark-mode .all-users-box,
+body.dark-mode #membersOverlay .bg-white {
+    background-color: #0C1014 !important;
+    color: white !important;
+    border-color: #262B33 !important;
+}
+
+body.dark-mode .all-users-title,
+body.dark-mode .all-users-close,
+body.dark-mode #membersOverlay .fw-bold,
+body.dark-mode #membersOverlay .bi-arrow-left,
+body.dark-mode .weather-container span,
+body.dark-mode .weather-container strong {
+    color: white !important;
+}
+
+body.dark-mode .following-btn {
+    background-color: #262B33 !important;
+    color: white !important;
+    border: 1px solid #555 !important; 
+    opacity: 1 !important;
+}
+
+body.dark-mode #groupsList button:not(.btn-primary):not(.btn-danger),
+body.dark-mode #membersList button:not(.btn-primary):not(.btn-danger) {
+    background-color: #262B33 !important;
+    color: white !important;
+    border: 1px solid #3a3f47 !important;
+}
