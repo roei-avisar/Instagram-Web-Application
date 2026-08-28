@@ -2,6 +2,12 @@ const { Post, Comment } = require('../models/postsModel');
 const gitService = require('../utils/gitService');
 const { decrypt } = require('../utils/encryption');
 
+async function deletePostComments(commentIds) {
+    if (commentIds && commentIds.length > 0) {
+        await Comment.deleteMany({ _id: { $in: commentIds } });
+    }
+}
+
 class PostController {
     // Controller method to handle fetching all posts
     async getAllPosts(req, res) {
@@ -146,6 +152,8 @@ class PostController {
                         });
                     } catch (err) { console.error("Error calling user route:", err); }
                 }
+                // Delete all comments associated with the post
+                await deletePostComments(deletedPost.comments);
 
                 res.status(200).json({ message: "Post deleted successfully" });
             } else {
