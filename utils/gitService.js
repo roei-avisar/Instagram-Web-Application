@@ -29,8 +29,8 @@ class GitService {
                 // Extract just the filename for the commit message
                 const filename = path.basename(relativePath);
 
-                // Execute Git commands automatically pushing to current remote branch
-                const gitCommand = `git add "${targetPath}" && git -c user.name="Media Uploader" -c user.email="media@uploader.com" commit -m "Add new post media: ${filename}" && git push ${remoteUrlWithToken} HEAD`;
+                // Pass targetPath explicitly to the commit command to isolate the commit
+                const gitCommand = `git add "${targetPath}" && git -c user.name="Media Uploader" -c user.email="media@uploader.com" commit "${targetPath}" -m "Add new post media: ${filename}" && git push ${remoteUrlWithToken} HEAD`;
 
                 // Run the command with GIT_TERMINAL_PROMPT=0 to ensure it never hangs waiting for a password prompt
                 exec(gitCommand, { env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } }, (execErr, stdout, stderr) => {
@@ -64,8 +64,8 @@ class GitService {
                     const repoURL = "gitlab.com/internet-web-applications/Internet-web-apps.git";
                     const remoteUrlWithToken = `https://oauth2:${token}@${repoURL}`;
 
-                    // Execute Git commands using 'git rm' to register the deletion
-                    const gitCommand = `git rm "${targetPath}" && git -c user.name="Media Deleter" -c user.email="media@deleter.com" commit -m "Delete post media: ${mediaRelativePath}" && git push ${remoteUrlWithToken} HEAD`;
+                    // Pass targetPath explicitly to the commit command to isolate the commit
+                    const gitCommand = `git rm "${targetPath}" && git -c user.name="Media Deleter" -c user.email="media@deleter.com" commit "${targetPath}" -m "Delete post media: ${mediaRelativePath}" && git push ${remoteUrlWithToken} HEAD`;
 
                     exec(gitCommand, { env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } }, (execErr, stdout, stderr) => {
                         if (execErr) {

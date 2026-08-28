@@ -26,4 +26,10 @@ router.patch('/follow', userController.followUser);
 
 router.patch('/unfollow', userController.unfollowUser);
 
+router.post('/addPersonalPost', userController.addPersonalPost);
+
+router.delete('/removePersonalPost/:postId', userController.removePersonalPost);
+
+router.get('/getFollowingAndPersonalPosts', userController.getFollowingAndPersonalPosts);
+
 module.exports = router; // export all the router functions to be used by server.js

@@ -5,6 +5,9 @@ const postController = require('../controllers/postsController');
 // Route to get all posts (GET /api/posts/getAllPosts)
 router.get('/getAllPosts', postController.getAllPosts);
 
+// Route to get filtered feed posts for the current user
+router.get('/getFeedPosts', postController.getFeedPosts);
+
 // Route to create a new post (POST /api/posts/createPost/)
 router.post('/createPost/', postController.createPost);
 

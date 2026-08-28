@@ -8,11 +8,11 @@ let allPostsData = []; // Start with an empty array
 // Fetch current user and then load posts
 async function initPosts() {
     try {
-        const userRes = await fetch('/api/user/currentUser');
+        const userRes = await fetch('/api/user/getUserDetails');
         if (userRes.ok) {
             const userData = await userRes.json();
             currentUsername = userData.username;
-            currentUserId = userData._id; // Store current user ID
+            currentUserId = userData.userId; // Store current user ID
         }
     } catch (error) {
         console.error("Could not fetch current user", error);
@@ -25,7 +25,7 @@ async function initPosts() {
 // Fetch initial post data from the server
 async function fetchPostsFromServer() {
     try {
-        const response = await fetch('/api/posts/getAllPosts', {
+        const response = await fetch('/api/posts/getFeedPosts', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -86,6 +86,8 @@ async function addNewPost(newPostData) {
                     }
                 }, 100); // Small delay to allow DOM to render
             }
+            const createdPost = await response.json();
+            return createdPost;
         }
     } catch (error) {
         console.error('Error adding new post:', error);

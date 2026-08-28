@@ -169,6 +169,10 @@
     object-fit: cover;
 }
 
+.upload-choice-overlay {
+    z-index: 14;
+}
+
 .discard-overlay {
     z-index: 15;
     justify-content: center;

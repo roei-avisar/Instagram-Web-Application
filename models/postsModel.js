@@ -22,6 +22,7 @@ const postSchema = new mongoose.Schema({
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
     caption: { type: String, default: "" },
     isSuggested: { type: Boolean, default: false },
+    group: { type: mongoose.Schema.Types.ObjectId, ref: 'Group', default: null },
     createdAt: { type: Date, default: Date.now }
 });
 

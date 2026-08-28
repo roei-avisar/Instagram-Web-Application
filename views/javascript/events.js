@@ -13,7 +13,7 @@ const menusConfig = [
     },
     {
         menuClass: '.create-form-overlay',
-        dontRemoveOn: '.js-menu-create-btn, .create-form-overlay, .js-discard-overlay'
+        dontRemoveOn: '.js-menu-create-btn, .create-form-overlay, .js-discard-overlay, #postUploadChoiceModal, #groupsSelectionModal'
     },
     {
         menuClass: '.js-notifications-panel',
@@ -91,6 +91,8 @@ function closePostCreationForm() {
     document.querySelector('.js-caption-input').value = '';
     document.querySelector('.js-location-input').value = '';
     document.body.style.overflow = '';
+    document.getElementById('postUploadChoiceModal')?.classList.replace('d-flex', 'd-none');
+    document.getElementById('groupsSelectionModal')?.classList.replace('d-flex', 'd-none');
 }
 
 function switchCreatePostFormState() {
@@ -102,6 +104,8 @@ function switchCreatePostFormState() {
     fileInput.value = '';
     document.querySelector('.js-caption-input').value = '';
     document.querySelector('.js-location-input').value = '';
+    document.getElementById('postUploadChoiceModal')?.classList.replace('d-flex', 'd-none');
+    document.getElementById('groupsSelectionModal')?.classList.replace('d-flex', 'd-none');
 }
 
 function discardPost() {
@@ -257,10 +261,10 @@ postFormBackBtn.addEventListener('click', function(event) {
     discardOverlay.classList.remove('d-none');
 });
 
-// Upload the new post when clicking on the share button, and show a notification about it
+// --- Post Upload Logic and Modals ---
+
 postShareBtn.addEventListener('click', function(event) {
     let captionText = document.querySelector('.js-caption-input').value;
-    let locationText = document.querySelector('.js-location-input').value;
     if (currentMediaType === 'text') {
         currentMediaSource = previewText.value.trim();
     }
@@ -268,32 +272,94 @@ postShareBtn.addEventListener('click', function(event) {
         alert("Cannot upload an empty post!");
         return;
     }
+    
+    document.getElementById('postUploadChoiceModal').classList.replace('d-none', 'd-flex');
+});
+
+document.querySelector('.js-postUpload-followers-btn').addEventListener('click', function() {
+    // Submit the post data to the server
+    submitPostDataToServer(null); 
+});
+
+document.querySelector('.js-postUpload-groups-btn').addEventListener('click', async function() {
+    document.getElementById('postUploadChoiceModal').classList.replace('d-flex', 'd-none');
+    
+    try {
+        const response = await fetch('/api/groups/myGroups');
+        const result = await response.json();
+        
+        if (result.success) {
+            const userGroups = result.data;
+            const container = document.getElementById('groupsListContainer');
+            container.innerHTML = '';
+            
+            if(userGroups.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted mt-3">You are not in any groups yet.</div>';
+            } else {
+                userGroups.forEach(group => {
+                    container.innerHTML += `
+                        <label class="d-flex align-items-center justify-content-between p-2 rounded hover-light bg-light" style="cursor: pointer;">
+                            <span class="fw-semibold">${group.name}</span>
+                            <input type="radio" name="groupSelection" class="form-check-input js-group-upload-radio" value="${group._id}">
+                        </label>
+                    `;
+                });
+            }
+            
+            document.getElementById('groupsSelectionModal').classList.replace('d-none', 'd-flex');
+        }
+    } catch (error) {
+        console.error("Error fetching groups", error);
+    }
+});
+
+// go back to the post upload choice modal from the groups selection modal
+document.querySelector('.js-back-to-choice-btn').addEventListener('click', function() {
+    document.getElementById('groupsSelectionModal').classList.replace('d-flex', 'd-none');
+    document.getElementById('postUploadChoiceModal').classList.replace('d-none', 'd-flex');
+});
+
+document.querySelector('.js-final-postUpload-groups-btn').addEventListener('click', function() {
+    const selectedRadio = document.querySelector('.js-group-upload-radio:checked');
+    if (!selectedRadio) {
+        alert("Please select a group");
+        return;
+    }
+    
+    // Submit the post data to the server
+    submitPostDataToServer(selectedRadio.value);
+});
+
+async function submitPostDataToServer(groupId) {
+    let captionText = document.querySelector('.js-caption-input').value;
+    let locationText = document.querySelector('.js-location-input').value;
+    
     const newPost = {
-        "authors": ["besteam_ever"],
+        "authors": [currentUserId], 
         "isVerified": false,
         "timeAgo": "1s",
         "subHeader": locationText,
         "mediaType": currentMediaType,
         "mediaSource": currentMediaSource,
         "hasMuteButton": isMuted,
-        "stats": {
-            "likes": "0",
-            "comments": "0",
-            "shares": "0"
-        },
+        "stats": { "likes": 0, "comments": 0, "shares": 0 },
         "likedByUsers": [],
         "caption": captionText,
         "isSuggested": false
     };
-    addNewPost(newPost);
+
+    if (groupId) {
+        newPost.groupId = groupId;
+    }
+
+    // Create the post
+    await addNewPost(newPost);
+
+    // Close the post creation form and reset its state
     closePostCreationForm();
     uploadNewPostNotification(currentMediaSource, currentMediaType);
-
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-});
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 // Open the search container when clicking on the search logo
 searchMenuBtn.addEventListener('click', function(event) {
