@@ -1,4 +1,5 @@
 const Group = require('../models/groupsModel');
+const { sendTweet } = require('../utils/twitterServices');
 
 class GroupsController {
     async createGroup(req, res) { // creating a new group on DB and making the user admin
@@ -12,6 +13,9 @@ class GroupsController {
             });
 
             const savedGroup = await newGroup.save(); // save group in DB
+
+            const tweetMessage = `A new group name "${req.body.name}" were created in our App!`;
+            sendTweet(tweetMessage);
 
             res.status(201).json({
                 success: true,
