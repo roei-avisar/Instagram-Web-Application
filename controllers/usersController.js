@@ -530,6 +530,79 @@ class UserController {
       return res.status(500).json({ error: 'Server error.' });
     }
   }
+  // POST /api/user/addPersonalPost
+  async addPersonalPost(req, res) {
+    try {
+      const { postId } = req.body;
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+      await User.findByIdAndUpdate(
+        req.session.userId,
+        { $addToSet: { personalPosts: postId } }
+      );
+      return res.status(200).json({ success: true, message: 'Added to personal posts' });
+    } catch (err) {
+      return res.status(500).json({ error: 'Server error' });
+    }
+  }
+
+  // DELETE /api/user/removePersonalPost/:postId
+  async removePersonalPost(req, res) {
+    try {
+      const { postId } = req.params;
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+      await User.findByIdAndUpdate(
+        req.session.userId,
+        { $pull: { personalPosts: postId } }
+      );
+      return res.status(200).json({ success: true, message: 'Removed from personal posts' });
+    } catch (err) {
+      return res.status(500).json({ error: 'Server error' });
+    }
+  }
+
+  // GET /api/user/getFollowingAndPersonalPosts
+  async getFollowingAndPersonalPosts(req, res) {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      // Fetch user and populate their following list to access their personalPosts
+      const currentUser = await User.findById(userId).populate('following');
+      if (!currentUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const postIds = [];
+
+      // Add user's own personal posts
+      if (currentUser.personalPosts) {
+        postIds.push(...currentUser.personalPosts.map(id => id.toString()));
+      }
+
+      // Add personal posts from users they follow
+      if (currentUser.following) {
+        currentUser.following.forEach(followedUser => {
+          if (followedUser.personalPosts) {
+            postIds.push(...followedUser.personalPosts.map(id => id.toString()));
+          }
+        });
+      }
+
+      // Remove duplicates using Set
+      const uniquePostIds = [...new Set(postIds)];
+
+      return res.status(200).json({ success: true, postIds: uniquePostIds });
+    } catch (err) {
+      console.error("Error getting personal posts:", err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+  }
 }
 
 module.exports = new UserController();
