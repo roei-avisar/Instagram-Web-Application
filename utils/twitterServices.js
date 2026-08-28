@@ -2,7 +2,7 @@ require('dotenv').config();
 const { TwitterApi } = require('twitter-api-v2');
 
 
-const twitterClient = new TwitterApi({
+const twitterClient = new TwitterApi({ //token and password parameters
   appKey: process.env.TWITTER_API_KEY,
   appSecret: process.env.TWITTER_API_SECRET,
   accessToken: process.env.TWITTER_ACCESS_TOKEN,
@@ -11,11 +11,15 @@ const twitterClient = new TwitterApi({
 
 const sendTweet = async (text) => {
   try {
-    const response = await twitterClient.v2.tweet(text);
+    const response = await twitterClient.v2.tweet(text); // send tweet
     console.log('Tweet published successfully! ID:', response.data.id);
     return true;
-  } catch (error) {
-    console.error('Failed to publish tweet:', error);
+    } catch(error){
+    if (error.code === 402) {
+        console.log("System message to the lecturer: Integration with the Twitter API was successful, but we do not have the tokens required to post via the Twitter API. See the relevant error:" + error);
+  }
+  else {
+    console.error('Failed to publish tweet:', error);}
     return false;
   }
 };

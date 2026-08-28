@@ -111,17 +111,17 @@ function renderGroups(groupsArray) {
             editBtn.className = 'btn btn-sm btn-outline-secondary ms-2';
             editBtn.textContent = 'Edit Name';
             
-            editBtn.onclick = () => {
+            editBtn.onclick = () => { // add functionality to edit button
                 nameSpan.classList.add('d-none');
                 editBtn.classList.add('d-none');
 
-                const editContainer = document.createElement('div');
+                const editContainer = document.createElement('div'); // make the container to write the new name
                 editContainer.className = 'd-flex align-items-center flex-grow-1';
 
                 const editInput = document.createElement('input');
                 editInput.type = 'text';
                 editInput.className = 'form-control form-control-sm w-75';
-                editInput.value = group.name;
+                editInput.value = group.name; // show group name at first while edit the group name
 
                 const saveBtn = document.createElement('button');
                 saveBtn.className = 'btn btn-sm btn-success ms-2';
@@ -132,13 +132,20 @@ function renderGroups(groupsArray) {
                 
                 row.insertBefore(editContainer, btnGroup);
 
-                saveBtn.onclick = () => {
+                saveBtn.onclick = () => { // add save button functionality
                     const newName = editInput.value.trim();
 
-                    if (newName === '' || newName.length > 20 || newName === group.name) {
+                    if (newName === group.name) {
                         nameSpan.classList.remove('d-none');
                         editBtn.classList.remove('d-none');
                         editContainer.remove();
+                        return;
+                    }
+                    if (newName === '' || newName.length > 60) {
+                        nameSpan.classList.remove('d-none');
+                        editBtn.classList.remove('d-none');
+                        editContainer.remove();
+                        alert("Group name must be between 1 and 60 characters");
                         return;
                     }
 
@@ -238,9 +245,21 @@ function openMembersPopup(groupId, isAdmin, usersArray, adminId) {
         row.className = 'd-flex justify-content-between align-items-center mb-2';
 
         const userContainer = document.createElement('div');
-        
         const userSpan = document.createElement('span');
-        userSpan.textContent = userId === CURRENT_USER_ID ? 'You' : `User: ${userId.substring(0,6)}...`; // change it to username from users model
+        
+        fetch("/api/user/username", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            userSpan.textContent = data.username; 
+            })
+        .catch(error => {
+            console.error("Error fetching username:", error);
+            userSpan.textContent = "Eror at loading";
+            });
         
         userContainer.appendChild(userSpan);
 
@@ -262,7 +281,7 @@ function openMembersPopup(groupId, isAdmin, usersArray, adminId) {
         }
 
         listContainer.appendChild(row);
-    });
+        });
 }
 
 function closeMembersPopup(event, forceClose = false) {

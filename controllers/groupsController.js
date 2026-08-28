@@ -15,7 +15,7 @@ class GroupsController {
             const savedGroup = await newGroup.save(); // save group in DB
 
             const tweetMessage = `A new group name "${req.body.name}" were created in our App!`;
-            sendTweet(tweetMessage);
+            sendTweet(tweetMessage); // tweet to our twitter user
 
             res.status(201).json({
                 success: true,
