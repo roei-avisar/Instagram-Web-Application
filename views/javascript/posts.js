@@ -205,9 +205,15 @@ function createProfilePicsHTML(post) {
 }
 
 function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
-    const optionsMenuHTML = `
-    <div class="position-relative">
-        <button class="bi bi-three-dots fs-4 bg-transparent border-0 p-0 ${textColour[post.mediaType]} options-btn"></button>
+    let optionsMenuHTML = '';
+
+    // Check if the current user is one of the authors of the post
+    const isCurrentUserAuthor = post.authors.some(author => (author._id || author) === currentUserId);
+
+    if (isCurrentUserAuthor) {
+        optionsMenuHTML = `
+        <div class="position-relative">
+            <button class="bi bi-three-dots fs-4 bg-transparent border-0 p-0 ${textColour[post.mediaType]} options-btn"></button>
 
         <div class="d-none post-options-dropdown">
                 <button class="delete-post-btn" data-id="${post._id}">
@@ -216,6 +222,10 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
         </div>
     </div>
     `;
+    } else {
+        // If the current user is not an author leave it empty
+        optionsMenuHTML = `<div></div>`;
+    }
 
     let audioTagHTML = '';
     if (post.audioSource) {

@@ -102,8 +102,23 @@ class PostController {
     async deletePost(req, res) {
         try {
             const postId = req.params.id;
+            const userId = req.session.userId;
 
-            // Use Mongoose's built-in findByIdAndDelete with the MongoDB _id
+            // Get the post to check if it exists and if the user is authorized to delete it
+            const postToDelete = await Post.findById(postId);
+            
+            if (!postToDelete) {
+                return res.status(404).json({ message: "Post not found" });
+            }
+
+            // Check if the user is one of the authors of the post
+            const isAuthor = postToDelete.authors.some(authorId => authorId.toString() === userId);
+            
+            if (!isAuthor) {
+                return res.status(403).json({ message: "You don't have permission to delete this post" });
+            }
+
+            // After passing the authorization check, use Mongoose's built-in findByIdAndDelete with the MongoDB _id
             const deletedPost = await Post.findByIdAndDelete(postId);
 
             if (deletedPost) {
