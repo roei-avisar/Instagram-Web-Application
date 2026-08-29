@@ -101,7 +101,7 @@ function closeSignupModal() {
 }
 
 // Close modal when clicking on the dark overlay (outside the box)
-document.getElementById('signupModal').addEventListener('click', function (e) {
+document.getElementById('signupModal').addEventListener('mousedown', function (e) {
   if (e.target === this) {
     closeSignupModal();
   }

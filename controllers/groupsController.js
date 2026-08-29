@@ -258,6 +258,33 @@ class GroupsController {
             return res.status(500).json({ success: false, error: error.message });
         }
     }
+    async destroyUserGroupsHistroy(req, res) { // while deleting a user this function deleting this user from all the groups he was a member and deleting the groups he were created
+        try {
+            const userId = req.params.userId;
+
+            if (!userId) {
+                return res.status(400).json({ success: false, message: 'User ID is required' });
+            }
+
+            const deletedGroups = await Group.deleteMany({ admin: userId }); // find all the groups that the user is the admin and deleting them
+
+            const updatedGroups = await Group.updateMany( // find all the groups that the user is a member and removing him
+                { users: userId },
+                { $pull: { users: userId } }
+            );
+
+            return res.status(200).json({
+                success: true,
+                stats: {
+                    groupsDeleted: deletedGroups.deletedCount,
+                    groupsLeft: updatedGroups.modifiedCount
+                }
+            });
+
+        } catch (error) {
+            return res.status(500).json({ success: false, error: error.message });
+        }
+    }
 }
 
 module.exports = new GroupsController();
