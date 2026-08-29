@@ -249,10 +249,11 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
 
     const safeAuthors = getSafeAuthors(post);
 
-    // Check if the current user is one of the authors of the post
-    const isCurrentUserAuthor = safeAuthors.some(author => (author._id || author) === CURRENT_USER_ID);
+    // Check if the current user is one of the authors or the group admin
+    const isCurrentUserAuthor = safeAuthors.some(author => String(author._id || author) === CURRENT_USER_ID);
+    const isGroupAdmin = Boolean(post.groupAdminId && String(post.groupAdminId) === CURRENT_USER_ID);
 
-    if (isCurrentUserAuthor) {
+    if (isCurrentUserAuthor || isGroupAdmin) {
         optionsMenuHTML = `
         <div class="position-relative">
             <button class="bi bi-three-dots fs-4 bg-transparent border-0 p-0 ${textColour[post.mediaType]} options-btn"></button>
@@ -268,7 +269,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
         </div>
         `;
     } else {
-        // If the current user is not an author leave it empty
+        // If the current user is not an author or group admin, leave it empty
         optionsMenuHTML = `<div></div>`;
     }
 

@@ -185,7 +185,7 @@ class PostController {
                 // Remove the post from the group or user's personal posts
                 if (deletedPost.group) {
                     try {
-                        await fetch(`${baseUrl}/api/groups/removeDeletedPost/${deletedPost.group}/${postId}`, {
+                        await fetch(`${baseUrl}/api/groups/removePost/${deletedPost.group}/${postId}`, {
                             method: 'DELETE',
                             headers: { 'Cookie': req.headers.cookie }
                         });
