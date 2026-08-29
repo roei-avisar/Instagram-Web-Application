@@ -1,6 +1,7 @@
 
 let globalGroups = [];
 let currentOpenGroupId = null;
+let pendingHighlightGroupId = null;
 
 function openGroupsPopup() {
     const overlay = document.getElementById('groupsOverlay');
@@ -59,6 +60,7 @@ function createGroup() {
     .then(data => {
         if (data.success) {
             input.value = '';
+            pendingHighlightGroupId = data.data._id; // scroll down and highk+lighting a new group were made
             openGroupsPopup(); // refresh the screen
             // Refresh the feed posts to reflect changes in group membership
             fetchPostsFromServer();
@@ -91,6 +93,7 @@ function renderGroups(groupsArray) {
         const isAdmin = group.admin === CURRENT_USER_ID;
 
         const row = document.createElement('div'); // group div HTML
+        row.id = `group-${group._id}`;
         row.className = 'd-flex justify-content-between align-items-center mb-2 p-3 border-bottom';
 
         const nameSpan = document.createElement('span'); // group name HTML
@@ -194,6 +197,11 @@ function renderGroups(groupsArray) {
         row.appendChild(nameSpan);
         row.appendChild(btnGroup);
         listContainer.appendChild(row); // add all the groups div to the HTML
+
+        if (group._id === pendingHighlightGroupId) {
+            scrollToAndHighlight(row);
+            pendingHighlightGroupId = null;
+        }
     });
 }
 
@@ -342,4 +350,18 @@ function renameGroup(groupId, currentName) {
     .catch(error => {
         console.error('Error:', error);
     });
+}
+
+function scrollToAndHighlight(groupElement) { // this function scrolldown and highlighting a new group who created
+    setTimeout(() => {
+        groupElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        groupElement.animate([
+            { backgroundColor: 'transparent' },
+            { backgroundColor: 'rgba(40, 167, 69, 0.4)' },
+            { backgroundColor: 'transparent' }
+        ], {
+            duration: 1000,
+            iterations: 2
+        });
+    }, 100);
 }
