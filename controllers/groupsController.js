@@ -1,4 +1,5 @@
 const Group = require('../models/groupsModel');
+const { sendTweet } = require('../utils/twitterServices');
 
 class GroupsController {
     async createGroup(req, res) { // creating a new group on DB and making the user admin
@@ -12,6 +13,9 @@ class GroupsController {
             });
 
             const savedGroup = await newGroup.save(); // save group in DB
+
+            const tweetMessage = `A new group name "${req.body.name}" were created in our App!`;
+            sendTweet(tweetMessage); // tweet to our twitter user
 
             res.status(201).json({
                 success: true,
@@ -250,6 +254,33 @@ class GroupsController {
             const uniquePostIds = [...new Set(postIds)];
 
             return res.status(200).json({ success: true, postIds: uniquePostIds });
+        } catch (error) {
+            return res.status(500).json({ success: false, error: error.message });
+        }
+    }
+    async destroyUserGroupsHistroy(req, res) { // while deleting a user this function deleting this user from all the groups he was a member and deleting the groups he were created
+        try {
+            const userId = req.params.userId;
+
+            if (!userId) {
+                return res.status(400).json({ success: false, message: 'User ID is required' });
+            }
+
+            const deletedGroups = await Group.deleteMany({ admin: userId }); // find all the groups that the user is the admin and deleting them
+
+            const updatedGroups = await Group.updateMany( // find all the groups that the user is a member and removing him
+                { users: userId },
+                { $pull: { users: userId } }
+            );
+
+            return res.status(200).json({
+                success: true,
+                stats: {
+                    groupsDeleted: deletedGroups.deletedCount,
+                    groupsLeft: updatedGroups.modifiedCount
+                }
+            });
+
         } catch (error) {
             return res.status(500).json({ success: false, error: error.message });
         }

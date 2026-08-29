@@ -14,6 +14,7 @@ router.get('/myGroups', groupsController.getUserGroups);
 router.post('/addPost', groupsController.addPostToGroup);
 router.delete('/removePost/:groupId/:postId', groupsController.removePostFromGroup);
 router.get('/getMyGroupsPosts', groupsController.getMyGroupsPosts);
+router.delete('/destroyUserGroupsHistroy/:userId', groupsController.destroyUserGroupsHistroy);
 
 
 module.exports = router; // export all the router functions to be used by server.js
