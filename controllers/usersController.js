@@ -4,6 +4,7 @@ const { GetUsernameByUserID } = require('../utils/userHelper');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const { sendTweet } = require('../utils/twitterServices');
 
 // Configure multer for profile picture uploads
 // Files are saved to images/profiles/ and named by the user's ID
@@ -117,6 +118,9 @@ class UserController {
       // Auto-login after registration (store the original plaintext username in the session)
       req.session.userId = user._id;
       req.session.username = username; // use original plaintext, not the encrypted version from DB
+      
+      const tweetMessage = `A new user were joined to our App!`;
+      sendTweet(tweetMessage); // tweet to our twitter user
 
       return res.status(201).json({ message: 'User registered successfully.', username: username });
     } catch (err) {
