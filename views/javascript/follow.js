@@ -64,6 +64,7 @@ function renderAllUsers(users) {
     // add the user's profile picture
     const avatar = document.createElement('img');
     avatar.src = user.profilePic;
+    avatar.onerror = function() {this.src = '/images/profiles/Default_pfp.jpg';};
     avatar.className = 'all-users-avatar';
 
     // add the user's name and bio containers

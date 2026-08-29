@@ -215,17 +215,17 @@ function createProfilePicsHTML(post) {
         profilePicsHTML = `
             <div>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="${post.authors[0].profilePic}" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" alt="Image">
+                    <img src="${post.authors[0].profilePic}" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" onerror="this.src='/images/profiles/Default_pfp.jpg'" alt="Image">
                 </a>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="${post.authors[1].profilePic}" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" alt="Image">
+                    <img src="${post.authors[1].profilePic}" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" onerror="this.src='/images/profiles/Default_pfp.jpg'" alt="Image">
                 </a>
             </div>
         `;
     } else {
         profilePicsHTML = `
             <a href="#!" class="text-decoration-none text-dark profile-circle">
-                <img src="${post.authors[0].profilePic}" class="img-fluid rounded-circle post-profile-pic" alt="Image">
+                <img src="${post.authors[0].profilePic}" class="img-fluid rounded-circle post-profile-pic" onerror="this.src='/images/profiles/Default_pfp.jpg'" alt="Image">
             </a>
         `;
     }
@@ -331,7 +331,6 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                                 <span class="text-muted ms-1 small-text">${post.timeAgo}</span>
                             </span>
                         </div>
-                        <!-- תיקון: שימוש במשתנה המשולב -->
                         <button class="bg-transparent border-0 p-0 ms-2 text-12 text-start">${combinedSubHeaderText}</button>
                     </div>
                 </div>
@@ -418,7 +417,7 @@ function createLikedByHTML(likedByUsers, likes) {
     usersToShow.forEach(user => {
         // Access populated profile picture directly
         likedByProfilesHTML += `
-            <img src="${user.profilePic}" class="liked-by-profile-pic rounded-circle" alt="Image">
+            <img src="${user.profilePic}" class="liked-by-profile-pic rounded-circle" onerror="this.src='/images/profiles/Default_pfp.jpg'" alt="Image">
         `;
     });
 
