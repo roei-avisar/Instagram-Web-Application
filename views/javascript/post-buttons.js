@@ -79,11 +79,11 @@ async function likePost(button) {
     // 1. Optimistic local data update using user ID
     let post = allPostsData.find(p => p._id === postId);
     if (post) {
-        if (post.likedByUsers.some(u => (u._id || u) === currentUserId)) {
-            post.likedByUsers = post.likedByUsers.filter(u => (u._id || u) !== currentUserId);
+        if (post.likedByUsers.some(u => (u._id || u) === CURRENT_USER_ID)) {
+            post.likedByUsers = post.likedByUsers.filter(u => (u._id || u) !== CURRENT_USER_ID);
             post.stats.likes = Math.max(0, post.stats.likes - 1);
         } else {
-            post.likedByUsers.push(currentUserId);
+            post.likedByUsers.push(CURRENT_USER_ID);
             post.stats.likes += 1;
         }
     }
@@ -98,7 +98,7 @@ async function likePost(button) {
     await fetch(`/api/posts/like/${postId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: currentUserId })
+        body: JSON.stringify({ userId: CURRENT_USER_ID })
     });
 }
 
@@ -110,10 +110,10 @@ async function savePost(button) {
     // 1. Optimistic local data update using user ID
     let post = allPostsData.find(p => p._id === postId);
     if (post) {
-        if (post.savedByUsers.some(u => (u._id || u) === currentUserId)) {
-            post.savedByUsers = post.savedByUsers.filter(u => (u._id || u) !== currentUserId);
+        if (post.savedByUsers.some(u => (u._id || u) === CURRENT_USER_ID)) {
+            post.savedByUsers = post.savedByUsers.filter(u => (u._id || u) !== CURRENT_USER_ID);
         } else {
-            post.savedByUsers.push(currentUserId);
+            post.savedByUsers.push(CURRENT_USER_ID);
         }
     }
 
@@ -127,7 +127,7 @@ async function savePost(button) {
     await fetch(`/api/posts/save/${postId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: currentUserId })
+        body: JSON.stringify({ userId: CURRENT_USER_ID })
     });
 }
 
@@ -255,7 +255,7 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
             if (typeof comment === 'string') return;
 
             // Check if liked by matching user ID
-            let isLiked = comment.likedBy && comment.likedBy.some(u => (u._id || u) === currentUserId);
+            let isLiked = comment.likedBy && comment.likedBy.some(u => (u._id || u) === CURRENT_USER_ID);
             let heartClass = isLiked ? "bi-heart-fill text-danger" : "bi-heart text-muted";
             let commentLikes = comment.likes || 0;
             
@@ -305,7 +305,7 @@ function addTypingLineToPopupComment(commentPopupBackground, allPost){
 
     let typingElement = document.createElement("div"); // make the "'user' is typing..."
     typingElement.className = "someone-is-typing my-3 mx-4 d-none";
-    typingElement.innerHTML = `${currentUsername} is typing<span class="typing-dots ms-1"><span>.</span><span>.</span><span>.</span></span>`;
+    typingElement.innerHTML = `${CURRENT_USERNAME} is typing<span class="typing-dots ms-1"><span>.</span><span>.</span><span>.</span></span>`;
     commentPopupList.appendChild(typingElement);
 
     commentInput.oninput = () =>
@@ -415,18 +415,18 @@ async function toggleCommentLike(postId, commentIndex, buttonElement) {
     if (!comment.likedBy) comment.likedBy = [];
 
     // Check if current user ID is in likedBy array
-    let isLiked = comment.likedBy.some(u => (u._id || u) === currentUserId);
+    let isLiked = comment.likedBy.some(u => (u._id || u) === CURRENT_USER_ID);
 
     // Optimistic UI update
     if (isLiked) {
         // Unlike the comment
-        comment.likedBy = comment.likedBy.filter(u => (u._id || u) !== currentUserId);
+        comment.likedBy = comment.likedBy.filter(u => (u._id || u) !== CURRENT_USER_ID);
         comment.likes = Math.max(0, comment.likes - 1);
         buttonElement.classList.remove("bi-heart-fill", "text-danger");
         buttonElement.classList.add("bi-heart", "text-muted");
     } else {
         // Like the comment
-        comment.likedBy.push(currentUserId);
+        comment.likedBy.push(CURRENT_USER_ID);
         comment.likes += 1;
         buttonElement.classList.remove("bi-heart", "text-muted");
         buttonElement.classList.add("bi-heart-fill", "text-danger");
@@ -444,7 +444,7 @@ async function toggleCommentLike(postId, commentIndex, buttonElement) {
         await fetch(`/api/posts/likeComment/${comment._id}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: currentUserId })
+            body: JSON.stringify({ userId: CURRENT_USER_ID })
         });
     } catch (error) {
         console.error("Error updating comment like on server:", error);
