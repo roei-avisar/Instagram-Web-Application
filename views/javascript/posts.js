@@ -371,7 +371,7 @@ function createPostButtonsHTML(post) {
                 </div>
                 <div class="d-flex align-items-center ms-3">
                     <button class="bi bi-chat fs-4 fw-bold bg-transparent border-0 p-0 post-icons" onclick="popupCommentMaker(this)"></button>
-                    <span class="ms-1">${post.stats.comments}</span>
+                    <span class="ms-1 js-comments-counter">${post.stats.comments}</span>
                 </div>
                 <div class="d-flex align-items-center ms-3">
                     <button class="bi bi-send fs-4 fw-bold bg-transparent border-0 p-0 post-icons" onclick="openSharePopup(this)"></button>
