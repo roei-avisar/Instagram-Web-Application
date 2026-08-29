@@ -1,26 +1,7 @@
 const postsContainer = document.querySelector('.instagram-posts'); // Global variable to store posts html elements
 const commentPopupBackground = document.querySelector('.comment-popup-background');
 const textColour = {video: 'text-white', image: 'text-dark', text: 'text-dark'};
-let currentUsername = ""; // Global variable to store the logged-in user
-let currentUserId = ""; // Global variable to store the logged-in user ID
 let allPostsData = []; // Start with an empty array
-
-// Fetch current user and then load posts
-async function initPosts() {
-    try {
-        const userRes = await fetch('/api/user/getUserDetails');
-        if (userRes.ok) {
-            const userData = await userRes.json();
-            currentUsername = userData.username;
-            currentUserId = userData.userId; // Store current user ID
-        }
-    } catch (error) {
-        console.error("Could not fetch current user", error);
-    }
-    
-    // Only fetch posts after we know who the current user is
-    fetchPostsFromServer();
-}
 
 // Fetch initial post data from the server
 async function fetchPostsFromServer() {
@@ -164,9 +145,9 @@ async function updatePostButtonsUI(postId) {
     const post = allPostsData.find(p => p._id === postId);
     if (!post) return;
 
-    // Use currentUserId to check if the user liked or saved the post
-    const isLiked = post.likedByUsers.some(u => (u._id || u) === currentUserId);
-    const isSaved = post.savedByUsers.some(u => (u._id || u) === currentUserId);
+    // Use CURRENT_USER_ID to check if the user liked or saved the post
+    const isLiked = post.likedByUsers.some(u => (u._id || u) === CURRENT_USER_ID);
+    const isSaved = post.savedByUsers.some(u => (u._id || u) === CURRENT_USER_ID);
 
     // Update both the main post and any popups that might be open for this post (for example, the comment popup)
     const postElements = document.querySelectorAll(`[data-post-id="${postId}"]`);
@@ -236,7 +217,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
     let optionsMenuHTML = '';
 
     // Check if the current user is one of the authors of the post
-    const isCurrentUserAuthor = post.authors.some(author => (author._id || author) === currentUserId);
+    const isCurrentUserAuthor = post.authors.some(author => (author._id || author) === CURRENT_USER_ID);
 
     if (isCurrentUserAuthor) {
         optionsMenuHTML = `
@@ -302,7 +283,6 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                                     <span class="text-white ms-1 small-text">${post.timeAgo}</span>
                                 </div>
                             </div>
-                            <!-- תיקון: שימוש במשתנה המשולב -->
                             <a href="#!" class="ms-2 text-decoration-none text-white text-12 text-start">${combinedSubHeaderText}</a>
                         </div>
                     </div>
@@ -310,7 +290,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                 </div>
                 
                 <div class="js-post-media position-relative">
-                    <video id="video-${post._id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline onended="restartMedia(this)"></video>
+                    <video id="video-${post._id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline onended="restartMedia(this)" onerror="this.outerHTML='<img src=&quot;/elements/media/posts/main-posts/error-post.jpg&quot; class=&quot;img-fluid rounded-2 main-post&quot;>'"></video>
                     ${audioTagHTML}
                     ${muteButtonHTML}
                 </div>
@@ -331,7 +311,6 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                                 <span class="text-muted ms-1 small-text">${post.timeAgo}</span>
                             </span>
                         </div>
-                        <!-- תיקון: שימוש במשתנה המשולב -->
                         <button class="bg-transparent border-0 p-0 ms-2 text-12 text-start">${combinedSubHeaderText}</button>
                     </div>
                 </div>
@@ -339,7 +318,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
             </div>
             
             <div class="position-relative js-post-media">
-                <img src="${post.mediaSource}" class="img-fluid rounded-2 main-post" alt="Image">
+                <img src="${post.mediaSource}" class="img-fluid rounded-2 main-post" onerror="this.onerror=null; this.src='/elements/media/posts/main-posts/error-post.jpg'" alt="Image">
                 ${audioTagHTML}
                 ${muteButtonHTML}
             </div>
@@ -358,7 +337,6 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                                 <span class="text-muted ms-1 small-text">${post.timeAgo}</span>
                             </span>
                         </div>
-                        <!-- תיקון: שימוש במשתנה המשולב -->
                         <button class="bg-transparent border-0 p-0 ms-2 text-12 text-start">${combinedSubHeaderText}</button>
                     </div>
                 </div>
@@ -375,8 +353,8 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
 
 function createPostButtonsHTML(post) {
     // Check if the current user ID is in the liked or saved arrays
-    let isLiked = post.likedByUsers && post.likedByUsers.some(u => (u._id || u) === currentUserId);
-    let isSaved = post.savedByUsers && post.savedByUsers.some(u => (u._id || u) === currentUserId);
+    let isLiked = post.likedByUsers && post.likedByUsers.some(u => (u._id || u) === CURRENT_USER_ID);
+    let isSaved = post.savedByUsers && post.savedByUsers.some(u => (u._id || u) === CURRENT_USER_ID);
 
     let heartClass = isLiked ? "bi-heart-fill" : "bi-heart";
     let heartTextColor = isLiked ? "text-danger" : "";
@@ -393,7 +371,7 @@ function createPostButtonsHTML(post) {
                 </div>
                 <div class="d-flex align-items-center ms-3">
                     <button class="bi bi-chat fs-4 fw-bold bg-transparent border-0 p-0 post-icons" onclick="popupCommentMaker(this)"></button>
-                    <span class="ms-1">${post.stats.comments}</span>
+                    <span class="ms-1 js-comments-counter">${post.stats.comments}</span>
                 </div>
                 <div class="d-flex align-items-center ms-3">
                     <button class="bi bi-send fs-4 fw-bold bg-transparent border-0 p-0 post-icons" onclick="openSharePopup(this)"></button>
@@ -411,7 +389,7 @@ function createLikedByHTML(likedByUsers, likes) {
     let likedByHTML = '';
 
     // Filter out current user based on user ID
-    const otherUsers = likedByUsers.filter(user => (user._id || user) !== currentUserId);
+    const otherUsers = likedByUsers.filter(user => (user._id || user) !== CURRENT_USER_ID);
     
     const usersToShow = otherUsers.slice(0, 3);
 
@@ -500,4 +478,4 @@ function renderPosts(postsData) {
     document.getElementById('mainApp').classList.remove('d-none');
 }
 
-initPosts(); // Call the initPosts function to fetch current user and then load posts
+fetchPostsFromServer(); // Call the fetchPostsFromServer function to fetch posts from the server and then render them

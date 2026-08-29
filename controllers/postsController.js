@@ -45,6 +45,8 @@ class PostController {
                     });
                 }
 
+                postObj.stats.comments = postObj.comments?.length || 0;
+
                 return postObj;
             });
 
@@ -164,6 +166,40 @@ class PostController {
         }
     }
 
+    // Method to delete multiple posts based on an array of IDs
+    async deleteMultiplePosts(req, res) {
+        try {
+            const { postIds } = req.body;
+
+            // Validate that postIds array exists and is not empty
+            if (!postIds || !Array.isArray(postIds) || postIds.length === 0) {
+                return res.status(400).json({ success: false, message: "No post IDs provided" });
+            }
+            
+            // Find all posts by their IDs using the $in operator for maximum efficiency
+            const postsToDelete = await Post.find({ _id: { $in: postIds } });
+            
+            for (const post of postsToDelete) {
+                // Trigger background deletion for media files if they exist
+                if (post.mediaType !== 'text' && post.mediaSource) {
+                    const fullRelativePath = `../views/${post.mediaSource}`;
+                    gitService.deleteMediaAndPushToGit(fullRelativePath);
+                }
+                
+                // Delete all comments associated with the post
+                await deletePostComments(post.comments);
+                
+                // Delete the post document from the database
+                await Post.findByIdAndDelete(post._id);
+            }
+            
+            res.status(200).json({ success: true, message: "All required posts were deleted successfully" });
+        } catch (error) {
+            console.error("Error deleting posts:", error);
+            res.status(500).json({ message: "Error deleting posts from database", error });
+        }
+    }
+
     async addComment(req, res) {
         try {
             const userId = req.session.userId;
@@ -173,12 +209,12 @@ class PostController {
             if (!userId) return res.status(401).json({ message: "User not logged in" });
 
             const newComment = await Comment.create({ postId, userId, text });
-            await Post.findByIdAndUpdate(postId, {
+            const updatedPost = await Post.findByIdAndUpdate(postId, {
                 $push: { comments: newComment._id },
                 $inc: { 'stats.comments': 1 }
-            });
+            }, { new: true });
 
-            res.status(201).json(newComment);
+            res.status(201).json({ comment: newComment, commentsCount: updatedPost.comments.length });
         } catch (error) {
             res.status(500).json({ message: "Error adding comment", error });
         }
@@ -341,6 +377,8 @@ class PostController {
                         if (c.userId && c.userId.username) c.userId.username = decrypt(c.userId.username);
                     });
                 }
+
+                postObj.stats.comments = postObj.comments?.length || 0;
 
                 return postObj;
             });

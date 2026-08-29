@@ -612,8 +612,39 @@ class UserController {
     }
 
     const userId = req.session.userId;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
 
     try {
+      // Fetch the user before deletion to access their personalPosts
+      const userToDelete = await User.findById(userId);
+      if (!userToDelete) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+
+      // Iterate through the user's personal posts and delete them using the posts API
+      if (userToDelete.personalPosts && userToDelete.personalPosts.length > 0) {
+        for (const postId of userToDelete.personalPosts) {
+          try {
+            await fetch(`${baseUrl}/api/posts/deletePost/${postId}`, {
+              method: 'DELETE',
+              headers: { 'Cookie': req.headers.cookie }
+            });
+          } catch (postErr) {
+            console.error(`Error deleting post ${postId} during user deletion:`, postErr);
+          }
+        }
+      }
+
+      // Remove this user from all groups they were part of
+      try {
+        await fetch(`${baseUrl}/api/groups/removeUserFromAllGroups/${userId}`, {
+          method: 'DELETE',
+          headers: { 'Cookie': req.headers.cookie }
+        });
+      } catch (groupErr) {
+        console.error(`Error removing user ${userId} from groups during user deletion:`, groupErr);
+      }
+
       // Remove this user from the 'followers' array of any user they were following
       await User.updateMany(
         { followers: userId },
@@ -637,10 +668,7 @@ class UserController {
       }
 
       // Delete the user document from the database
-      const deletedUser = await User.findByIdAndDelete(userId);
-      if (!deletedUser) {
-        return res.status(404).json({ error: 'User not found.' });
-      }
+      await User.findByIdAndDelete(userId);
 
       // Destroy the session and clear cookie
       req.session.destroy((err) => {
@@ -648,7 +676,7 @@ class UserController {
           console.error('Error destroying session during user delete:', err);
         }
         res.clearCookie('connect.sid');
-        return res.json({ message: 'Account deleted successfully.' });
+        return res.json({ message: 'Account and associated posts deleted successfully.' });
       });
     } catch (err) {
       console.error('deleteUser error:', err);
