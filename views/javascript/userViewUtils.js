@@ -10,7 +10,7 @@ function updateCurrentUserUI() {
         if (CURRENT_USERNAME) {
             nameElement.textContent = CURRENT_USERNAME;
         } else {
-            nameElement.textContent = ''; // Leave blank if there is no username
+            nameElement.textContent = 'Unkown User'; // If there is no username
         }
     }
 
