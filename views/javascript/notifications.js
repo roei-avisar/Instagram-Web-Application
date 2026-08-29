@@ -107,7 +107,7 @@ function renderNotifications(notificationsData) {
 
         const notifHTML = `
             <div class="notification-item">
-                <img src="./elements/media/profile-pictures/${notif.username}.jpg" class="notif-profile-pic rounded-circle me-3">
+                <img src="./views/elements/media/profile-pictures/${notif.username}.jpg" class="notif-profile-pic rounded-circle me-3">
                 <div class="notif-content flex-grow-1">
                     <span class="fw-bold text-dark">${notif.username}</span>
                     <span class="text-dark">${notif.text}</span>

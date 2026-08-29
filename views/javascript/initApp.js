@@ -13,7 +13,7 @@ fetch('/api/user/getUserDetails') // load user details into global variables and
         CURRENT_USER_ID = data.userId;
         CURRENT_USERNAME = data.username;
         CURRENT_USER_BIO = data.bio || '';
-        CURRENT_USER_PIC = data.profilePic || '/images/profiles/Default_pfp.jpg';
+        CURRENT_USER_PIC = data.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg';
 
         // Push the loaded data into all DOM elements
         updateCurrentUserUI();

@@ -22,7 +22,7 @@ function openSettings() {
   updateBioCharCount(); // update the character counter
 
   // Load the current profile picture into the settings preview
-  document.getElementById('settings-profile-pic-preview').src = CURRENT_USER_PIC || '/images/profiles/Default_pfp.jpg';
+  document.getElementById('settings-profile-pic-preview').src = CURRENT_USER_PIC || '/elements/media/profile-pictures/Default_pfp.jpg';
 }
 
 // Close the settings modal
@@ -33,7 +33,7 @@ function closeSettings() {
   pendingProfilePicFile = null;
   document.getElementById('settings-profile-pic-input').value = '';
   // Reset preview back to the current saved picture
-  document.getElementById('settings-profile-pic-preview').src = CURRENT_USER_PIC || '/images/profiles/Default_pfp.jpg';
+  document.getElementById('settings-profile-pic-preview').src = CURRENT_USER_PIC || '/elements/media/profile-pictures/Default_pfp.jpg';
   document.body.classList.remove('overflow-hidden'); // make scrolling available again
 }
 
