@@ -1,6 +1,25 @@
 const Group = require('../models/groupsModel');
 const { sendTweet } = require('../utils/twitterServices');
 
+// Helper function to delete posts using their IDs array
+async function deleteGroupPostsHelper(postIds, req) {
+    if (!postIds || postIds.length === 0) return;
+
+    try {
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        await fetch(`${baseUrl}/api/posts/deleteMultiplePosts`, {
+            method: 'DELETE',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Cookie': req.headers.cookie 
+            },
+            body: JSON.stringify({ postIds: postIds })
+        });
+    } catch (error) {
+        console.error(`Error deleting group posts:`, error);
+    }
+}
+
 class GroupsController {
     async createGroup(req, res) { // creating a new group on DB and making the user admin
         try {
@@ -56,6 +75,9 @@ class GroupsController {
             if (group.admin.toString() !== userId) { // check if the user who deleting the group is the admin
                 return res.status(403).json({ success: false, message: "Only admin can delete the group"});
             }
+
+            // Call the helper function to delete all posts in this group using the group posts array
+            await deleteGroupPostsHelper(group.posts, req);
 
             await Group.findByIdAndDelete(groupId); //  find and deleting the group
 
@@ -258,7 +280,7 @@ class GroupsController {
             return res.status(500).json({ success: false, error: error.message });
         }
     }
-    async destroyUserGroupsHistroy(req, res) { // while deleting a user this function deleting this user from all the groups he was a member and deleting the groups he were created
+    async removeUserFromAllGroups(req, res) { // while deleting a user this function removes this user from all the groups he was a member and deleting the groups he created
         try {
             const userId = req.params.userId;
 
@@ -266,7 +288,15 @@ class GroupsController {
                 return res.status(400).json({ success: false, message: 'User ID is required' });
             }
 
-            const deletedGroups = await Group.deleteMany({ admin: userId }); // find all the groups that the user is the admin and deleting them
+            // Find all groups where the user is the admin and delete their posts and the groups themselves
+            const groupsToDelete = await Group.find({ admin: userId }); 
+            
+            // Iterate and delete posts for each group using the helper function and the group's posts array
+            for (const group of groupsToDelete) {
+                await deleteGroupPostsHelper(group.posts, req);
+            }
+
+            const deletedGroups = await Group.deleteMany({ admin: userId });
 
             const updatedGroups = await Group.updateMany( // find all the groups that the user is a member and removing him
                 { users: userId },

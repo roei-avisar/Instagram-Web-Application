@@ -25,4 +25,7 @@ router.post('/likeComment/:id', postController.manageCommentLike);
 // Route to update a post's text fields (PATCH /api/posts/updatePost/:id)
 router.patch('/updatePost/:id', postController.updatePost);
 
+// Route to delete multiple posts by their IDs (DELETE /api/posts/deleteMultiplePosts)
+router.delete('/deleteMultiplePosts', postController.deleteMultiplePosts);
+
 module.exports = router;
