@@ -33,7 +33,7 @@
 }
 .text-bubble {
     position: absolute;
-    bottom: 130%; 
+    bottom: 130%;
     left: 50%;
     transform: translateX(-50%);
     background-color: white;
@@ -42,7 +42,7 @@
     border-radius: 10px;
     font-size: 13px;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     white-space: nowrap;
     opacity: 0;
     visibility: hidden;

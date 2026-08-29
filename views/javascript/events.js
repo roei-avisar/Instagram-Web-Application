@@ -1,7 +1,7 @@
 const menusConfig = [
     {
         menuClass: '.post-options-dropdown',
-        dontRemoveOn: '.options-btn, .post-options-dropdown' 
+        dontRemoveOn: '.options-btn, .post-options-dropdown'
     },
     {
         menuClass: '.js-search-container',
@@ -13,7 +13,7 @@ const menusConfig = [
     },
     {
         menuClass: '.create-form-overlay',
-        dontRemoveOn: '.js-menu-create-btn, .create-form-overlay, .js-discard-overlay'
+        dontRemoveOn: '.js-menu-create-btn, .create-form-overlay, .js-discard-overlay, #postUploadChoiceModal, #groupsSelectionModal'
     },
     {
         menuClass: '.js-notifications-panel',
@@ -91,6 +91,8 @@ function closePostCreationForm() {
     document.querySelector('.js-caption-input').value = '';
     document.querySelector('.js-location-input').value = '';
     document.body.style.overflow = '';
+    document.getElementById('postUploadChoiceModal')?.classList.replace('d-flex', 'd-none');
+    document.getElementById('groupsSelectionModal')?.classList.replace('d-flex', 'd-none');
 }
 
 function switchCreatePostFormState() {
@@ -102,6 +104,8 @@ function switchCreatePostFormState() {
     fileInput.value = '';
     document.querySelector('.js-caption-input').value = '';
     document.querySelector('.js-location-input').value = '';
+    document.getElementById('postUploadChoiceModal')?.classList.replace('d-flex', 'd-none');
+    document.getElementById('groupsSelectionModal')?.classList.replace('d-flex', 'd-none');
 }
 
 function discardPost() {
@@ -115,11 +119,11 @@ function discardPost() {
 
 // Global listener usef for closing all open menu's when clicking on elements not in their 'safe zone'
 document.addEventListener('click', function(event) {
-    
+
     menusConfig.forEach(config => {
-        
+
         const clickedInsideSafeZone = event.target.closest(config.dontRemoveOn);
-        
+
         if (!clickedInsideSafeZone) {
             const openElements = document.querySelectorAll(`${config.menuClass}:not(.d-none)`);
             openElements.forEach(element => {
@@ -135,23 +139,23 @@ document.addEventListener('click', function(event) {
 
 // Generate event listener on all suggested Follow/Followign buttons that changes their state between Follow and Following
 followButtons.forEach(button => {
-    button.addEventListener('click', function(event) {        
-        if (this.textContent.trim() === 'Follow') {            
-            this.textContent = 'Following';            
+    button.addEventListener('click', function(event) {
+        if (this.textContent.trim() === 'Follow') {
+            this.textContent = 'Following';
             this.classList.remove('instagram-blue');
             this.classList.add('following-state-btn');
-            
+
         } else {
-            this.textContent = 'Follow';            
+            this.textContent = 'Follow';
             this.classList.remove('following-state-btn');
             this.classList.add('instagram-blue');
         }
     });
 });
 
-// Open the 'delete post' menu when clicking on the post options button, and deleting the post when the delete button is clicked
+// Open the 'delete post' or 'edit post' menu when clicking on the post options button, and deleting the post when the delete button is clicked
 document.addEventListener('click', function(event) {
-    
+
     if (event.target.classList.contains('options-btn')) {
         const parentContainer = event.target.closest('.position-relative');
         const dropdownMenu = parentContainer.querySelector('.post-options-dropdown');
@@ -160,8 +164,14 @@ document.addEventListener('click', function(event) {
 
     const deleteBtn = event.target.closest('.delete-post-btn');
     if (deleteBtn) {
-        const deleteId = Number(deleteBtn.getAttribute('data-id'));
+        const deleteId = deleteBtn.getAttribute('data-id');
         deletePostById(deleteId);
+    }
+
+    const editBtn = event.target.closest('.edit-post-btn');
+    if (editBtn) {
+        const editId = editBtn.getAttribute('data-id');
+        openEditModal(editId);
     }
 });
 
@@ -169,9 +179,9 @@ document.addEventListener('click', function(event) {
 menuCreateBtn.addEventListener('click', function(event) {
     createFormOverlay.classList.toggle('d-none');
     if (createFormOverlay.classList.contains('d-none')) {
-        document.body.style.overflow = ''; 
+        document.body.style.overflow = '';
     } else {
-        document.body.style.overflow = 'hidden'; 
+        document.body.style.overflow = 'hidden';
     }
 });
 createTextPostBtn.addEventListener('click', function(event) {
@@ -195,8 +205,16 @@ fileInput.addEventListener('change', function(event) {
     const selectedFile = event.target.files[0];
 
     if (selectedFile) {
+        // Create virtual path for fast UI preview
         const tempVirtualPath = URL.createObjectURL(selectedFile);
-        currentMediaSource = tempVirtualPath;
+
+        // Read the actual file to send to the server
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            currentMediaSource = e.target.result; // This holds the actual Base64 data
+        };
+        reader.readAsDataURL(selectedFile);
+
         previewText.classList.add('d-none');
 
         if (selectedFile.type.startsWith('image/')) {
@@ -213,7 +231,6 @@ fileInput.addEventListener('change', function(event) {
             previewImg.classList.add('d-none');
         }
 
-        // Switch between the difference creation form stages (media upload and details) 
         switchCreatePostFormState();
     }
 });
@@ -250,9 +267,10 @@ postFormBackBtn.addEventListener('click', function(event) {
     discardOverlay.classList.remove('d-none');
 });
 
+// --- Post Upload Logic and Modals ---
+
 postShareBtn.addEventListener('click', function(event) {
     let captionText = document.querySelector('.js-caption-input').value;
-    let locationText = document.querySelector('.js-location-input').value;
     if (currentMediaType === 'text') {
         currentMediaSource = previewText.value.trim();
     }
@@ -260,32 +278,94 @@ postShareBtn.addEventListener('click', function(event) {
         alert("Cannot upload an empty post!");
         return;
     }
+    
+    document.getElementById('postUploadChoiceModal').classList.replace('d-none', 'd-flex');
+});
+
+document.querySelector('.js-postUpload-followers-btn').addEventListener('click', function() {
+    // Submit the post data to the server
+    submitPostDataToServer(null); 
+});
+
+document.querySelector('.js-postUpload-groups-btn').addEventListener('click', async function() {
+    document.getElementById('postUploadChoiceModal').classList.replace('d-flex', 'd-none');
+    
+    try {
+        const response = await fetch('/api/groups/myGroups');
+        const result = await response.json();
+        
+        if (result.success) {
+            const userGroups = result.data;
+            const container = document.getElementById('groupsListContainer');
+            container.innerHTML = '';
+            
+            if(userGroups.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted mt-3">You are not in any groups yet.</div>';
+            } else {
+                userGroups.forEach(group => {
+                    container.innerHTML += `
+                        <label class="d-flex align-items-center justify-content-between p-2 rounded hover-light bg-light" style="cursor: pointer;">
+                            <span class="fw-semibold">${group.name}</span>
+                            <input type="radio" name="groupSelection" class="form-check-input js-group-upload-radio" value="${group._id}">
+                        </label>
+                    `;
+                });
+            }
+            
+            document.getElementById('groupsSelectionModal').classList.replace('d-none', 'd-flex');
+        }
+    } catch (error) {
+        console.error("Error fetching groups", error);
+    }
+});
+
+// go back to the post upload choice modal from the groups selection modal
+document.querySelector('.js-back-to-choice-btn').addEventListener('click', function() {
+    document.getElementById('groupsSelectionModal').classList.replace('d-flex', 'd-none');
+    document.getElementById('postUploadChoiceModal').classList.replace('d-none', 'd-flex');
+});
+
+document.querySelector('.js-final-postUpload-groups-btn').addEventListener('click', function() {
+    const selectedRadio = document.querySelector('.js-group-upload-radio:checked');
+    if (!selectedRadio) {
+        alert("Please select a group");
+        return;
+    }
+    
+    // Submit the post data to the server
+    submitPostDataToServer(selectedRadio.value);
+});
+
+async function submitPostDataToServer(groupId) {
+    let captionText = document.querySelector('.js-caption-input').value;
+    let locationText = document.querySelector('.js-location-input').value;
+    
     const newPost = {
-        "authors": ["besteam_ever"],
+        "authors": [currentUserId], 
         "isVerified": false,
         "timeAgo": "1s",
         "subHeader": locationText,
         "mediaType": currentMediaType,
         "mediaSource": currentMediaSource,
         "hasMuteButton": isMuted,
-        "stats": {
-            "likes": "0",
-            "comments": "0",
-            "shares": "0"
-        },
+        "stats": { "likes": 0, "comments": 0, "shares": 0 },
         "likedByUsers": [],
         "caption": captionText,
         "isSuggested": false
     };
-    addNewPost(newPost);
+
+    if (groupId) {
+        newPost.groupId = groupId;
+    }
+
+    // Create the post
+    await addNewPost(newPost);
+
+    // Close the post creation form and reset its state
     closePostCreationForm();
     uploadNewPostNotification(currentMediaSource, currentMediaType);
-
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-});
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 // Open the search container when clicking on the search logo
 searchMenuBtn.addEventListener('click', function(event) {
@@ -319,22 +399,22 @@ function triggerFilterUpdate() {
 // Mark or un-mark every checkbox in accordance to the 'all' checkbox mark
 filterAllCheckboxes.addEventListener('change', function(event) {
     const isChecked = event.target.checked;
-    
+
     filterSingleCheckbox.forEach(cb => {
         cb.checked = isChecked;
     });
-    
+
     triggerFilterUpdate();
 });
 
 // Upon 'change' event in the regular checkboxes (all checkboxes other then 'all'), change the 'all' checkbox accordingly, and trigger the mediaFilterUpdate
 filterSingleCheckbox.forEach(checkbox => {
     checkbox.addEventListener('change', function() {
-        
+
         const areAllChecked = Array.from(filterSingleCheckbox).every(cb => cb.checked);
-        
+
         filterAllCheckboxes.checked = areAllChecked;
-        
+
         triggerFilterUpdate();
     });
 });
@@ -343,16 +423,16 @@ function togglePostAudio(button, postId) {
     let postContainer = button.closest('.js-post-media');
     let audioElement = postContainer.querySelector('audio');
     let videoElement = postContainer.querySelector('video');
-    
+
     let mediaToToggle = audioElement ? audioElement : videoElement; // if there are any audio use it if not then use the video audio
-    
+
     if (!mediaToToggle) return;
 
     if (mediaToToggle.muted) {
         document.querySelectorAll('audio, video').forEach(media => { // turn off all the sounds that turn on right now
             media.muted = true;
         });
-        
+
         document.querySelectorAll('.bi-volume-up-fill').forEach(btn => {
             btn.classList.remove('bi-volume-up-fill');
             btn.classList.add('bi-volume-mute-fill');
@@ -360,13 +440,13 @@ function togglePostAudio(button, postId) {
 
         mediaToToggle.muted = false; // turn on our sound
         mediaToToggle.play();
-        
+
         if (videoElement && audioElement) {
             audioElement.muted = false;
             audioElement.currentTime = videoElement.currentTime;
             audioElement.play();
         }
-        
+
         button.classList.remove('bi-volume-mute-fill');
         button.classList.add('bi-volume-up-fill');
     } else {
@@ -382,12 +462,40 @@ function togglePostAudio(button, postId) {
 function restartMedia(videoElement) { // function that restart the video and the sound and sync it if the video were ended
     let postContainer = videoElement.closest('.js-post-media');
     let audioElement = postContainer.querySelector('audio');
-    
+
     videoElement.currentTime = 0;
     videoElement.play();
-    
+
     if (audioElement) {
         audioElement.currentTime = 0;
         audioElement.play();
     }
+}
+
+function openEditModal(postId) {
+    const post = allPostsData.find(p => p._id === postId);
+    if (!post) return;
+
+    document.getElementById('editPostId').value = postId;
+    document.getElementById('editSubHeaderInput').value = post.subHeader || '';
+    document.getElementById('editCaptionInput').value = post.caption || '';
+
+    const modal = document.getElementById('editPostModal');
+    modal.classList.replace('d-none', 'd-flex');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeEditModal() {
+    const modal = document.getElementById('editPostModal');
+    modal.classList.replace('d-flex', 'd-none');
+    document.body.style.overflow = '';
+}
+
+function saveEditedPost() {
+    const postId = document.getElementById('editPostId').value;
+    const newSubHeader = document.getElementById('editSubHeaderInput').value;
+    const newCaption = document.getElementById('editCaptionInput').value;
+    
+    // Call the function to update the post data on the server
+    editPostData(postId, newCaption, newSubHeader);
 }

@@ -1,209 +1,3 @@
-const commentsDatabase = {
-    1: [
-        { 
-            username: "ofra_fan99", 
-            text: "רק טים עופרה!" ,
-            likes: "20",
-            time: "50m",
-            isLiked: false
-        },
-        { 
-            username: "yardena.arazi.fanpage", 
-            text: "איכככככ מי יצביע לעופרה כולנו ירדנה בלב ❤️" ,
-            likes: "5",
-            time: "48m",
-            isLiked: false
-        },
-        { 
-            username: "real_dafna_dekel", 
-            text: "חבר'ה פה בתגובות חייבים להרגע. זה רק ספורט!" ,
-            likes: "100",
-            time: "42m",
-            isLiked: false
-        },
-        { 
-            username: "ofra.haza.my.love", 
-            text: "עופרה היא המלכה האמיתית! ירדנה סתם חקיינית" ,
-            likes: "12",
-            time: "31m",
-            isLiked: false
-        },
-        { 
-            username: "gali_atari10", 
-            text: "סורי עופרה אני אוהבת את המסיבות על שמך אבל נראלי אני מצביעה לירדנה",
-            likes: "33",
-            time: "22m",
-            isLiked: false
-        },
-        { 
-            username: "yardena.thequeennnn", 
-            text: "עופרה חזה מתה מבושה!!",
-            likes: "12",
-            time: "12m",
-            isLiked: false
-        },
-        { 
-            username: "gual.nefesh", 
-            text: "גועל נפש",
-            likes: "58",
-            time: "4m",
-            isLiked: false
-        }
-    ],
-   2: [
-        { 
-            username: "donald.j.trump", 
-            text: "You have to release a new song!! Thank you for your attention to this matter! PRESIDENT DONALD J. TRUMP" ,
-            likes: "1541",
-            time: "5h",
-            isLiked: false
-        },
-        { 
-            username: "elon.musk23", 
-            text: "Can you sing one trillion dollar?" ,
-            likes: "948",
-            time: "3h",
-            isLiked: false
-        },
-        { 
-            username: "gual.nefesh", 
-            text: "גועל נפש",
-            likes: "912",
-            time: "5m",
-            isLiked: false
-        }
-    ],
-    3: [
-        { 
-            username: "mustache.man", 
-            text: "Thank you for the music!! The songs you're singing... Thanks for all the joy you're bringing!!" ,
-            likes: "15",
-            time: "1d",
-            isLiked: false
-        },
-        { 
-            username: "john_len99", 
-            text: "I'm dreaming about moving to your band so bad" ,
-            likes: "88",
-            time: "1d",
-            isLiked: false
-        },
-        { 
-            username: "paulmc.cartney", 
-            text: "@john_len99 WTH? LENON?!?! WE NEED TO TALK..." ,
-            likes: "99",
-            time: "23h",
-            isLiked: false
-        },
-        { 
-            username: "gual.nefesh", 
-            text: "גועל נפש",
-            likes: "144",
-            time: "20h",
-            isLiked: false
-        }
-    ],
-    4: [
-        { 
-            username: "neil_arm_strong", 
-            text: "BRO 🔥" ,
-            likes: "4",
-            time: "11h",
-            isLiked: false
-        },
-        { 
-            username: "lance_arm_strong", 
-            text: "BRO 🔥" ,
-            likes: "2",
-            time: "9h",
-            isLiked: false
-        }
-    ],
-    5: [
-        { 
-            username: "lihi_griner67", 
-            text: "רק נחתת מאיפה יש לך שיר חדש?!" ,
-            likes: "985",
-            time: "2d",
-            isLiked: false
-        },
-        { 
-            username: "rickroll", 
-            text: "Never Gonna Give You Up, Never Gonna Let You Down" ,
-            likes: "188",
-            time: "1d",
-            isLiked: false
-        },
-        { 
-            username: "gual.nefesh", 
-            text: "גועל נפש",
-            likes: "214",
-            time: "1d",
-            isLiked: false
-        }
-    ],
-    6: [
-        { 
-            username: "anna_russia", 
-            text: "Big wheel keep on turnin'🛞" ,
-            likes: "71",
-            time: "1h",
-            isLiked: false
-        },
-        { 
-            username: "michael_jack2222", 
-            text: "So beat it, just beat it" ,
-            likes: "65",
-            time: "1h",
-            isLiked: false
-        },
-        { 
-            username: "gurlll", 
-            text: "I just wanna have fun" ,
-            likes: "24",
-            time: "1h",
-            isLiked: false
-        }
-    ],
-    7: [
-        { 
-            username: "abba.band", 
-            text: "As we always said, The winner takes it all." ,
-            likes: "555",
-            time: "55m",
-            isLiked: false
-        },
-        { 
-            username: "hamsa.band", 
-            text: "חמסה חמסה חמסה 🖐️🖐️🖐️" ,
-            likes: "555",
-            time: "55m",
-            isLiked: false
-        },
-        { 
-            username: "zehava.b", 
-            text: "שאלוהים יתן לכם רק טיפת מזל" ,
-            likes: "555",
-            time: "55m",
-            isLiked: false
-        },
-        { 
-            username: "tina.terner111", 
-            text: "You're simply the best! Better than all the rest...",
-            likes: "55",
-            time: "5m",
-            isLiked: false
-        },
-        { 
-            username: "gual.nefesh", 
-            text: "זה לא גועל נפש" ,
-            likes: "55",
-            time: "5m",
-            isLiked: false
-        }
-    ]
-};
-
 const timeDictionary = {
     's': 'seconds',
     'm': 'minutes',
@@ -211,9 +5,6 @@ const timeDictionary = {
     'd': 'days',
     'w': 'weeks'
 };
-
-const likedPosts = {};
-const savedPosts = {};
 
 const friends = [
     { 
@@ -280,136 +71,97 @@ const friends = [
 
 let selectedShareFriends = {};
 
-const chatsDatabase = {};
-
-function likePost(button) { // the function only update on database if the post were liked or unliked and then call to other function to draw it
-  
-    let idDiv = button.closest('[data-post-id]');  // find the id of the post
+async function likePost(button) {
+    let idDiv = button.closest('[data-post-id]');
     if (!idDiv) return;
-    
     let postId = idDiv.dataset.postId;
-    let changeLike = 0;
 
-  
-    if (likedPosts[postId]) {
-        delete likedPosts[postId];
-        changeLike = -1;
-    } else {
-        likedPosts[postId] = true;
-        changeLike = 1;
+    // 1. Optimistic local data update using user ID
+    let post = allPostsData.find(p => p._id === postId);
+    if (post) {
+        if (post.likedByUsers.some(u => (u._id || u) === currentUserId)) {
+            post.likedByUsers = post.likedByUsers.filter(u => (u._id || u) !== currentUserId);
+            post.stats.likes = Math.max(0, post.stats.likes - 1);
+        } else {
+            post.likedByUsers.push(currentUserId);
+            post.stats.likes += 1;
+        }
     }
-
 
     button.classList.add('button-pop-animation');
-    setTimeout(() => button.classList.remove('button-pop-animation'), 300); // make the button jump
-
-
-    syncLikePost(postId, changeLike);
-}
-
-
-
-function syncLikePost(postId, changeLike) {
-    let isLiked = likedPosts[postId] === true;
-    
-    let postInData = allPostsData.find(post => post.id === parseInt(postId));
-
-    if (postInData && changeLike !== 0) {
-        postInData.stats.likes = (parseInt(postInData.stats.likes) + changeLike).toString();
-    }
-
-    let allMatchingPosts = document.querySelectorAll(`[data-post-id="${postId}"]`);  // the post in the feed the and the post in the popup section if its open
-
-    allMatchingPosts.forEach(postElement => {
-   
-        let heartBtn = postElement.querySelector('.js-like-container .post-icons');
-        if (heartBtn) {
-            if (isLiked) {
-                heartBtn.classList.remove('bi-heart');
-                heartBtn.classList.add('bi-heart-fill', 'text-danger');
-            } else {
-                heartBtn.classList.add('bi-heart');
-                heartBtn.classList.remove('bi-heart-fill', 'text-danger');
-            }
-        }
-
-    
-        if (changeLike !== 0) {
-            let likeCounter = postElement.querySelector(".js-like-counter");
-            if (likeCounter) {
-                likeCounter.innerText = parseInt(likeCounter.innerText) + changeLike;
-            }
-            
-            let likedByCounter = postElement.querySelector(".js-liked-by-counter");
-            if (likedByCounter) {
-                likedByCounter.innerText = parseInt(likedByCounter.innerText) + changeLike;
-            }
-        }
-    });
-}
-
-
-
-function savePost(button) {  // the function only update on database if the post were saved or unsaved and then call to other function to draw it
-    let idDiv = button.closest('[data-post-id]'); // find the id of the post
-    if (!idDiv) return; 
-    
-    let postId = idDiv.dataset.postId;
-
-    if (savedPosts[postId]) {
-        delete savedPosts[postId]; 
-    } else {
-        savedPosts[postId] = true; 
-    }
-
-    button.classList.add('button-pop-animation'); // make the button jump
     setTimeout(() => button.classList.remove('button-pop-animation'), 300);
 
-    syncSavePost(postId);
-}
+    // 2. Render UI based on updated local data
+    updatePostButtonsUI(postId);
 
-function syncSavePost(postId) {
-    let isSaved = savedPosts[postId] === true;
-    let allMatchingPosts = document.querySelectorAll(`[data-post-id="${postId}"]`);
-    
-    allMatchingPosts.forEach(postElement => {
-        let saveBtn = postElement.querySelector('.js-save-button');
-
-        if (saveBtn) {
-            if (isSaved) {
-                saveBtn.classList.remove('bi-bookmark');
-                saveBtn.classList.add('bi-bookmark-fill', 'text-dark');
-            } else {
-                saveBtn.classList.add('bi-bookmark');
-                saveBtn.classList.remove('bi-bookmark-fill', 'text-dark');
-            }
-        }
+    // 3. Sync with server using userId parameter
+    await fetch(`/api/posts/like/${postId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUserId })
     });
 }
 
-function popupCommentMaker(comment)
-{
+async function savePost(button) {
+    let idDiv = button.closest('[data-post-id]');
+    if (!idDiv) return;
+    let postId = idDiv.dataset.postId;
+
+    // 1. Optimistic local data update using user ID
+    let post = allPostsData.find(p => p._id === postId);
+    if (post) {
+        if (post.savedByUsers.some(u => (u._id || u) === currentUserId)) {
+            post.savedByUsers = post.savedByUsers.filter(u => (u._id || u) !== currentUserId);
+        } else {
+            post.savedByUsers.push(currentUserId);
+        }
+    }
+
+    button.classList.add('button-pop-animation');
+    setTimeout(() => button.classList.remove('button-pop-animation'), 300);
+
+    // 2. Render UI based on updated local data
+    updatePostButtonsUI(postId);
+
+    // 3. Sync with server using userId parameter
+    await fetch(`/api/posts/save/${postId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUserId })
+    });
+}
+
+// Main comments function to open and startup a post comments popup
+function popupCommentMaker(comment) {
     let commentPopupBackground = document.querySelector(".comment-popup-background");
     commentPopupBackground.classList.remove('d-none');
     commentPopupBackground.classList.add('d-flex'); // display the pop up window (changing from d-none to d-flex) 
     commentPopupBackground.querySelector(".comment-popup-container").classList.add('comment-popup-animation'); // adding animation class to the pop up window 
     document.body.classList.add('overflow-hidden'); // make the scrolling behind the popup to unavailable 
     let allPost = comment.closest(".js-all-post");
-    commentPopupBackground.dataset.postId = allPost.dataset.postId;
     let postId = allPost.dataset.postId;
-    
-    syncLikePost(postId, 0);
-    syncSavePost(postId);
+    commentPopupBackground.dataset.postId = postId;
+        
     addPostToPopupComment(commentPopupBackground, allPost);
     addHeaderToPopupComment(commentPopupBackground, allPost);
     addLikedByToPopupComment(commentPopupBackground, allPost);
     addCommentsToPopupComment(commentPopupBackground, allPost);
     addTypingLineToPopupComment(commentPopupBackground, allPost);
+
+    // Sync the buttons in the popup to the current state of the post
+    updatePostButtonsUI(postId);
 }
 
-function addPostToPopupComment(commentPopupBackground, allPost){
+// Copy post media to the post comments popup
+function addPostToPopupComment(commentPopupBackground, allPost) {
     let commentPopupPost = commentPopupBackground.querySelector(".comment-popup-post");
-    commentPopupPost.innerHTML = allPost.querySelector(".js-post-media").outerHTML; // main post copy to popup 
+    let postMedia = allPost.querySelector(".js-post-media");
+    
+    if (postMedia) {
+        commentPopupPost.innerHTML = postMedia.outerHTML; 
+    } else {
+        commentPopupPost.innerHTML = "";
+    }
 
     let popupVolumeBtn = commentPopupPost.querySelector('.bi-volume-up-fill');
     if (popupVolumeBtn) {
@@ -424,6 +176,7 @@ function addPostToPopupComment(commentPopupBackground, allPost){
         btn.classList.add('bi-volume-mute-fill');
     });
 }
+
 function addHeaderToPopupComment(commentPopupBackground, allPost){
     let commentPopupHeader = commentPopupBackground.querySelector(".js-popup-header-slot");
     commentPopupHeader.innerHTML = allPost.querySelector(".js-post-header").outerHTML; // header post copy to popup 
@@ -440,6 +193,7 @@ function addHeaderToPopupComment(commentPopupBackground, allPost){
     let postTime = commentPopupHeader.querySelector(".js-post-time"); // Hide the time 
     postTime.classList.add("d-none");
 }
+
 function addLikedByToPopupComment(commentPopupBackground, allPost){
     let commentPopupHeader = commentPopupBackground.querySelector(".js-popup-header-slot");
     let postTime = commentPopupHeader.querySelector(".js-post-time"); 
@@ -456,28 +210,36 @@ function addLikedByToPopupComment(commentPopupBackground, allPost){
     `;
 
 }
-function addCommentsToPopupComment(commentPopupBackground, allPost){
-    let postComments = commentsDatabase[allPost.dataset.postId];
+
+// 3. Render the comments list dynamically from MongoDB data
+function addCommentsToPopupComment(commentPopupBackground, allPost) {
+    let postId = allPost.dataset.postId;
+    
+    // Fetch the post from our global post array
+    let currentPost = allPostsData.find(post => post._id === postId);
+    let postComments = currentPost ? currentPost.comments : [];
+    
     let commentPopupList = commentPopupBackground.querySelector(".js-popup-comments-slot");
     commentPopupList.innerHTML = "";
-    let authorProfilePic = allPost.querySelector(".js-post-header img").src; // if there are 2 authors take the first one
+    
+    // Fetch populated author profile picture
+    let authorProfilePic = currentPost && currentPost.authors.length > 0 ? currentPost.authors[0].profilePic : "";
     let captionHTML = allPost.querySelector(".js-post-caption");
+    
     let commentPopupHeader = commentPopupBackground.querySelector(".js-popup-header-slot");
-    let postTime = commentPopupHeader.querySelector(".js-post-time");
-    let time = postTime ? postTime.innerText.replace('•', '').trim() : "";
+    let postTimeElement = commentPopupHeader.querySelector(".js-post-time");
+    let time = postTimeElement ? postTimeElement.innerText.replace('•', '').trim() : "";
 
-    if (captionHTML && captionHTML.innerText.trim() != "")
-    {
+    // Render the post caption first
+    if (captionHTML && captionHTML.innerText.trim() !== "") {
         let caption = captionHTML.innerHTML;
-        commentPopupList.innerHTML =
-         `
+        commentPopupList.innerHTML = `
         <div class="d-flex m-3">
             <div class="flex-shrink-0">
                 <img src="${authorProfilePic}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
             </div>
             <div class="w-100 ms-2 text-break" style="min-width: 0;">
                 ${caption}
-
                 <div class="mt-1 text-muted text-12">
                     <span>${time}</span>
                 </div>
@@ -486,35 +248,48 @@ function addCommentsToPopupComment(commentPopupBackground, allPost){
         `;
     }
 
-   if (postComments) {
+    // Render actual comments from the database
+    if (postComments && postComments.length > 0) {
         postComments.forEach((comment, index) => {
-            let heartClass = comment.isLiked ? "bi-heart-fill text-danger" : "bi-heart text-muted";
+            // Guard clause: if comments aren't populated from DB, skip rendering to prevent errors
+            if (typeof comment === 'string') return;
 
+            // Check if liked by matching user ID
+            let isLiked = comment.likedBy && comment.likedBy.some(u => (u._id || u) === currentUserId);
+            let heartClass = isLiked ? "bi-heart-fill text-danger" : "bi-heart text-muted";
+            let commentLikes = comment.likes || 0;
+            
+            // Extract username and profile picture from populated userId object
+            let commentUsername = comment.userId && comment.userId.username ? comment.userId.username : "Unknown";
+            let commentProfilePic = comment.userId && comment.userId.profilePic ? comment.userId.profilePic : "elements/media/profile-pictures/default.jpg";
+            let commentText = comment.text || "";
+            
+            // Format comment date if available
+            let commentTime = comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : "Just now";
+            
             let commentHTML = `
                 <div class="d-flex m-3 align-items-start js-comment-row">
                     <div class="flex-shrink-0">
-                        <img src="elements/media/profile-pictures/${comment.username}.jpg" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                        <img src="${commentProfilePic}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                     </div>
                     <div class="w-100 ms-2 text-break" style="min-width: 0;">
-                        <a href="#!" class="username fw-semibold text-decoration-none text-dark">${comment.username}</a>
-                        <span class="ms-1">${comment.text}</span>
+                        <a href="#!" class="username fw-semibold text-decoration-none text-dark">${commentUsername}</a>
+                        <span class="ms-1">${commentText}</span>
 
                         <div class="d-flex align-items-center mt-1 text-muted text-12" style="gap: 12px;">
-                            <span>${comment.time}</span>
-                            <span class="fw-semibold js-comment-likes-count" style="cursor: pointer;">${comment.likes} likes</span>
-                            <button class="bg-transparent border-0 p-0 text-muted fw-semibold" onclick="prepareReply('${comment.username}')">Reply</button>
-                            <button class="bg-transparent border-0 p-0 text-muted fw-semibold">See translation</button>
+                            <span>${commentTime}</span>
+                            <span class="fw-semibold js-comment-likes-count" style="cursor: pointer;">${commentLikes} likes</span>
+                            <button class="bg-transparent border-0 p-0 text-muted fw-semibold" onclick="prepareReply('${commentUsername}')">Reply</button>
                         </div>
                     </div>
                     <div class="ms-3 mt-1">
-                        <button class="bi ${heartClass} fs-6 bg-transparent border-0 p-0 post-icons" onclick="toggleCommentLike('${allPost.dataset.postId}', ${index}, this)"></button>
+                        <button class="bi ${heartClass} fs-6 bg-transparent border-0 p-0 post-icons" onclick="toggleCommentLike('${postId}', ${index}, this)"></button>
                     </div>
                 </div>
             `;
             commentPopupList.innerHTML += commentHTML;
         });
     }
-    
 }
 
 function addTypingLineToPopupComment(commentPopupBackground, allPost){
@@ -528,9 +303,9 @@ function addTypingLineToPopupComment(commentPopupBackground, allPost){
     postButton.classList.add("pe-none");
     postButton.dataset.postId = allPost.dataset.postId;
 
-    let typingElement = document.createElement("div"); // make the "besteam_ever is typing..."
+    let typingElement = document.createElement("div"); // make the "'user' is typing..."
     typingElement.className = "someone-is-typing my-3 mx-4 d-none";
-    typingElement.innerHTML = `besteam_ever is typing<span class="typing-dots ms-1"><span>.</span><span>.</span><span>.</span></span>`;
+    typingElement.innerHTML = `${currentUsername} is typing<span class="typing-dots ms-1"><span>.</span><span>.</span><span>.</span></span>`;
     commentPopupList.appendChild(typingElement);
 
     commentInput.oninput = () =>
@@ -574,64 +349,106 @@ function addTypingLineToPopupComment(commentPopupBackground, allPost){
     }, 100);
 }
 
-function publishNewComment() { //function that add the new comment to the database and to the div started by onclick post or enter 
-
+// 4. Publish a new comment by sending a POST request to the server
+async function publishNewComment() {
     let commentInput = document.querySelector(".js-comment-input");
     let postButton = document.querySelector(".js-post-button");
-    
-    let commentPopupList = document.querySelector(".js-popup-comments-slot");
     let typingElement = document.querySelector(".someone-is-typing");
-
+    
     let newCommentText = commentInput.value.trim();
     
-    if (newCommentText !== "") 
-    {
-        
+    if (newCommentText !== "") {
         let currentPostId = postButton.dataset.postId;
-        
-        if (!commentsDatabase[currentPostId]) { // creating comment database if it does not exist
-            commentsDatabase[currentPostId] = [];
-        }
 
-        commentsDatabase[currentPostId].push({
-            username: "besteam_ever",
-            text: newCommentText,
-            likes: "0",
-            time: "1s",
-            isLiked: false
-        });
+        try {
+            // 1. Send the new comment to the server
+            const response = await fetch(`/api/posts/addComment/${currentPostId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: newCommentText
+                })
+            });
 
-        let commentPopupBackground = document.querySelector(".comment-popup-background");
-        let allPost = document.querySelector(`[data-post-id="${currentPostId}"]`);
-        
-        addCommentsToPopupComment(commentPopupBackground, allPost); // render all the comments from start
-        addTypingLineToPopupComment(commentPopupBackground, allPost);
-        
-        let commentPopupList = document.querySelector(".js-popup-comments-slot");
-        commentPopupList.scrollTop = commentPopupList.scrollHeight; // scrolling down by posting
-
-        let feedPost = document.querySelector(`.js-all-post[data-post-id="${currentPostId}"]`);
-        
-        if (feedPost) { // adding 1 to the comment number on html
-            let chatIcon = feedPost.querySelector('.bi-chat');
-            if (chatIcon) {
-                let counterSpan = chatIcon.nextElementSibling;
-                if (counterSpan) {
-                    let currentCount = parseInt(counterSpan.innerText) || 0;
-                    counterSpan.innerText = currentCount + 1;
+            if (response.ok) {
+                // 2. Clear input fields immediately
+                commentInput.value = "";
+                postButton.classList.add("opacity-50");
+                postButton.classList.remove("opacity-100");
+                postButton.classList.add("pe-none");
+                if (typingElement) typingElement.classList.add("d-none");
+                
+                // 3. Fetch all posts again to update local data with the new comment
+                await fetchPostsFromServer();
+                
+                // 4. Re-open/update the popup UI with the newly fetched comments
+                let commentPopupBackground = document.querySelector(".comment-popup-background");
+                let allPost = document.querySelector(`[data-post-id="${currentPostId}"]`);
+                
+                if (commentPopupBackground && allPost) {
+                    addCommentsToPopupComment(commentPopupBackground, allPost);
+                    
+                    // Scroll to bottom to see the new comment
+                    let commentPopupList = document.querySelector(".js-popup-comments-slot");
+                    commentPopupList.scrollTop = commentPopupList.scrollHeight;
                 }
+            } else {
+                console.error("Server failed to add comment");
             }
-        }
-
-        let realPostId = parseInt(currentPostId);
-        let postInData = allPostsData.find(post => post.id === realPostId);
-        
-        if (postInData) {
-            let currentCommentsCount = parseInt(postInData.stats.comments) || 0; // adding 1 to share count on posts database
-            postInData.stats.comments = (currentCommentsCount + 1).toString();
+        } catch (error) {
+            console.error("Error connecting to server for adding comment:", error);
         }
     }
-    
+}
+
+async function toggleCommentLike(postId, commentIndex, buttonElement) {
+    // Find the specific post and comment in our frontend database
+    let currentPost = allPostsData.find(p => p._id === postId);
+    if (!currentPost || !currentPost.comments) return;
+
+    let comment = currentPost.comments[commentIndex];
+    if (!comment) return;
+
+    // Ensure likedBy array exists
+    if (!comment.likedBy) comment.likedBy = [];
+
+    // Check if current user ID is in likedBy array
+    let isLiked = comment.likedBy.some(u => (u._id || u) === currentUserId);
+
+    // Optimistic UI update
+    if (isLiked) {
+        // Unlike the comment
+        comment.likedBy = comment.likedBy.filter(u => (u._id || u) !== currentUserId);
+        comment.likes = Math.max(0, comment.likes - 1);
+        buttonElement.classList.remove("bi-heart-fill", "text-danger");
+        buttonElement.classList.add("bi-heart", "text-muted");
+    } else {
+        // Like the comment
+        comment.likedBy.push(currentUserId);
+        comment.likes += 1;
+        buttonElement.classList.remove("bi-heart", "text-muted");
+        buttonElement.classList.add("bi-heart-fill", "text-danger");
+    }
+
+    buttonElement.classList.add('button-pop-animation');
+    setTimeout(() => buttonElement.classList.remove('button-pop-animation'), 300);
+
+    let commentRow = buttonElement.closest('.js-comment-row');
+    let likesCountSpan = commentRow.querySelector('.js-comment-likes-count');
+    likesCountSpan.innerText = comment.likes + " likes";
+
+    // Sync with the server using userId
+    try {
+        await fetch(`/api/posts/likeComment/${comment._id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: currentUserId })
+        });
+    } catch (error) {
+        console.error("Error updating comment like on server:", error);
+    }
 }
 
 function closePopupComment(event, forcedExit)
@@ -779,36 +596,12 @@ function sendSharedPost()
         }
     }
 
-    let realPostId = parseInt(postId);
-    let postInData = allPostsData.find(post => post.id === realPostId);
+    let postInData = allPostsData.find(post => post._id === postId);
         
-        if (postInData) {
-            let currentSharesCount = parseInt(postInData.stats.shares) || 0; // adding number of shares to share count on posts database
-            postInData.stats.shares = (currentSharesCount + selectedIds.length).toString();
-        }
-}
-
-function toggleCommentLike(postId, commentIndex, buttonElement) {
-    let comment = commentsDatabase[postId][commentIndex];
-
-    if (comment.isLiked) {
-        comment.isLiked = false;
-        comment.likes = (parseInt(comment.likes) - 1).toString();
-        buttonElement.classList.remove("bi-heart-fill", "text-danger");
-        buttonElement.classList.add("bi-heart", "text-muted");
-    } else {
-        comment.isLiked = true;
-        comment.likes = (parseInt(comment.likes) + 1).toString();
-        buttonElement.classList.remove("bi-heart", "text-muted");
-        buttonElement.classList.add("bi-heart-fill", "text-danger");
+    if (postInData) {
+        let currentSharesCount = parseInt(postInData.stats.shares) || 0; // adding number of shares to share count on posts database
+        postInData.stats.shares = (currentSharesCount + selectedIds.length).toString();
     }
-
-    buttonElement.classList.add('button-pop-animation');
-    setTimeout(() => buttonElement.classList.remove('button-pop-animation'), 300);
-
-    let commentRow = buttonElement.closest('.js-comment-row');
-    let likesCountSpan = commentRow.querySelector('.js-comment-likes-count');
-    likesCountSpan.innerText = comment.likes + " likes";
 }
 
 function prepareReply(username) {

@@ -17,10 +17,6 @@ fetch('/api/user/getUserDetails') // load user details into global variables and
 
         // Push the loaded data into all DOM elements
         updateCurrentUserUI();
-
-        document.getElementById('loadingScreen').classList.remove('d-flex');
-        document.getElementById('loadingScreen').classList.add('d-none');
-        document.getElementById('mainApp').classList.remove('d-none');
     })
     .catch(error => {
         window.location.href = '/login.html';
