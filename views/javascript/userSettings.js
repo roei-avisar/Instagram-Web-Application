@@ -245,3 +245,68 @@ function handleProfilePicUpload(input) {
   };
   reader.readAsDataURL(file);
 }
+
+// DELETE ACCOUNT
+
+function openDeleteAccountConfirm() {
+  const deleteModal = document.getElementById('deleteAccountModal');
+  if (deleteModal) {
+    document.getElementById('delete-account-error').style.display = 'none';
+    deleteModal.classList.add('active');
+  }
+}
+
+function closeDeleteAccountConfirm() {
+  const deleteModal = document.getElementById('deleteAccountModal');
+  if (deleteModal) {
+    deleteModal.classList.remove('active');
+  }
+}
+
+// Close delete modal when clicking outside
+document.getElementById('deleteAccountModal')?.addEventListener('click', function (e) {
+  if (e.target === this) {
+    closeDeleteAccountConfirm();
+  }
+});
+
+// Close delete modal with Escape key
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && document.getElementById('deleteAccountModal')?.classList.contains('active')) {
+    closeDeleteAccountConfirm();
+  }
+});
+
+async function handleConfirmDeleteAccount() {
+  const confirmBtn = document.getElementById('delete-account-confirm-btn');
+  const errorBox = document.getElementById('delete-account-error');
+  const errorText = document.getElementById('delete-account-error-text');
+
+  errorBox.style.display = 'none';
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Deleting...';
+
+  try {
+    const res = await fetch('/api/user/delete', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // Account deleted — redirect to login page
+      window.location.href = '/';
+    } else {
+      errorText.textContent = data.error || 'Failed to delete account.';
+      errorBox.style.display = 'flex';
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = 'Yes, Delete My Account';
+    }
+  } catch (err) {
+    errorText.textContent = 'Connection error. Please try again.';
+    errorBox.style.display = 'flex';
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Yes, Delete My Account';
+  }
+}

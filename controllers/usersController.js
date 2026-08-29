@@ -44,23 +44,24 @@ class UserController {
       const username = req.body.username;
       const password = req.body.password;
 
-      // Must have at least email or phone
-      if (!email && !phone) {
-        return res.status(400).json({ error: 'Email or phone number is required.' });
+      // Both email and phone are required
+      if (!email) {
+        return res.status(400).json({ error: 'Email address is required.' });
       }
-      // Validate email format if provided
-      if (email) {
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!emailRegex.test(email)) {
-          return res.status(400).json({ error: 'Please enter a valid email address.' });
-        }
+      if (!phone) {
+        return res.status(400).json({ error: 'Phone number is required.' });
       }
-      // Validate phone format if provided
-      if (phone) {
-        const phoneRegex = /^\d{10,15}$/;
-        if (!phoneRegex.test(phone)) {
-          return res.status(400).json({ error: 'Phone number must contain between 10 and 15 digits.' });
-        }
+
+      // Validate email format
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Please enter a valid email address.' });
+      }
+
+      // Validate phone format (supports Israel format including +972/05x and international format)
+      const phoneRegex = /^(?:\+?972[- ]?(?:5[0-9]|[23489]|7[1-9])|0(?:5[0-9]|[23489]|7[1-9]))[- ]?\d{3}[- ]?\d{4}$|^\+?[1-9]\d{9,14}$/;
+      if (!phoneRegex.test(phone)) {
+        return res.status(400).json({ error: 'Please enter a valid phone number (e.g. 050-1234567 or +972-50-1234567).' });
       }
       if (!username) {
         return res.status(400).json({ error: 'Username is required.' });
@@ -96,19 +97,15 @@ class UserController {
 
 
       // Check if email is already taken
-      if (email) {
-        const emailExists = await User.findOne({ email });
-        if (emailExists) {
-          return res.status(409).json({ error: 'An account with this email already exists.' });
-        }
+      const emailExists = await User.findOne({ email: email.toLowerCase() });
+      if (emailExists) {
+        return res.status(409).json({ error: 'An account with this email already exists.' });
       }
 
       // Check if phone number is already taken
-      if (phone) {
-        const phoneExists = await User.findOne({ phone });
-        if (phoneExists) {
-          return res.status(409).json({ error: 'An account with this phone number already exists.' });
-        }
+      const phoneExists = await User.findOne({ phone });
+      if (phoneExists) {
+        return res.status(409).json({ error: 'An account with this phone number already exists.' });
       }
 
       // Create user (password is hashed automatically by the pre-save hook)
@@ -118,7 +115,7 @@ class UserController {
       // Auto-login after registration (store the original plaintext username in the session)
       req.session.userId = user._id;
       req.session.username = username; // use original plaintext, not the encrypted version from DB
-      
+
       const tweetMessage = `A new user were joined to our App!`;
       sendTweet(tweetMessage); // tweet to our twitter user
 
@@ -140,9 +137,9 @@ class UserController {
       }
       // Validate identifier format (must be a valid email or phone number)
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      const phoneRegex = /^\d{10,15}$/;
+      const phoneRegex = /^(?:\+?972[- ]?(?:5[0-9]|[23489]|7[1-9])|0(?:5[0-9]|[23489]|7[1-9]))[- ]?\d{3}[- ]?\d{4}$|^\+?[1-9]\d{9,14}$/;
       if (!emailRegex.test(identifier) && !phoneRegex.test(identifier)) {
-        return res.status(400).json({ error: 'Please enter a valid email address or a phone number containing only digits.' });
+        return res.status(400).json({ error: 'Please enter a valid email address or phone number.' });
       }
       if (!password) {
         return res.status(400).json({ error: 'Password is required.' });
@@ -214,7 +211,7 @@ class UserController {
       // The file is already saved as <userId>.jpg by multer's storage config
       // (if an old file existed, multer overwrites it automatically)
       const profilePicUrl = '/images/profiles/' + req.session.userId + '.jpg?t=' + Date.now();
-      
+
       try {
         const user = await User.findById(req.session.userId);
         if (user) {
@@ -534,6 +531,131 @@ class UserController {
       return res.status(500).json({ error: 'Server error.' });
     }
   }
+
+  // GET /api/user/check_followers
+  // Returns the list of users who follow a given user (or the current user if no userId is provided)
+  async check_followers(req, res) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+      const targetId = req.query.userId || req.session.userId;
+      const user = await User.findById(targetId).populate('followers');
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+
+      const followersList = user.followers.map(follower => {
+        let username = 'Unknown';
+        try {
+          username = follower.decryptUsername();
+        } catch { /* keep Unknown */ }
+
+        return {
+          userId: follower._id,
+          username: username,
+          bio: follower.bio || '',
+          profilePic: follower.profilePic || '/images/profiles/Default_pfp.jpg'
+        };
+      });
+
+      return res.json({ followers: followersList, count: followersList.length });
+    } catch (err) {
+      console.error('check_followers error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+
+  // GET /api/user/check_following
+  // Returns the list of users that a given user follows (or the current user if no userId is provided)
+  async check_following(req, res) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+      const targetId = req.query.userId || req.session.userId;
+      const user = await User.findById(targetId).populate('following');
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+
+      const followingList = user.following.map(followed => {
+        let username = 'Unknown';
+        try {
+          username = followed.decryptUsername();
+        } catch { /* keep Unknown */ }
+
+        return {
+          userId: followed._id,
+          username: username,
+          bio: followed.bio || '',
+          profilePic: followed.profilePic || '/images/profiles/Default_pfp.jpg'
+        };
+      });
+
+      return res.json({ following: followingList, count: followingList.length });
+    } catch (err) {
+      console.error('check_following error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+
+  // DELETE /api/user/delete
+  // Permanently deletes the logged-in user and cleans up their follower/following links across all users
+  async deleteUser(req, res) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const userId = req.session.userId;
+
+    try {
+      // Remove this user from the 'followers' array of any user they were following
+      await User.updateMany(
+        { followers: userId },
+        { $pull: { followers: userId } }
+      );
+
+      // Remove this user from the 'following' array of any user who was following them
+      await User.updateMany(
+        { following: userId },
+        { $pull: { following: userId } }
+      );
+
+      // Delete user's profile picture file from disk if it exists
+      const userProfilePicPath = path.join(__dirname, '..', 'images', 'profiles', `${userId}.jpg`);
+      if (fs.existsSync(userProfilePicPath)) {
+        try {
+          fs.unlinkSync(userProfilePicPath);
+        } catch (fileErr) {
+          console.error('Error deleting profile pic file:', fileErr);
+        }
+      }
+
+      // Delete the user document from the database
+      const deletedUser = await User.findByIdAndDelete(userId);
+      if (!deletedUser) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+
+      // Destroy the session and clear cookie
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Error destroying session during user delete:', err);
+        }
+        res.clearCookie('connect.sid');
+        return res.json({ message: 'Account deleted successfully.' });
+      });
+    } catch (err) {
+      console.error('deleteUser error:', err);
+      return res.status(500).json({ error: 'Server error while deleting account.' });
+    }
+  }
+
   // POST /api/user/addPersonalPost
   async addPersonalPost(req, res) {
     try {
