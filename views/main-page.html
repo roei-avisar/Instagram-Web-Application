@@ -809,6 +809,31 @@
 
         </div>
 
+        <!-- Post Upload Choice Modal -->
+        <div id="postUploadChoiceModal" class="dark-overlay upload-choice-overlay d-none align-items-center justify-content-center" onclick="discardBtn.setAttribute('discard-action', 'close'); discardOverlay.classList.remove('d-none');">
+            <div class="bg-white rounded-4 shadow border d-flex flex-column" style="width: 300px;" onclick="event.stopPropagation()">
+                <div class="p-3 text-center border-bottom fw-bold fs-5">Upload to</div>
+                <button class="btn btn-light rounded-0 py-3 border-bottom fs-6 js-postUpload-followers-btn">Upload to Followers</button>
+                <button class="btn btn-light rounded-0 py-3 rounded-bottom-4 fs-6 js-postUpload-groups-btn">Upload to my Groups</button>
+            </div>
+        </div>
+
+        <!-- Groups Selection Modal -->
+        <div id="groupsSelectionModal" class="dark-overlay upload-choice-overlay d-none align-items-center justify-content-center" onclick="discardBtn.setAttribute('discard-action', 'close'); discardOverlay.classList.remove('d-none');">
+            <div class="bg-white rounded-4 shadow border d-flex flex-column" style="width: 350px; max-height: 70vh;" onclick="event.stopPropagation()">
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                    <button class="bg-transparent border-0 bi bi-arrow-left fs-4 js-back-to-choice-btn"></button>
+                    <div class="fw-bold fs-5">Select Groups</div>
+                    <div style="width: 24px;"></div>
+                </div>
+                <div id="groupsListContainer" class="overflow-y-auto p-3 flex-grow-1 d-flex flex-column gap-2">
+                </div>
+                <div class="p-3 border-top">
+                    <button class="btn btn-primary w-100 fw-bold js-final-postUpload-groups-btn">Upload to Selected Group</button>
+                </div>
+            </div>
+        </div>
+
         <div class="dark-overlay discard-overlay js-discard-overlay d-none">
             <div class="discard-container">
                 <div class="p-4 text-center">
@@ -822,6 +847,26 @@
 
         <div class="new-post-notification-bubble js-new-post-notification">
             <span class="fw-semibold">New Post created !</span>
+        </div>
+
+        <!-- Edit Post Modal -->
+        <div id="editPostModal" class="dark-overlay upload-choice-overlay d-none align-items-center justify-content-center" onclick="closeEditModal()">
+            <div class="bg-white rounded-4 shadow border d-flex flex-column p-4" style="width: 400px; max-width: 90vw;" onclick="event.stopPropagation()">
+                <h5 class="fw-bold mb-3 text-dark">Edit Post</h5>
+                <input type="hidden" id="editPostId">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-dark fs-7">Location / Sub Header</label>
+                    <input type="text" id="editSubHeaderInput" class="form-control bg-light border-0 shadow-none">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold text-dark fs-7">Caption</label>
+                    <textarea id="editCaptionInput" class="form-control bg-light border-0 shadow-none" rows="3"></textarea>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-light fw-bold text-dark border" onclick="closeEditModal()">Cancel</button>
+                    <button class="btn btn-primary fw-bold" onclick="saveEditedPost()">Save</button>
+                </div>
+            </div>
         </div>
 
         <!-- share popup -->
@@ -975,11 +1020,11 @@
     <script src="javascript/initApp.js"></script> <!-- important to be first, this is loading the userID -->
     <script src="javascript/userViewUtils.js"></script> <!-- user UI helper functions (must be after initApp.js globals) -->
     <script src="javascript/stories.js"></script>
+    <script src="javascript/posts.js"></script>
+    <script src="javascript/post-buttons.js"></script>
     <script src="javascript/events.js"></script>
     <script src="javascript/notifications.js"></script>
-    <script src="javascript/post-buttons.js"></script>
     <script src="javascript/messages.js"></script>
-    <script src="javascript/posts.js"></script>
     <script src="javascript/groups.js"></script>
     <script src="javascript/sidebar.js"></script>
     <script src="javascript/settings.js"></script>

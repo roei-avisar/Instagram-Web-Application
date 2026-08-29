@@ -60,6 +60,8 @@ function createGroup() {
         if (data.success) {
             input.value = '';
             openGroupsPopup(); // refresh the screen
+            // Refresh the feed posts to reflect changes in group membership
+            fetchPostsFromServer();
         }
     })
     .catch(err => console.error(err));
@@ -204,6 +206,8 @@ function joinGroup(groupID, userID) { // join user to requested group
     .then(res => res.json())
     .then(data => {
         if(data.success) openGroupsPopup(); // it will render all the groups from start
+        // Refresh the feed posts to reflect changes in group membership
+        fetchPostsFromServer();
     });
 }
 
@@ -216,6 +220,8 @@ function leaveGroup(groupId, userID) {
     .then(res => res.json())
     .then(data => {
         if(data.success) openGroupsPopup();// it will rnder all the groups from start
+        // Refresh the feed posts to reflect changes in group membership
+        fetchPostsFromServer();
     });
 }
 
@@ -228,6 +234,8 @@ function deleteGroup(groupID, userID) { // delete the group if the user is the a
     .then(res => res.json())
     .then(data => {
         if(data.success) openGroupsPopup(); // it will rnder all the groups from start
+        // Refresh the feed posts to reflect changes in group membership
+        fetchPostsFromServer();
     });
 }
 
@@ -304,6 +312,8 @@ function removeUser(groupId, userIdToRemove) {
         if(data.success) {
             closeMembersPopup(null, true);
             openGroupsPopup(); // refreshing the groups render
+            // Refresh the feed posts to reflect changes in group membership
+            fetchPostsFromServer();
         }
     });
 }

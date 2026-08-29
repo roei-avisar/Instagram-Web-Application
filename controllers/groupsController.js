@@ -177,6 +177,87 @@ class GroupsController {
             res.status(500).json({ error: 'Server error' });
         }
     }
+    async getUserGroups(req, res) { // get all the groups that the user is a member of
+        try {
+            const userId = req.session.userId;
+            if (!userId) {
+                return res.status(401).json({ success: false, message: "User not logged in" });
+            }
+
+            const userGroups = await Group.find({ users: userId });
+
+            res.status(200).json({ success: true, data: userGroups });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+    async addPostToGroup(req, res) { // add a post to a specific group
+        try {
+            const { postId, groupId } = req.body;
+            const userId = req.session.userId;
+
+            if (!userId) return res.status(401).json({ success: false, message: "User not logged in" });
+            if (!postId || !groupId) return res.status(400).json({ success: false, message: "Invalid data provided" });
+
+            await Group.findByIdAndUpdate(
+                groupId,
+                { $addToSet: { posts: postId } } 
+            );
+
+            res.status(200).json({ success: true, message: "Post added to group successfully" });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+    async removePostFromGroup(req, res) { // remove a post from a specific group
+        try {
+            const { groupId, postId } = req.params;
+            const userId = req.session.userId;
+
+            if (!userId) return res.status(401).json({ success: false, message: "User not logged in" });
+
+            const group = await Group.findById(groupId);
+            if (!group) return res.status(404).json({ success: false, message: "Group not found" });
+
+            const updatedGroup = await Group.findByIdAndUpdate(
+                groupId,
+                { $pull: { posts: postId } },
+                { returnDocument: 'after' }
+            );
+
+            res.status(200).json({ success: true, data: updatedGroup });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // GET /api/groups/getMyGroupsPosts
+    async getMyGroupsPosts(req, res) {
+        try {
+            const userId = req.session.userId;
+            if (!userId) {
+                return res.status(401).json({ success: false, message: "User not logged in" });
+            }
+
+            // Find all groups where the user is a member
+            const userGroups = await Group.find({ users: userId });
+            const postIds = [];
+
+            // Extract all post IDs from these groups
+            userGroups.forEach(group => {
+                if (group.posts) {
+                    postIds.push(...group.posts.map(id => id.toString()));
+                }
+            });
+
+            // Remove duplicates using Set
+            const uniquePostIds = [...new Set(postIds)];
+
+            return res.status(200).json({ success: true, postIds: uniquePostIds });
+        } catch (error) {
+            return res.status(500).json({ success: false, error: error.message });
+        }
+    }
 }
 
 module.exports = new GroupsController();
