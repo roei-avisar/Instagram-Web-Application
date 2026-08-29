@@ -33,4 +33,35 @@ function updateCurrentUserUI() {
             pictureElement.src = CURRENT_USER_PIC;
         }
     }
+
+    // 4. Update dynamically rendered posts and comments belonging to the current user
+    if (CURRENT_USERNAME && CURRENT_USER_PIC) {
+        const dynamicPics = document.querySelectorAll(`img[data-username="${CURRENT_USERNAME}"]`);
+        for (const pic of dynamicPics) {
+            pic.src = CURRENT_USER_PIC;
+        }
+
+        // 5. Update global data state so that any future popups (like comments) render with the new image
+        if (typeof allPostsData !== 'undefined') {
+            allPostsData.forEach(post => {
+                if (post.authors) {
+                    post.authors.forEach(author => {
+                        if (author.username === CURRENT_USERNAME) author.profilePic = CURRENT_USER_PIC;
+                    });
+                }
+                if (post.likedByUsers) {
+                    post.likedByUsers.forEach(user => {
+                        if (user.username === CURRENT_USERNAME) user.profilePic = CURRENT_USER_PIC;
+                    });
+                }
+                if (post.comments) {
+                    post.comments.forEach(comment => {
+                        if (comment.userId && comment.userId.username === CURRENT_USERNAME) {
+                            comment.userId.profilePic = CURRENT_USER_PIC;
+                        }
+                    });
+                }
+            });
+        }
+    }
 }

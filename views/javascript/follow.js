@@ -118,7 +118,7 @@ async function handleFollowToggle(targetUserId, btnElement) {
   // Disable button while processing
   btnElement.disabled = true;
 
-  const isCurrentlyFollowing = btnElement.classList.contains('following-btn');
+  const isCurrentlyFollowing = btnElement.textContent.trim() === 'Following';
   const endpoint = isCurrentlyFollowing ? '/api/user/unfollow' : '/api/user/follow';
 
   try {
@@ -129,13 +129,21 @@ async function handleFollowToggle(targetUserId, btnElement) {
     });
 
     if (res.ok) {
-      // Toggle button appearance
+      // Toggle button appearance dynamically based on the button's current classes
       if (isCurrentlyFollowing) {
-        btnElement.className = 'follow-btn';
         btnElement.textContent = 'Follow';
+        if (btnElement.classList.contains('following-btn')) {
+          btnElement.classList.replace('following-btn', 'follow-btn');
+        } else if (btnElement.classList.contains('text-dark')) {
+          btnElement.classList.replace('text-dark', 'instagram-blue');
+        }
       } else {
-        btnElement.className = 'following-btn';
         btnElement.textContent = 'Following';
+        if (btnElement.classList.contains('follow-btn')) {
+          btnElement.classList.replace('follow-btn', 'following-btn');
+        } else if (btnElement.classList.contains('instagram-blue')) {
+          btnElement.classList.replace('instagram-blue', 'text-dark');
+        }
       }
       // Refresh the feed posts to reflect changes in following status
       fetchPostsFromServer();
@@ -165,3 +173,63 @@ if (allUsersSearchInput) {
     renderAllUsers(filteredUsers);
   });
 }
+
+// Dynamically load suggested users for the right sidebar
+async function loadSidebarSuggestedUsers() {
+  const listContainer = document.getElementById('suggestedUsersSidebarList');
+  if (!listContainer) return;
+
+  try {
+    const res = await fetch('/api/user/allUsers');
+    const data = await res.json();
+
+    if (res.ok) {
+      // Filter out users we are already following
+      const unfollowedUsers = data.users.filter(u => !u.isFollowing);
+
+      // Shuffle and take 5
+      const shuffled = unfollowedUsers.sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 5);
+
+      listContainer.innerHTML = '';
+
+      if (selected.length === 0) {
+        listContainer.innerHTML = '<div class="text-muted fs-8 text-center mt-3">No suggestions available</div>';
+        return;
+      }
+
+      selected.forEach(user => {
+        const row = document.createElement('div');
+        row.className = 'user-row d-flex justify-content-between align-items-center';
+
+        // Truncate username for display if necessary
+        const displayUsername = user.username.length > 12 ? user.username.substring(0, 10) + '...' : user.username;
+
+        row.innerHTML = `
+          <div class="user-info d-flex align-items-center gap-2">
+            <img src="${user.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg'}" class="right-sidebar-avatar rounded-circle" />
+            <div class="lh-1">
+              <span class="username">${displayUsername}</span>
+              <div class="d-flex mt-1">
+                <span class="text-muted fs-8 ms-1">Suggested for you</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        const btn = document.createElement('button');
+        btn.className = 'small-transparent-btn instagram-blue fw-semibold hover-darken js-suggested-follow';
+        btn.textContent = 'Follow';
+        btn.onclick = () => handleFollowToggle(user.userId, btn);
+
+        row.appendChild(btn);
+        listContainer.appendChild(row);
+      });
+    }
+  } catch (err) {
+    console.error('Error loading suggested users:', err);
+  }
+}
+
+// Call it when the page loads
+document.addEventListener('DOMContentLoaded', loadSidebarSuggestedUsers);

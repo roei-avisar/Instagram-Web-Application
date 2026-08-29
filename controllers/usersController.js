@@ -7,10 +7,10 @@ const multer = require('multer');
 const { sendTweet } = require('../utils/twitterServices');
 
 // Configure multer for profile picture uploads
-// Files are saved to images/profiles/ and named by the user's ID
+// Files are saved to views/elements/media/profile-pictures/ and named by the user's ID
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '..', 'images', 'profiles'));
+    cb(null, path.join(__dirname, '..', 'views', 'elements', 'media', 'profile-pictures'));
   },
   filename: function (req, file, cb) {
     // Name the file as <userId>.jpg so we can find it later
@@ -210,7 +210,7 @@ class UserController {
 
       // The file is already saved as <userId>.jpg by multer's storage config
       // (if an old file existed, multer overwrites it automatically)
-      const profilePicUrl = '/images/profiles/' + req.session.userId + '.jpg?t=' + Date.now();
+      const profilePicUrl = '/elements/media/profile-pictures/' + req.session.userId + '.jpg?t=' + Date.now();
 
       try {
         const user = await User.findById(req.session.userId);
@@ -309,7 +309,7 @@ class UserController {
       await user.save();
 
       // Use the current profile picture URL from the database
-      let profilePic = user.profilePic || '/images/profiles/Default_pfp.jpg';
+      let profilePic = user.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg';
 
       return res.json({
         message: 'Profile updated successfully.',
@@ -349,7 +349,7 @@ class UserController {
       }
 
       // Use the profile picture from the database
-      let profilePic = user.profilePic || '/images/profiles/Default_pfp.jpg';
+      let profilePic = user.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg';
 
       res.json({
         userId: req.session.userId,
@@ -393,7 +393,7 @@ class UserController {
         }
 
         // Use the profile picture from the database
-        let profilePic = user.profilePic || '/images/profiles/Default_pfp.jpg';
+        let profilePic = user.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg';
 
         // Check if the current user is already following this user
         const isFollowing = currentUser.following.includes(user._id.toString());
@@ -557,7 +557,7 @@ class UserController {
           userId: follower._id,
           username: username,
           bio: follower.bio || '',
-          profilePic: follower.profilePic || '/images/profiles/Default_pfp.jpg'
+          profilePic: follower.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg'
         };
       });
 
@@ -593,7 +593,7 @@ class UserController {
           userId: followed._id,
           username: username,
           bio: followed.bio || '',
-          profilePic: followed.profilePic || '/images/profiles/Default_pfp.jpg'
+          profilePic: followed.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg'
         };
       });
 

@@ -233,10 +233,11 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
     // Render the post caption first
     if (captionHTML && captionHTML.innerText.trim() !== "") {
         let caption = captionHTML.innerHTML;
+        let popupAuthorUsername = currentPost && currentPost.authors.length > 0 ? currentPost.authors[0].username : "";
         commentPopupList.innerHTML = `
         <div class="d-flex m-3">
             <div class="flex-shrink-0">
-                <img src="${authorProfilePic}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                <img src="${authorProfilePic}" data-username="${popupAuthorUsername}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
             </div>
             <div class="w-100 ms-2 text-break" style="min-width: 0;">
                 ${caption}
@@ -270,7 +271,7 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
             let commentHTML = `
                 <div class="d-flex m-3 align-items-start js-comment-row">
                     <div class="flex-shrink-0">
-                        <img src="${commentProfilePic}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                        <img src="${commentProfilePic}" data-username="${commentUsername}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                     </div>
                     <div class="w-100 ms-2 text-break" style="min-width: 0;">
                         <a href="#!" class="username fw-semibold text-decoration-none text-dark">${commentUsername}</a>
