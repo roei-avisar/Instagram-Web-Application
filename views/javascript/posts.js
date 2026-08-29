@@ -3,6 +3,27 @@ const commentPopupBackground = document.querySelector('.comment-popup-background
 const textColour = {video: 'text-white', image: 'text-dark', text: 'text-dark'};
 let allPostsData = []; // Start with an empty array
 
+function formatTimeAgo(createdAt) {
+    const createdTime = new Date(createdAt).getTime();
+    if (Number.isNaN(createdTime)) return '';
+
+    const seconds = Math.max(0, Math.floor((Date.now() - createdTime) / 1000));
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d`;
+
+    return new Date(createdTime).toLocaleDateString();
+}
+
+function refreshPostTimes() {
+    document.querySelectorAll('.js-post-time-value').forEach(timeElement => {
+        timeElement.textContent = formatTimeAgo(timeElement.dataset.createdAt);
+    });
+}
+
+setInterval(refreshPostTimes, 60000);
+
 // Fetch initial post data from the server
 async function fetchPostsFromServer() {
     try {
@@ -280,7 +301,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                             ${post.isVerified ? '<span class="ms-1 bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
                                 <div class="js-post-time d-flex align-items-center">
                                     <span class="text-white ms-1 fw-medium small-text">&bull;</span>
-                                    <span class="text-white ms-1 small-text">${post.timeAgo}</span>
+                                    <span class="text-white ms-1 small-text js-post-time-value" data-created-at="${post.createdAt}">${formatTimeAgo(post.createdAt)}</span>
                                 </div>
                             </div>
                             <a href="#!" class="ms-2 text-decoration-none text-white text-12 text-start">${combinedSubHeaderText}</a>
@@ -308,7 +329,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                             ${post.isVerified ? '<span class="ms-1 bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
                             <span class="js-post-time">
                                 <span class="text-muted ms-1 fw-bold small-text">&bull;</span>
-                                <span class="text-muted ms-1 small-text">${post.timeAgo}</span>
+                                <span class="text-muted ms-1 small-text js-post-time-value" data-created-at="${post.createdAt}">${formatTimeAgo(post.createdAt)}</span>
                             </span>
                         </div>
                         <button class="bg-transparent border-0 p-0 ms-2 text-12 text-start">${combinedSubHeaderText}</button>
@@ -334,7 +355,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                             ${post.isVerified ? '<span class="ms-1 bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
                             <span class="js-post-time">
                                 <span class="text-muted ms-1 fw-bold small-text">&bull;</span>
-                                <span class="text-muted ms-1 small-text">${post.timeAgo}</span>
+                                <span class="text-muted ms-1 small-text js-post-time-value" data-created-at="${post.createdAt}">${formatTimeAgo(post.createdAt)}</span>
                             </span>
                         </div>
                         <button class="bg-transparent border-0 p-0 ms-2 text-12 text-start">${combinedSubHeaderText}</button>

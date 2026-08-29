@@ -11,7 +11,6 @@ const statsSchema = new mongoose.Schema({
 const postSchema = new mongoose.Schema({
     authors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
     isVerified: { type: Boolean, default: false },
-    timeAgo: { type: String, required: true },
     subHeader: { type: String, default: "" },
     mediaType: { type: String, enum: ['image', 'video', 'text'], required: true },
     mediaSource: { type: String, required: true },

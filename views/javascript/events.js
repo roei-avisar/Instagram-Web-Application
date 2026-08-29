@@ -343,7 +343,6 @@ async function submitPostDataToServer(groupId) {
     const newPost = {
         "authors": [CURRENT_USER_ID],
         "isVerified": false,
-        "timeAgo": "1s",
         "subHeader": locationText,
         "mediaType": currentMediaType,
         "mediaSource": currentMediaSource,
