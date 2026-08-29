@@ -627,7 +627,7 @@ class UserController {
       );
 
       // Delete user's profile picture file from disk if it exists
-      const userProfilePicPath = path.join(__dirname, '..', 'images', 'profiles', `${userId}.jpg`);
+      const userProfilePicPath = path.join(__dirname, '..', 'views', 'elements', 'media', 'profile-pictures', `${userId}.jpg`);
       if (fs.existsSync(userProfilePicPath)) {
         try {
           fs.unlinkSync(userProfilePicPath);
