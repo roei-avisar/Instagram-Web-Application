@@ -215,17 +215,17 @@ function createProfilePicsHTML(post) {
         profilePicsHTML = `
             <div>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="${post.authors[0].profilePic}" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" alt="Image">
+                    <img src="${post.authors[0].profilePic}" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
                 </a>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="${post.authors[1].profilePic}" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" alt="Image">
+                    <img src="${post.authors[1].profilePic}" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
                 </a>
             </div>
         `;
     } else {
         profilePicsHTML = `
             <a href="#!" class="text-decoration-none text-dark profile-circle">
-                <img src="${post.authors[0].profilePic}" class="img-fluid rounded-circle post-profile-pic" alt="Image">
+                <img src="${post.authors[0].profilePic}" class="img-fluid rounded-circle post-profile-pic" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
             </a>
         `;
     }
@@ -302,7 +302,6 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                                     <span class="text-white ms-1 small-text">${post.timeAgo}</span>
                                 </div>
                             </div>
-                            <!-- תיקון: שימוש במשתנה המשולב -->
                             <a href="#!" class="ms-2 text-decoration-none text-white text-12 text-start">${combinedSubHeaderText}</a>
                         </div>
                     </div>
@@ -310,7 +309,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                 </div>
                 
                 <div class="js-post-media position-relative">
-                    <video id="video-${post._id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline onended="restartMedia(this)"></video>
+                    <video id="video-${post._id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline onended="restartMedia(this)" onerror="this.outerHTML='<img src=&quot;/elements/media/posts/main-posts/error-post.jpg&quot; class=&quot;img-fluid rounded-2 main-post&quot;>'"></video>
                     ${audioTagHTML}
                     ${muteButtonHTML}
                 </div>
@@ -331,7 +330,6 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                                 <span class="text-muted ms-1 small-text">${post.timeAgo}</span>
                             </span>
                         </div>
-                        <!-- תיקון: שימוש במשתנה המשולב -->
                         <button class="bg-transparent border-0 p-0 ms-2 text-12 text-start">${combinedSubHeaderText}</button>
                     </div>
                 </div>
@@ -339,7 +337,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
             </div>
             
             <div class="position-relative js-post-media">
-                <img src="${post.mediaSource}" class="img-fluid rounded-2 main-post" alt="Image">
+                <img src="${post.mediaSource}" class="img-fluid rounded-2 main-post" onerror="this.onerror=null; this.src='/elements/media/posts/main-posts/error-post.jpg'" alt="Image">
                 ${audioTagHTML}
                 ${muteButtonHTML}
             </div>
@@ -418,7 +416,7 @@ function createLikedByHTML(likedByUsers, likes) {
     usersToShow.forEach(user => {
         // Access populated profile picture directly
         likedByProfilesHTML += `
-            <img src="${user.profilePic}" class="liked-by-profile-pic rounded-circle" alt="Image">
+            <img src="${user.profilePic}" class="liked-by-profile-pic rounded-circle" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
         `;
     });
 
