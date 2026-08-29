@@ -26,7 +26,8 @@
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "mongoose": "^9.9.1",
-    "multer": "^2.2.0"
+    "multer": "^2.2.0",
+    "twitter-api-v2": "^1.29.1"
   },
   "allowScripts": {
     "bcrypt@6.0.0": true

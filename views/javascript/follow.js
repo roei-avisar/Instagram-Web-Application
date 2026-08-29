@@ -132,6 +132,8 @@ async function handleFollowToggle(targetUserId, btnElement) {
         btnElement.className = 'following-btn';
         btnElement.textContent = 'Following';
       }
+      // Refresh the feed posts to reflect changes in following status
+      fetchPostsFromServer();
     } else {
       const data = await res.json();
       alert(data.error || 'Action failed.');

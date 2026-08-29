@@ -1,8 +1,8 @@
-function openMessagesPopup() 
+function openMessagesPopup()
 {
     let messagesPopup = document.querySelector(".messages-popup-container");
     let messagesCapsule = document.querySelector(".js-messages-capsule");
-    
+
     if (messagesCapsule) {
         messagesCapsule.classList.add("d-none");
     }
@@ -11,7 +11,7 @@ function openMessagesPopup()
     renderMessagesList();
 }
 
-function closeMessagesPopup() 
+function closeMessagesPopup()
 {
     let messagesPopup = document.querySelector(".messages-popup-container");
     let messagesCapsule = document.querySelector(".js-messages-capsule");
@@ -23,7 +23,7 @@ function closeMessagesPopup()
     }
 }
 
-function renderMessagesList() 
+function renderMessagesList()
 {
     let container = document.querySelector(".js-messages-list-container");
     container.innerHTML = "";
@@ -31,7 +31,7 @@ function renderMessagesList()
     friends.forEach(friend => {
         let lastMessageText = "Tap to chat";
         let chatHistory = chatsDatabase[friend.id];
-        
+
         if (chatHistory && chatHistory.length > 0) {
             let lastMessage = chatHistory[chatHistory.length - 1];
             if (lastMessage.type === "shared_post") {
@@ -52,7 +52,7 @@ function renderMessagesList()
     });
 }
 
-function openChatWindow(friendId) 
+function openChatWindow(friendId)
 {
     document.querySelector(".messages-popup-container").classList.add("d-none");
 
@@ -61,7 +61,7 @@ function openChatWindow(friendId)
     chatWindow.classList.remove("d-none");
 
     let friend = friends.find(f => f.id === friendId);
-    
+
     let headerInfo = document.querySelector(".js-chat-header-info");
     headerInfo.innerHTML = `
         <img src="elements/media/profile-pictures/${friend.username}.jpg" class="rounded-circle" style="width: 30px; height: 30px; object-fit: cover;">
@@ -87,10 +87,10 @@ function renderChatHistory(friendId) {
 
     chatHistory.forEach(message => {
         if (message.type === "shared_post") {
-            
+
             let postElement = document.querySelector(`.js-all-post[data-post-id="${message.postId}"]`);
             let mediaTag = "";
-            
+
             if (postElement) {
                 let videoEl = postElement.querySelector('video');
                 let imgEl = postElement.querySelector('img.main-post');
@@ -132,13 +132,13 @@ function renderChatHistory(friendId) {
     });
 }
 
-function openSharedPostComments(postId) 
+function openSharedPostComments(postId)
 {
     let commentPopupBackground = document.querySelector(".comment-popup-background");
     let allPost = document.querySelector(`[data-post-id="${postId}"]`);
-    
+
     if (!commentPopupBackground || !allPost) return;
-    
+
     commentPopupBackground.dataset.postId = postId;
     
     commentPopupBackground.classList.remove('d-none');
@@ -156,14 +156,14 @@ function openSharedPostComments(postId)
     handleVideoMedia(commentPopupBackground);
 }
 
-function backToMessages() 
+function backToMessages()
 {
     document.querySelector(".chat-window-container").classList.add("d-none");
     document.querySelector(".messages-popup-container").classList.remove("d-none");
     renderMessagesList();
 }
 
-function closeChatWindow() 
+function closeChatWindow()
 {
     document.querySelector(".chat-window-container").classList.add("d-none");
     let messagesCapsule = document.querySelector(".js-messages-capsule");
@@ -172,7 +172,7 @@ function closeChatWindow()
     }
 }
 
-function handleChatInput(event) 
+function handleChatInput(event)
 {
     if (event.key === "Enter") {
         event.preventDefault();
@@ -181,19 +181,19 @@ function handleChatInput(event)
         if (text !== "") {
             let chatWindow = document.querySelector(".chat-window-container");
             let friendId = chatWindow.dataset.friendId;
-            
+
             if (!chatsDatabase[friendId]) {
                 chatsDatabase[friendId] = [];
             }
-            
+
             chatsDatabase[friendId].push({
                 type: "text",
                 text: text,
                 sender: "me",
                 time: "Just now"
             });
-            chatInput.value = ""; 
-            renderChatHistory(friendId); 
+            chatInput.value = "";
+            renderChatHistory(friendId);
             renderMessagesList();
         }
         let chatHistoryContainer = document.querySelector(".js-chat-history-container");
@@ -201,6 +201,6 @@ function handleChatInput(event)
             top: chatHistoryContainer.scrollHeight,
             behavior: 'smooth'
         });
-        
+
     }
 }

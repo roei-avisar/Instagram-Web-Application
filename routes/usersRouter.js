@@ -32,4 +32,10 @@ router.get('/check_following', userController.check_following);
 
 router.delete('/delete', userController.deleteUser);
 
+router.post('/addPersonalPost', userController.addPersonalPost);
+
+router.delete('/removePersonalPost/:postId', userController.removePersonalPost);
+
+router.get('/getFollowingAndPersonalPosts', userController.getFollowingAndPersonalPosts);
+
 module.exports = router; // export all the router functions to be used by server.js

@@ -1,6 +1,7 @@
 
 let globalGroups = [];
 let currentOpenGroupId = null;
+let pendingHighlightGroupId = null;
 
 function openGroupsPopup() {
     const overlay = document.getElementById('groupsOverlay');
@@ -59,7 +60,10 @@ function createGroup() {
     .then(data => {
         if (data.success) {
             input.value = '';
+            pendingHighlightGroupId = data.data._id; // scroll down and highk+lighting a new group were made
             openGroupsPopup(); // refresh the screen
+            // Refresh the feed posts to reflect changes in group membership
+            fetchPostsFromServer();
         }
     })
     .catch(err => console.error(err));
@@ -89,6 +93,7 @@ function renderGroups(groupsArray) {
         const isAdmin = group.admin === CURRENT_USER_ID;
 
         const row = document.createElement('div'); // group div HTML
+        row.id = `group-${group._id}`;
         row.className = 'd-flex justify-content-between align-items-center mb-2 p-3 border-bottom';
 
         const nameSpan = document.createElement('span'); // group name HTML
@@ -111,17 +116,17 @@ function renderGroups(groupsArray) {
             editBtn.className = 'btn btn-sm btn-outline-secondary ms-2';
             editBtn.textContent = 'Edit Name';
             
-            editBtn.onclick = () => {
+            editBtn.onclick = () => { // add functionality to edit button
                 nameSpan.classList.add('d-none');
                 editBtn.classList.add('d-none');
 
-                const editContainer = document.createElement('div');
+                const editContainer = document.createElement('div'); // make the container to write the new name
                 editContainer.className = 'd-flex align-items-center flex-grow-1';
 
                 const editInput = document.createElement('input');
                 editInput.type = 'text';
                 editInput.className = 'form-control form-control-sm w-75';
-                editInput.value = group.name;
+                editInput.value = group.name; // show group name at first while edit the group name
 
                 const saveBtn = document.createElement('button');
                 saveBtn.className = 'btn btn-sm btn-success ms-2';
@@ -132,13 +137,20 @@ function renderGroups(groupsArray) {
                 
                 row.insertBefore(editContainer, btnGroup);
 
-                saveBtn.onclick = () => {
+                saveBtn.onclick = () => { // add save button functionality
                     const newName = editInput.value.trim();
 
-                    if (newName === '' || newName.length > 20 || newName === group.name) {
+                    if (newName === group.name) {
                         nameSpan.classList.remove('d-none');
                         editBtn.classList.remove('d-none');
                         editContainer.remove();
+                        return;
+                    }
+                    if (newName === '' || newName.length > 60) {
+                        nameSpan.classList.remove('d-none');
+                        editBtn.classList.remove('d-none');
+                        editContainer.remove();
+                        alert("Group name must be between 1 and 60 characters");
                         return;
                     }
 
@@ -185,6 +197,11 @@ function renderGroups(groupsArray) {
         row.appendChild(nameSpan);
         row.appendChild(btnGroup);
         listContainer.appendChild(row); // add all the groups div to the HTML
+
+        if (group._id === pendingHighlightGroupId) {
+            scrollToAndHighlight(row);
+            pendingHighlightGroupId = null;
+        }
     });
 }
 
@@ -197,6 +214,8 @@ function joinGroup(groupID, userID) { // join user to requested group
     .then(res => res.json())
     .then(data => {
         if(data.success) openGroupsPopup(); // it will render all the groups from start
+        // Refresh the feed posts to reflect changes in group membership
+        fetchPostsFromServer();
     });
 }
 
@@ -209,6 +228,8 @@ function leaveGroup(groupId, userID) {
     .then(res => res.json())
     .then(data => {
         if(data.success) openGroupsPopup();// it will rnder all the groups from start
+        // Refresh the feed posts to reflect changes in group membership
+        fetchPostsFromServer();
     });
 }
 
@@ -221,6 +242,8 @@ function deleteGroup(groupID, userID) { // delete the group if the user is the a
     .then(res => res.json())
     .then(data => {
         if(data.success) openGroupsPopup(); // it will rnder all the groups from start
+        // Refresh the feed posts to reflect changes in group membership
+        fetchPostsFromServer();
     });
 }
 
@@ -238,9 +261,21 @@ function openMembersPopup(groupId, isAdmin, usersArray, adminId) {
         row.className = 'd-flex justify-content-between align-items-center mb-2';
 
         const userContainer = document.createElement('div');
-        
         const userSpan = document.createElement('span');
-        userSpan.textContent = userId === CURRENT_USER_ID ? 'You' : `User: ${userId.substring(0,6)}...`; // change it to username from users model
+        
+        fetch("/api/user/username", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            userSpan.textContent = data.username; 
+            })
+        .catch(error => {
+            console.error("Error fetching username:", error);
+            userSpan.textContent = "Eror at loading";
+            });
         
         userContainer.appendChild(userSpan);
 
@@ -262,7 +297,7 @@ function openMembersPopup(groupId, isAdmin, usersArray, adminId) {
         }
 
         listContainer.appendChild(row);
-    });
+        });
 }
 
 function closeMembersPopup(event, forceClose = false) {
@@ -285,6 +320,8 @@ function removeUser(groupId, userIdToRemove) {
         if(data.success) {
             closeMembersPopup(null, true);
             openGroupsPopup(); // refreshing the groups render
+            // Refresh the feed posts to reflect changes in group membership
+            fetchPostsFromServer();
         }
     });
 }
@@ -313,4 +350,18 @@ function renameGroup(groupId, currentName) {
     .catch(error => {
         console.error('Error:', error);
     });
+}
+
+function scrollToAndHighlight(groupElement) { // this function scrolldown and highlighting a new group who created
+    setTimeout(() => {
+        groupElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        groupElement.animate([
+            { backgroundColor: 'transparent' },
+            { backgroundColor: 'rgba(40, 167, 69, 0.4)' },
+            { backgroundColor: 'transparent' }
+        ], {
+            duration: 1000,
+            iterations: 2
+        });
+    }, 100);
 }
