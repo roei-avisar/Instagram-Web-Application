@@ -389,6 +389,11 @@ async function publishNewComment() {
                 
                 if (commentPopupBackground && allPost) {
                     addCommentsToPopupComment(commentPopupBackground, allPost);
+
+                    const commentsCounter = allPost.querySelector('.js-comments-counter');
+                    if (commentsCounter) {
+                        commentsCounter.textContent = allPostsData.find(post => post._id === currentPostId)?.comments.length || 0;
+                    }
                     
                     // Scroll to bottom to see the new comment
                     let commentPopupList = document.querySelector(".js-popup-comments-slot");

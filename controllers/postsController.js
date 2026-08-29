@@ -45,6 +45,8 @@ class PostController {
                     });
                 }
 
+                postObj.stats.comments = postObj.comments?.length || 0;
+
                 return postObj;
             });
 
@@ -207,12 +209,12 @@ class PostController {
             if (!userId) return res.status(401).json({ message: "User not logged in" });
 
             const newComment = await Comment.create({ postId, userId, text });
-            await Post.findByIdAndUpdate(postId, {
+            const updatedPost = await Post.findByIdAndUpdate(postId, {
                 $push: { comments: newComment._id },
                 $inc: { 'stats.comments': 1 }
-            });
+            }, { new: true });
 
-            res.status(201).json(newComment);
+            res.status(201).json({ comment: newComment, commentsCount: updatedPost.comments.length });
         } catch (error) {
             res.status(500).json({ message: "Error adding comment", error });
         }
@@ -375,6 +377,8 @@ class PostController {
                         if (c.userId && c.userId.username) c.userId.username = decrypt(c.userId.username);
                     });
                 }
+
+                postObj.stats.comments = postObj.comments?.length || 0;
 
                 return postObj;
             });
