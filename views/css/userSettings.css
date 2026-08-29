@@ -292,7 +292,7 @@
 .settings-delete-btn {
   width: 100%;
   padding: 12px;
-  background: #fff;
+  background: transparent;
   color: #ed4956;
   border: 1.5px solid #ed4956;
   border-radius: 14px;
@@ -418,4 +418,41 @@
 .delete-account-confirm-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ========== DARK MODE OVERRIDES ========== */
+body.dark-mode .settings-delete-btn {
+  color: #ed4956 !important;
+  background: transparent !important;
+}
+
+body.dark-mode .settings-delete-btn:hover {
+  background: #ed4956 !important;
+  color: #fff !important;
+}
+
+body.dark-mode .delete-account-box {
+  background: #0C1014 !important;
+  border: 1px solid #262B33 !important;
+}
+
+body.dark-mode .delete-account-title {
+  color: white !important;
+}
+
+body.dark-mode .delete-account-text {
+  color: #a8a8a8 !important;
+}
+
+body.dark-mode .delete-account-icon {
+  background: rgba(237, 73, 86, 0.1) !important;
+}
+
+body.dark-mode .delete-account-cancel-btn {
+  background: #262B33 !important;
+  color: white !important;
+}
+
+body.dark-mode .delete-account-cancel-btn:hover {
+  background: #3a414d !important;
 }
