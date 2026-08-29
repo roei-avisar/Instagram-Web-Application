@@ -6,14 +6,14 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     unique: true,
-    sparse: true,       // allows null — user can register with phone instead
+    required: true,
     lowercase: true,
     trim: true
   },
   phone: {
     type: String,
     unique: true,
-    sparse: true,       // allows null — user can register with email instead
+    required: true,
     trim: true
   },
   username: {

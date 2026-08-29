@@ -8,11 +8,16 @@ async function openAllUsersPopup() {
   const listContainer = document.getElementById('allUsersList');
   listContainer.innerHTML = '<div class="text-center text-muted my-3">Loading users...</div>';
 
+  const searchInput = document.getElementById('allUsersSearchInput');
+  if (searchInput) searchInput.value = ''; // clear search input
+
   try {
     const res = await fetch('/api/user/allUsers'); // fetch all users from the DB
     const data = await res.json();
 
     if (res.ok) {
+      // save all the users in a global variable so we can use it for the search
+      window.allFetchedUsersList = data.users;
       renderAllUsers(data.users);
     } else {
       listContainer.innerHTML = `<div class="text-center text-danger my-3">${data.error || 'Failed to load users'}</div>`;
@@ -144,4 +149,19 @@ async function handleFollowToggle(targetUserId, btnElement) {
   } finally {
     btnElement.disabled = false;
   }
+}
+
+// Handle search input filtering
+const allUsersSearchInput = document.getElementById('allUsersSearchInput');
+if (allUsersSearchInput) {
+  allUsersSearchInput.addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase().trim();
+    if (!window.allFetchedUsersList) return;
+
+    const filteredUsers = window.allFetchedUsersList.filter(user =>
+      user.username.toLowerCase().includes(searchTerm)
+    );
+
+    renderAllUsers(filteredUsers);
+  });
 }

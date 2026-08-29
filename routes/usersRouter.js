@@ -26,6 +26,12 @@ router.patch('/follow', userController.followUser);
 
 router.patch('/unfollow', userController.unfollowUser);
 
+router.get('/check_followers', userController.check_followers);
+
+router.get('/check_following', userController.check_following);
+
+router.delete('/delete', userController.deleteUser);
+
 router.post('/addPersonalPost', userController.addPersonalPost);
 
 router.delete('/removePersonalPost/:postId', userController.removePersonalPost);
