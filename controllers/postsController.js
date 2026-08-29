@@ -2,10 +2,50 @@ const { Post, Comment } = require('../models/postsModel');
 const gitService = require('../utils/gitService');
 const { decrypt } = require('../utils/encryption');
 
+const DEFAULT_PROFILE_PIC = '/elements/media/profile-pictures/Default_pfp.jpg';
+
+// Helper function to delete all comments associated with a post
 async function deletePostComments(commentIds) {
     if (commentIds && commentIds.length > 0) {
         await Comment.deleteMany({ _id: { $in: commentIds } });
     }
+}
+
+// Helper function to normalize authors array, ensuring each author has a username and profilePic
+function normalizePostAuthors(authors) {
+    return (authors || []).map(author => {
+        if (!author) {
+            return {
+                username: 'Unknown',
+                profilePic: DEFAULT_PROFILE_PIC
+            };
+        }
+
+        const normalizedAuthor = { ...author };
+
+        if (!normalizedAuthor.username || normalizedAuthor.username.trim() === '') {
+            normalizedAuthor.username = 'Unknown';
+        }
+
+        if (!normalizedAuthor.profilePic || normalizedAuthor.profilePic.trim() === '') {
+            normalizedAuthor.profilePic = DEFAULT_PROFILE_PIC;
+        }
+
+        return normalizedAuthor;
+    });
+}
+
+// Helper function to check if a user can manage (edit/delete) a post
+function canManagePost(post, userId) {
+    if (!post || !userId) return false;
+
+    // Check if the user is one of the authors
+    const isAuthor = post.authors.some(authorId => authorId.toString() === userId);
+    
+    // Check if the user is the group admin
+    const isGroupAdmin = post.groupAdminId && post.groupAdminId.toString() === userId;
+
+    return isAuthor || isGroupAdmin;
 }
 
 class PostController {
@@ -17,6 +57,7 @@ class PostController {
                 .populate('authors')
                 .populate('likedByUsers')
                 .populate('savedByUsers')
+                .populate('group')
                 .populate({
                     path: 'comments',
                     populate: { path: 'userId' } // Populate the user who wrote the comment
@@ -25,6 +66,8 @@ class PostController {
             // Format posts to decrypt usernames before sending to frontend
             const formattedPosts = posts.map(post => {
                 const postObj = post.toObject();
+
+                postObj.authors = normalizePostAuthors(postObj.authors);
 
                 // Decrypt authors
                 if (postObj.authors) {
@@ -63,7 +106,11 @@ class PostController {
             newPostData.authors = [req.session.userId];
 
             if (newPostData.groupId) {
-                newPostData.group = newPostData.groupId; 
+                newPostData.group = newPostData.groupId;
+            }
+
+            if (!newPostData.groupAdminId) {
+                newPostData.groupAdminId = null;
             }
 
             if (newPostData.mediaSource && newPostData.mediaSource.startsWith('data:')) {
@@ -119,10 +166,7 @@ class PostController {
                 return res.status(404).json({ message: "Post not found" });
             }
 
-            // Check if the user is one of the authors of the post
-            const isAuthor = postToDelete.authors.some(authorId => authorId.toString() === userId);
-            
-            if (!isAuthor) {
+            if (!canManagePost(postToDelete, userId)) {
                 return res.status(403).json({ message: "You don't have permission to delete this post" });
             }
 
@@ -352,12 +396,14 @@ class PostController {
                 .populate('group')
                 .populate({
                     path: 'comments',
-                    populate: { path: 'userId' }
+                    populate: { path: 'userId' } // Populate the user who wrote the comment
                 });
 
             // Format posts to decrypt usernames before sending to frontend
             const formattedPosts = feedPosts.map(post => {
                 const postObj = post.toObject();
+
+                postObj.authors = normalizePostAuthors(postObj.authors);
 
                 // Decrypt authors
                 if (postObj.authors) {
@@ -408,11 +454,9 @@ class PostController {
                 return res.status(404).json({ message: "Post not found" });
             }
 
-            // Check if the user is one of the authors of the post
-            const isAuthor = postToUpdate.authors.some(authorId => authorId.toString() === userId);
-            
-            if (!isAuthor) {
-                return res.status(403).json({ message: "You don't have permission to edit this post" });
+            // Check if the user is authorized to update the post
+            if (!canManagePost(postToUpdate, userId)) {
+                return res.status(403).json({ message: "You don't have permission to update this post" });
             }
 
             // Create an object with the fields that need to be updated

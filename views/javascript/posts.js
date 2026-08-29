@@ -193,41 +193,51 @@ async function updatePostButtonsUI(postId) {
     });
 }
 
+function getSafeAuthors(post) {
+    return (Array.isArray(post.authors) ? post.authors : []).filter(Boolean);
+}
+
 function createAuthorsHTML(post) {
+    const safeAuthors = getSafeAuthors(post);
+    const primaryAuthor = safeAuthors[0] || { username: 'Unknown' };
+    const secondaryAuthor = safeAuthors[1] || { username: 'Unknown' };
+
     let authorsNamesHTML = '';
-    if (post.authors.length > 1) {
-        // Access populated username
+    if (safeAuthors.length > 1) {
         authorsNamesHTML = `
-            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[0].username}</a>
+            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${primaryAuthor.username || 'Unknown'}</a>
             <span class="ms-1">and</span>
-            <a href="#!" class="username ms-1 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[1].username}</a>
+            <a href="#!" class="username ms-1 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${secondaryAuthor.username || 'Unknown'}</a>
         `;
     } else {
         authorsNamesHTML = `
-            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[0].username}</a>
+            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${primaryAuthor.username || 'Unknown'}</a>
         `;
     }
     return authorsNamesHTML;
 }
 
 function createProfilePicsHTML(post) {
+    const safeAuthors = getSafeAuthors(post);
+    const primaryAuthor = safeAuthors[0] || { profilePic: '/elements/media/profile-pictures/Default_pfp.jpg' };
+    const secondaryAuthor = safeAuthors[1] || { profilePic: '/elements/media/profile-pictures/Default_pfp.jpg' };
+
     let profilePicsHTML = '';
-    if (post.authors.length > 1) {
-        // Access populated profilePic
+    if (safeAuthors.length > 1) {
         profilePicsHTML = `
             <div>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="${post.authors[0].profilePic}" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
+                    <img src="${primaryAuthor.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg'}" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
                 </a>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="${post.authors[1].profilePic}" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
+                    <img src="${secondaryAuthor.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg'}" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
                 </a>
             </div>
         `;
     } else {
         profilePicsHTML = `
             <a href="#!" class="text-decoration-none text-dark profile-circle">
-                <img src="${post.authors[0].profilePic}" class="img-fluid rounded-circle post-profile-pic" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
+                <img src="${primaryAuthor.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg'}" class="img-fluid rounded-circle post-profile-pic" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
             </a>
         `;
     }
@@ -237,8 +247,10 @@ function createProfilePicsHTML(post) {
 function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
     let optionsMenuHTML = '';
 
+    const safeAuthors = getSafeAuthors(post);
+
     // Check if the current user is one of the authors of the post
-    const isCurrentUserAuthor = post.authors.some(author => (author._id || author) === CURRENT_USER_ID);
+    const isCurrentUserAuthor = safeAuthors.some(author => (author._id || author) === CURRENT_USER_ID);
 
     if (isCurrentUserAuthor) {
         optionsMenuHTML = `
@@ -448,11 +460,14 @@ function createLikedByHTML(likedByUsers, likes) {
 }
 
 function createCaptionHTML(post) {
+    const safeAuthors = getSafeAuthors(post);
+    const primaryAuthor = safeAuthors[0] || { username: 'Unknown' };
+
     let captionHTML = `
     <div class="js-post-caption">
-        <a href="#!" class="username fw-semibold text-decoration-none text-dark">${post.authors[0].username}</a>
+        <a href="#!" class="username fw-semibold text-decoration-none text-dark">${primaryAuthor.username || 'Unknown'}</a>
         ${post.isVerified ? '<span class="bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
-        <span>${post.caption}</span>
+        <span>${post.caption || ''}</span>
     </div>
     <button class="small-text fw-semibold bg-transparent border-0 p-0"> See translation</button>
     `;
