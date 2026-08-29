@@ -236,7 +236,7 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
         commentPopupList.innerHTML = `
         <div class="d-flex m-3">
             <div class="flex-shrink-0">
-                <img src="${authorProfilePic}" class="rounded-circle" onerror="this.src='/images/profiles/Default_pfp.jpg'" style="width: 32px; height: 32px; object-fit: cover;">
+                <img src="${authorProfilePic}" class="rounded-circle" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" style="width: 32px; height: 32px; object-fit: cover;">
             </div>
             <div class="w-100 ms-2 text-break" style="min-width: 0;">
                 ${caption}
@@ -270,7 +270,7 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
             let commentHTML = `
                 <div class="d-flex m-3 align-items-start js-comment-row">
                     <div class="flex-shrink-0">
-                        <img src="${commentProfilePic}" class="rounded-circle" onerror="this.src='/images/profiles/Default_pfp.jpg'" style="width: 32px; height: 32px; object-fit: cover;">
+                        <img src="${commentProfilePic}" class="rounded-circle" onerror="this.onerror = null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" style="width: 32px; height: 32px; object-fit: cover;">
                     </div>
                     <div class="w-100 ms-2 text-break" style="min-width: 0;">
                         <a href="#!" class="username fw-semibold text-decoration-none text-dark">${commentUsername}</a>
@@ -502,7 +502,7 @@ function createShareList(listToRender = friends) //render a share list from all 
         let friendHTML = 
         `<label class="d-flex align-items-center justify-content-between mb-2 p-2 rounded js-friend-row" style="cursor: pointer;" onmouseenter="this.classList.add('bg-light')" onmouseleave="this.classList.remove('bg-light')">
             <div class="d-flex align-items-center gap-2">
-                <img src="elements/media/profile-pictures/${friend.username}.jpg" class="rounded-circle" onerror="this.src='/images/profiles/Default_pfp.jpg'" style="width: 44px; height: 44px; object-fit: cover;">
+                <img src="elements/media/profile-pictures/${friend.username}.jpg" class="rounded-circle" onerror="this.onerror = null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" style="width: 44px; height: 44px; object-fit: cover;">
                 <div class="d-flex flex-column lh-1">
                     <span class="fw-semibold">${friend.username}</span>
                     <span class="text-muted text-12">${friend.fullName}</span>
