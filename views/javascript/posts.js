@@ -202,17 +202,18 @@ function createAuthorsHTML(post) {
     const safeAuthors = getSafeAuthors(post);
     const primaryUsername = safeAuthors[0]?.username || 'Unknown';
     const secondaryUsername = safeAuthors[1]?.username || 'Unknown';
+    const mediaTypeClass = textColour[post?.mediaType] || '';
 
     let authorsNamesHTML = '';
     if (safeAuthors.length > 1) {
         authorsNamesHTML = `
-            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${primaryUsername}</a>
+            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${mediaTypeClass} small-text">${primaryUsername}</a>
             <span class="ms-1">and</span>
-            <a href="#!" class="username ms-1 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${secondaryUsername}</a>
+            <a href="#!" class="username ms-1 fw-semibold text-decoration-none ${mediaTypeClass} small-text">${secondaryUsername}</a>
         `;
     } else {
         authorsNamesHTML = `
-            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${primaryUsername}</a>
+            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${mediaTypeClass} small-text">${primaryUsername}</a>
         `;
     }
     return authorsNamesHTML;
