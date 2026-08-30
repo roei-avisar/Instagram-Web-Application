@@ -194,7 +194,8 @@ async function updatePostButtonsUI(postId) {
 }
 
 function getSafeAuthors(post) {
-    return (Array.isArray(post.authors) ? post.authors : []).filter(Boolean);
+    const authors = post?.authors;
+    return (Array.isArray(authors) ? authors : []).filter(Boolean);
 }
 
 function createAuthorsHTML(post) {
