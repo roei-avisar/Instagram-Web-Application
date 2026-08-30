@@ -40,8 +40,8 @@ function canManagePost(post, userId) {
     if (!post || !userId) return false;
 
     // Check if the user is one of the authors
-    const isAuthor = post.authors.some(authorId => authorId.toString() === userId);
-    
+    const isAuthor = Array.isArray(post.authors) && post.authors.some(authorId => authorId.toString() === userId);
+
     // Check if the user is the group admin
     const isGroupAdmin = post.groupAdminId && post.groupAdminId.toString() === userId;
 
