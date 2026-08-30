@@ -200,19 +200,19 @@ function getSafeAuthors(post) {
 
 function createAuthorsHTML(post) {
     const safeAuthors = getSafeAuthors(post);
-    const primaryAuthor = safeAuthors[0] || { username: 'Unknown' };
-    const secondaryAuthor = safeAuthors[1] || { username: 'Unknown' };
+    const primaryUsername = safeAuthors[0]?.username || 'Unknown';
+    const secondaryUsername = safeAuthors[1]?.username || 'Unknown';
 
     let authorsNamesHTML = '';
     if (safeAuthors.length > 1) {
         authorsNamesHTML = `
-            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${primaryAuthor.username || 'Unknown'}</a>
+            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${primaryUsername}</a>
             <span class="ms-1">and</span>
-            <a href="#!" class="username ms-1 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${secondaryAuthor.username || 'Unknown'}</a>
+            <a href="#!" class="username ms-1 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${secondaryUsername}</a>
         `;
     } else {
         authorsNamesHTML = `
-            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${primaryAuthor.username || 'Unknown'}</a>
+            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${primaryUsername}</a>
         `;
     }
     return authorsNamesHTML;
@@ -220,25 +220,27 @@ function createAuthorsHTML(post) {
 
 function createProfilePicsHTML(post) {
     const safeAuthors = getSafeAuthors(post);
-    const primaryAuthor = safeAuthors[0] || { profilePic: '/elements/media/profile-pictures/Default_pfp.jpg' };
-    const secondaryAuthor = safeAuthors[1] || { profilePic: '/elements/media/profile-pictures/Default_pfp.jpg' };
+    const primaryProfilePic = safeAuthors[0]?.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg';
+    const secondaryProfilePic = safeAuthors[1]?.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg';
+    const primaryUsername = safeAuthors[0]?.username || 'Unknown';
+    const secondaryUsername = safeAuthors[1]?.username || 'Unknown';
 
     let profilePicsHTML = '';
     if (safeAuthors.length > 1) {
         profilePicsHTML = `
             <div>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="${primaryAuthor.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg'}" data-username="${post.authors[0].username}" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
+                    <img src="${primaryProfilePic}" data-username="${primaryUsername}" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
                 </a>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="${secondaryAuthor.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg'}" data-username="${post.authors[1].username}" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
+                    <img src="${secondaryProfilePic}" data-username="${secondaryUsername}" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
                 </a>
             </div>
         `;
     } else {
         profilePicsHTML = `
             <a href="#!" class="text-decoration-none text-dark profile-circle">
-                <img src="${primaryAuthor.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg'}" data-username="${post.authors[0].username}" class="img-fluid rounded-circle post-profile-pic" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
+                <img src="${primaryProfilePic}" data-username="${primaryUsername}" class="img-fluid rounded-circle post-profile-pic" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
             </a>
         `;
     }
