@@ -223,7 +223,7 @@ class GroupsController {
 
             await Group.findByIdAndUpdate(
                 groupId,
-                { $addToSet: { posts: postId } } 
+                { $addToSet: { posts: postId } }
             );
 
             res.status(200).json({ success: true, message: "Post added to group successfully" });
