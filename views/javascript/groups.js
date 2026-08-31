@@ -261,22 +261,38 @@ function openMembersPopup(groupId, isAdmin, usersArray, adminId) {
         row.className = 'd-flex justify-content-between align-items-center mb-2';
 
         const userContainer = document.createElement('div');
+        userContainer.className = 'd-flex align-items-center';
+
+        const userImg = document.createElement('img');
+        userImg.className = 'rounded-circle me-2';
+        userImg.style.width = '35px';
+        userImg.style.height = '35px';
+        userImg.style.objectFit = 'cover';
+        
+        userImg.onerror = function() {
+            this.onerror = null;
+            this.src = '/images/profiles/Default_pfp.jpg';
+        };
+
         const userSpan = document.createElement('span');
         
-        fetch("/api/user/username", {
+        fetch("/api/user/getBasicInfo", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: userId })
         })
         .then(response => response.json())
         .then(data => {
-            userSpan.textContent = data.username; 
-            })
+            userSpan.textContent = data.username || "Unknown"; 
+            userImg.src = data.profilePic || '/images/profiles/Default_pfp.jpg';
+        })
         .catch(error => {
-            console.error("Error fetching username:", error);
-            userSpan.textContent = "Eror at loading";
-            });
+            console.error("Error fetching user info:", error);
+            userSpan.textContent = "Error loading";
+            userImg.src = '/images/profiles/Default_pfp.jpg';
+        });
         
+        userContainer.appendChild(userImg);
         userContainer.appendChild(userSpan);
 
         if (userId === adminId) {
@@ -297,7 +313,7 @@ function openMembersPopup(groupId, isAdmin, usersArray, adminId) {
         }
 
         listContainer.appendChild(row);
-        });
+    });
 }
 
 function closeMembersPopup(event, forceClose = false) {

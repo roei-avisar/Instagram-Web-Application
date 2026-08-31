@@ -35,7 +35,7 @@ function closeAllUsersPopup() {
 }
 
 // Close modal when clicking on the dark overlay (outside the box)
-document.getElementById('allUsersModal').addEventListener('click', function (e) {
+document.getElementById('allUsersModal').addEventListener('mousedown', function (e) {
   if (e.target === this) {
     closeAllUsersPopup();
   }
@@ -208,7 +208,7 @@ async function loadSidebarSuggestedUsers() {
 
         row.innerHTML = `
           <div class="user-info d-flex align-items-center gap-2">
-            <img src="${user.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg'}" class="right-sidebar-avatar rounded-circle" />
+            <img src="${user.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg'}" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" class="right-sidebar-avatar rounded-circle" />
             <div class="lh-1">
               <span class="username">${displayUsername}</span>
               <div class="d-flex mt-1">
