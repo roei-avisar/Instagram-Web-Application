@@ -632,14 +632,14 @@
                 <div class="p-4 border-bottom bg-light">
                     <div class="d-flex gap-2 mb-3">
                         <input type="text" id="newGroupName" class="form-control rounded-pill px-3 shadow-none border"
-                            placeholder="Name your new group..." maxlength="60">
+                            placeholder="Name your new group..." maxlength="60" dir="auto">
                         <button class="btn btn-primary rounded-pill px-4 fw-bold"
                             onclick="createGroup()">Create</button>
                     </div>
 
                     <input type="text" id="groupSearch"
                         class="form-control rounded-pill px-3 shadow-none border-0 bg-white shadow-sm"
-                        placeholder="Search groups..." oninput="filterGroups()">
+                        placeholder="Search groups..." oninput="filterGroups()" dir="auto">
 
                     <div class="form-check mt-3 ms-2">
                         <input type="checkbox" id="myGroupsFilter" class="form-check-input border-secondary"
