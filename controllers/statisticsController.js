@@ -1,6 +1,6 @@
 const Group = require('../models/groupsModel');
 const { Post } = require('../models/postsModel');
-const { GetUsernameByUserID } = require('../utils/userHelper');;
+const { GetUsernameByUserID } = require('../utils/userHelper');
 
 class StatisticsController {
     async getCommunitySize(req, res) {
