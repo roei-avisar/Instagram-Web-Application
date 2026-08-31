@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="./css/userSettings.css">
     <link rel="stylesheet" href="./css/follow.css">
     <link rel="stylesheet" href="./css/statistics.css">
+    <link rel="stylesheet" href="./css/advanced-search.css">
     <script src="https://d3js.org/d3.v7.min.js"></script> <!-- should be on top of the page -->
 </head>
 
@@ -169,10 +170,10 @@
                         <span>Messages</span>
                     </button>
 
-                    <!-- Search -->
-                    <button class="menu-item js-search-btn">
-                        <i class="bi bi-search"></i>
-                        <span>Search</span>
+                    <!-- Search and filter -->
+                    <button class="menu-item js-filter-btn">
+                        <div class="bi bi-funnel small-icon"></div>
+                        <span>Filter Posts</span>
                     </button>
 
                     <!-- Notifications -->
@@ -191,12 +192,6 @@
                     <button class="menu-item js-dashboard-btn" onclick="openDashboard()">
                         <i class="bi bi-bar-chart"></i>
                         <span>Dashboard</span>
-                    </button>
-
-                    <!-- Filter -->
-                    <button class="menu-item js-filter-btn">
-                        <div class="bi bi-funnel small-icon"></div>
-                        <span>Filter Posts</span>
                     </button>
 
                     <!-- Profile -->
@@ -259,42 +254,54 @@
                 </div>
             </div>
 
-            <div class="filter-menu-dropdown js-filter-menu d-none">
-                <h6 class="fw-bold mb-3 fs-6">Filter by Media</h6>
-
-                <div class="form-check mb-2">
-                    <input class="form-check-input js-filter-all" type="checkbox" value="all" id="filterAll" checked>
-                    <label class="form-check-label fs-7 cursor-pointer" for="filterAll">
-                        <i class="bi bi-grid me-2"></i>All
-                    </label>
+            <!-- Feed Advanced Search Sidebar -->
+            <div class="feed-advanced-search-panel js-feed-advanced-search-panel hidden-panel">
+                <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+                    <h4 class="fw-bold mb-0 text-dark">Advanced Search</h4>
+                    <button class="bg-transparent border-0 bi bi-x fs-4 text-dark js-close-feed-adv-search hover-extend"></button>
                 </div>
+                
+                <div class="p-4 overflow-y-auto flex-grow-1">
+                    <!-- Parameter 1: Text Input -->
+                    <div class="mb-4">
+                        <label class="fw-bold mb-2 fs-7 text-secondary">Search Caption or Username</label>
+                        <input type="text" id="feedAdvSearchText" class="form-control rounded-pill bg-light shadow-none border px-3 py-2 text-dark" placeholder="Keywords..." dir="auto">
+                    </div>
 
-                <div class="form-check mb-2">
-                    <input class="form-check-input js-filter-single" type="checkbox" value="image" id="filterImage"
-                        checked>
-                    <label class="form-check-label fs-7 cursor-pointer" for="filterImage">
-                        <i class="bi bi-image me-2"></i>Images
-                    </label>
+                    <!-- Parameter 2: Media Types -->
+                    <div class="mb-4">
+                        <label class="fw-bold mb-2 fs-7 text-secondary">Media Type</label>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input js-feed-adv-filter-media border-secondary" type="checkbox" value="image" id="feedAdvFilterImage" checked>
+                            <label class="form-check-label cursor-pointer text-dark" for="feedAdvFilterImage"><i class="bi bi-image me-2"></i>Images</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input js-feed-adv-filter-media border-secondary" type="checkbox" value="video" id="feedAdvFilterVideo" checked>
+                            <label class="form-check-label cursor-pointer text-dark" for="feedAdvFilterVideo"><i class="bi bi-play-btn me-2"></i>Videos</label>
+                        </div>
+                        <div class="form-check mb-0">
+                            <input class="form-check-input js-feed-adv-filter-media border-secondary" type="checkbox" value="text" id="feedAdvFilterText" checked>
+                            <label class="form-check-label cursor-pointer text-dark" for="feedAdvFilterText"><i class="bi bi-card-text me-2"></i>Text</label>
+                        </div>
+                    </div>
+
+                    <!-- Parameter 3: Time Range -->
+                    <div class="mb-4">
+                        <label class="fw-bold mb-2 fs-7 text-secondary">Upload Time</label>
+                        <select id="feedAdvSearchTime" class="form-select rounded-pill bg-light shadow-none border px-3 py-2 text-dark">
+                            <option value="all">Anytime</option>
+                            <option value="24h">Last 24 Hours</option>
+                            <option value="week">Past Week</option>
+                        </select>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 mt-4">
+                        <button class="btn btn-light w-50 rounded-pill fw-bold py-2 border text-dark" onclick="clearFeedAdvancedSearch()">Clear</button>
+                        <button class="btn btn-primary w-50 rounded-pill fw-bold py-2" onclick="executeFeedAdvancedSearch()">Apply</button>
+                    </div>
                 </div>
-
-                <div class="form-check mb-2">
-                    <input class="form-check-input js-filter-single" type="checkbox" value="video" id="filterVideo"
-                        checked>
-                    <label class="form-check-label fs-7 cursor-pointer" for="filterVideo">
-                        <i class="bi bi-play-btn me-2"></i>Videos
-                    </label>
-                </div>
-
-                <div class="form-check mb-0">
-                    <input class="form-check-input js-filter-single" type="checkbox" value="text" id="filterText"
-                        checked>
-                    <label class="form-check-label fs-7 cursor-pointer" for="filterText">
-                        <i class="bi bi-card-text me-2"></i>Text
-                    </label>
-                </div>
-
             </div>
-
             <section class="main-feed-section"> <!-- Main feed section -->
 
                 <a id="backToTop" href="#top">
@@ -626,7 +633,7 @@
                 <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
                     <div class="fw-bold fs-5 mx-auto">Groups</div>
                     <button class="bg-transparent border-0 bi bi-x fs-3 position-absolute end-0 me-3 hover-extend"
-                        onmousedown="closeGroupsPopup(event, true)"></button>
+                        onclick="closeGroupsPopup(event, true)"></button>
                 </div>
 
                 <div class="p-4 border-bottom bg-light">
@@ -1063,6 +1070,7 @@
     <script src="javascript/userSettings.js"></script>
     <script src="javascript/follow.js"></script>
     <script src="javascript/statistics.js"></script>
+    <script src="javascript/advanced-Search.js"></script>
 </body>
 
 </html>

@@ -434,3 +434,37 @@ body.dark-mode .chart-grid-line {
 .dark-mode #groupsOverlay .form-control::placeholder {
     color: #a0a0a0 !important;
 }
+body.dark-mode .feed-advanced-search-panel {
+    background-color: #121212;
+    border-right: 1px solid #333;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .feed-advanced-search-panel .text-dark,
+body.dark-mode .feed-advanced-search-panel h4 {
+    color: #ffffff !important;
+}
+
+body.dark-mode .feed-advanced-search-panel .bg-light {
+    background-color: #262626 !important;
+}
+
+body.dark-mode .feed-advanced-search-panel .form-control,
+body.dark-mode .feed-advanced-search-panel .form-select {
+    background-color: #262626 !important;
+    color: #ffffff !important;
+    border: 1px solid #444444 !important;
+}
+
+body.dark-mode .feed-advanced-search-panel .form-control::placeholder {
+    color: #a0a0a0 !important;
+}
+body.dark-mode .feed-advanced-search-panel .btn-light {
+    background-color: #262626 !important;
+    color: #ffffff !important;
+    border-color: #444444 !important;
+}
+
+body.dark-mode .feed-advanced-search-panel .btn-light:hover {
+    background-color: #333333 !important;
+}

@@ -28,4 +28,7 @@ router.patch('/updatePost/:id', postController.updatePost);
 // Route to delete multiple posts by their IDs (DELETE /api/posts/deleteMultiplePosts)
 router.delete('/deleteMultiplePosts', postController.deleteMultiplePosts);
 
+// Route to get filtered post
+router.post('/advancedSearch', postController.advancedFeedSearch);
+
 module.exports = router;

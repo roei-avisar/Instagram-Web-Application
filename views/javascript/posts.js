@@ -40,26 +40,6 @@ async function fetchPostsFromServer() {
     }
 }
 
-const filtersList = {
-    mediaType: [ "image", "video", "text" ],
-    searchString: ''
-};
-
-const filtersFunctions = {
-    mediaType: function(postsData, values) {
-        return postsData.filter(post => values.includes(post.mediaType));
-    },
-    searchString: function(postsData, value) {
-        return postsData.filter(post => {
-            const inCaption = post.caption.toLowerCase().includes(value.toLowerCase());
-            // Checking against populated username object
-            const inAuthors = post.authors.some(author => author.username.toLowerCase().includes(value.toLowerCase()));
-            const inText = post.mediaType === 'text' && post.mediaSource.toLowerCase().includes(value.toLowerCase());
-            return inCaption || inAuthors || inText;
-        });
-    }
-};
-
 // Create new post by sending a POST request to the server
 async function addNewPost(newPostData) {
     try {
@@ -94,26 +74,6 @@ async function addNewPost(newPostData) {
     } catch (error) {
         console.error('Error adding new post:', error);
     }
-}
-
-function applyFilters() {
-    let currentPosts = allPostsData;
-
-    Object.keys(filtersList).forEach(key => {
-        currentPosts = filtersFunctions[key](currentPosts, filtersList[key]);
-    });
-
-    renderPosts(currentPosts);
-}
-
-function updateSearchFilter(text) {
-    filtersList.searchString = text;
-    applyFilters();
-}
-
-function updateMediaFilter(mediaTypes) {
-    filtersList.mediaType = mediaTypes;
-    applyFilters();
 }
 
 // Update the deletePostById function to send delete request to the server
@@ -328,9 +288,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                 </div>
                 
                 <div class="js-post-media position-relative">
-                    <video id="video-${post._id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline onended="restartMedia(this)" onerror="this.outerHTML='<img src=&quot;/elements/media/posts/main-posts/error-post.jpg&quot; class=&quot;img-fluid rounded-2 main-post&quot;>'"></video>
-                    ${audioTagHTML}
-                    ${muteButtonHTML}
+                    <video id="video-${post._id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline controls onended="restartMedia(this)" onerror="this.outerHTML='<img src=&quot;/elements/media/posts/main-posts/error-post.jpg&quot; class=&quot;img-fluid rounded-2 main-post&quot;>'"></video>
                 </div>
             </div> 
         `;
@@ -481,6 +439,10 @@ function createCaptionHTML(post) {
 
 function renderPosts(postsData) {
     let allPostsHTML = ''; // Accumulate all HTML here
+
+    if (typeof clearFeedAdvancedSearch === 'function') {
+        clearFeedAdvancedSearch(); // clear filter button
+    }
 
     postsData.forEach(post => {
         let profilePicsHTML = createProfilePicsHTML(post);
