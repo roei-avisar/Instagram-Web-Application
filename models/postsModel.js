@@ -10,8 +10,8 @@ const statsSchema = new mongoose.Schema({
 // Post schema definition
 const postSchema = new mongoose.Schema({
     authors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
+    groupAdminId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     isVerified: { type: Boolean, default: false },
-    timeAgo: { type: String, required: true },
     subHeader: { type: String, default: "" },
     mediaType: { type: String, enum: ['image', 'video', 'text'], required: true },
     mediaSource: { type: String, required: true },

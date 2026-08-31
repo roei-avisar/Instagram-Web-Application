@@ -3,6 +3,27 @@ const commentPopupBackground = document.querySelector('.comment-popup-background
 const textColour = {video: 'text-white', image: 'text-dark', text: 'text-dark'};
 let allPostsData = []; // Start with an empty array
 
+function formatTimeAgo(createdAt) {
+    const createdTime = new Date(createdAt).getTime();
+    if (Number.isNaN(createdTime)) return '';
+
+    const seconds = Math.max(0, Math.floor((Date.now() - createdTime) / 1000));
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d`;
+
+    return new Date(createdTime).toLocaleDateString();
+}
+
+function refreshPostTimes() {
+    document.querySelectorAll('.js-post-time-value').forEach(timeElement => {
+        timeElement.textContent = formatTimeAgo(timeElement.dataset.createdAt);
+    });
+}
+
+setInterval(refreshPostTimes, 60000);
+
 // Fetch initial post data from the server
 async function fetchPostsFromServer() {
     try {
@@ -172,41 +193,55 @@ async function updatePostButtonsUI(postId) {
     });
 }
 
+function getSafeAuthors(post) {
+    const authors = post?.authors;
+    return (Array.isArray(authors) ? authors : []).filter(Boolean);
+}
+
 function createAuthorsHTML(post) {
+    const safeAuthors = getSafeAuthors(post);
+    const primaryUsername = safeAuthors[0]?.username || 'Unknown';
+    const secondaryUsername = safeAuthors[1]?.username || 'Unknown';
+    const mediaTypeClass = textColour[post?.mediaType] || '';
+
     let authorsNamesHTML = '';
-    if (post.authors.length > 1) {
-        // Access populated username
+    if (safeAuthors.length > 1) {
         authorsNamesHTML = `
-            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[0].username}</a>
+            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${mediaTypeClass} small-text">${primaryUsername}</a>
             <span class="ms-1">and</span>
-            <a href="#!" class="username ms-1 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[1].username}</a>
+            <a href="#!" class="username ms-1 fw-semibold text-decoration-none ${mediaTypeClass} small-text">${secondaryUsername}</a>
         `;
     } else {
         authorsNamesHTML = `
-            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[0].username}</a>
+            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${mediaTypeClass} small-text">${primaryUsername}</a>
         `;
     }
     return authorsNamesHTML;
 }
 
 function createProfilePicsHTML(post) {
+    const safeAuthors = getSafeAuthors(post);
+    const primaryProfilePic = safeAuthors[0]?.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg';
+    const secondaryProfilePic = safeAuthors[1]?.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg';
+    const primaryUsername = safeAuthors[0]?.username || 'Unknown';
+    const secondaryUsername = safeAuthors[1]?.username || 'Unknown';
+
     let profilePicsHTML = '';
-    if (post.authors.length > 1) {
-        // Access populated profilePic
+    if (safeAuthors.length > 1) {
         profilePicsHTML = `
             <div>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="${post.authors[0].profilePic}" data-username="${post.authors[0].username}" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
+                    <img src="${primaryProfilePic}" data-username="${primaryUsername}" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
                 </a>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="${post.authors[1].profilePic}" data-username="${post.authors[1].username}" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
+                    <img src="${secondaryProfilePic}" data-username="${secondaryUsername}" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
                 </a>
             </div>
         `;
     } else {
         profilePicsHTML = `
             <a href="#!" class="text-decoration-none text-dark profile-circle">
-                <img src="${post.authors[0].profilePic}" data-username="${post.authors[0].username}" class="img-fluid rounded-circle post-profile-pic" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
+                <img src="${primaryProfilePic}" data-username="${primaryUsername}" class="img-fluid rounded-circle post-profile-pic" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
             </a>
         `;
     }
@@ -216,10 +251,13 @@ function createProfilePicsHTML(post) {
 function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
     let optionsMenuHTML = '';
 
-    // Check if the current user is one of the authors of the post
-    const isCurrentUserAuthor = post.authors.some(author => (author._id || author) === CURRENT_USER_ID);
+    const safeAuthors = getSafeAuthors(post);
 
-    if (isCurrentUserAuthor) {
+    // Check if the current user is one of the authors or the group admin
+    const isCurrentUserAuthor = safeAuthors.some(author => String(author._id || author) === CURRENT_USER_ID);
+    const isGroupAdmin = Boolean(post.groupAdminId && String(post.groupAdminId) === CURRENT_USER_ID);
+
+    if (isCurrentUserAuthor || isGroupAdmin) {
         optionsMenuHTML = `
         <div class="position-relative">
             <button class="bi bi-three-dots fs-4 bg-transparent border-0 p-0 ${textColour[post.mediaType]} options-btn"></button>
@@ -235,7 +273,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
         </div>
         `;
     } else {
-        // If the current user is not an author leave it empty
+        // If the current user is not an author or group admin, leave it empty
         optionsMenuHTML = `<div></div>`;
     }
 
@@ -280,7 +318,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                             ${post.isVerified ? '<span class="ms-1 bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
                                 <div class="js-post-time d-flex align-items-center">
                                     <span class="text-white ms-1 fw-medium small-text">&bull;</span>
-                                    <span class="text-white ms-1 small-text">${post.timeAgo}</span>
+                                    <span class="text-white ms-1 small-text js-post-time-value" data-created-at="${post.createdAt}">${formatTimeAgo(post.createdAt)}</span>
                                 </div>
                             </div>
                             <a href="#!" class="ms-2 text-decoration-none text-white text-12 text-start">${combinedSubHeaderText}</a>
@@ -308,7 +346,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                             ${post.isVerified ? '<span class="ms-1 bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
                             <span class="js-post-time">
                                 <span class="text-muted ms-1 fw-bold small-text">&bull;</span>
-                                <span class="text-muted ms-1 small-text">${post.timeAgo}</span>
+                                <span class="text-muted ms-1 small-text js-post-time-value" data-created-at="${post.createdAt}">${formatTimeAgo(post.createdAt)}</span>
                             </span>
                         </div>
                         <button class="bg-transparent border-0 p-0 ms-2 text-12 text-start">${combinedSubHeaderText}</button>
@@ -334,7 +372,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                             ${post.isVerified ? '<span class="ms-1 bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
                             <span class="js-post-time">
                                 <span class="text-muted ms-1 fw-bold small-text">&bull;</span>
-                                <span class="text-muted ms-1 small-text">${post.timeAgo}</span>
+                                <span class="text-muted ms-1 small-text js-post-time-value" data-created-at="${post.createdAt}">${formatTimeAgo(post.createdAt)}</span>
                             </span>
                         </div>
                         <button class="bg-transparent border-0 p-0 ms-2 text-12 text-start">${combinedSubHeaderText}</button>
@@ -427,11 +465,14 @@ function createLikedByHTML(likedByUsers, likes) {
 }
 
 function createCaptionHTML(post) {
+    const safeAuthors = getSafeAuthors(post);
+    const primaryAuthor = safeAuthors[0] || { username: 'Unknown' };
+
     let captionHTML = `
     <div class="js-post-caption">
-        <a href="#!" class="username fw-semibold text-decoration-none text-dark">${post.authors[0].username}</a>
+        <a href="#!" class="username fw-semibold text-decoration-none text-dark">${primaryAuthor.username || 'Unknown'}</a>
         ${post.isVerified ? '<span class="bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
-        <span>${post.caption}</span>
+        <span>${post.caption || ''}</span>
     </div>
     <button class="small-text fw-semibold bg-transparent border-0 p-0"> See translation</button>
     `;

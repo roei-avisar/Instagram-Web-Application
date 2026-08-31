@@ -318,7 +318,7 @@ document.querySelector('.js-postUpload-groups-btn').addEventListener('click', as
                     container.innerHTML += `
                         <label class="d-flex align-items-center justify-content-between p-2 rounded hover-light bg-light" style="cursor: pointer;">
                             <span class="fw-semibold">${group.name}</span>
-                            <input type="radio" name="groupSelection" class="form-check-input js-group-upload-radio" value="${group._id}">
+                            <input type="radio" name="groupSelection" class="form-check-input js-group-upload-radio" value="${group._id}" data-admin-id="${group.admin || ''}">
                         </label>
                     `;
                 });
@@ -343,19 +343,20 @@ document.querySelector('.js-final-postUpload-groups-btn').addEventListener('clic
         alert("Please select a group");
         return;
     }
-    
+
+    const selectedGroupAdminId = selectedRadio.dataset.adminId || null;
+
     // Submit the post data to the server
-    submitPostDataToServer(selectedRadio.value);
+    submitPostDataToServer(selectedRadio.value, selectedGroupAdminId);
 });
 
-async function submitPostDataToServer(groupId) {
+async function submitPostDataToServer(groupId, groupAdminId = null) {
     let captionText = document.querySelector('.js-caption-input').value;
     let locationText = document.querySelector('.js-location-input').value;
     
     const newPost = {
         "authors": [CURRENT_USER_ID],
         "isVerified": false,
-        "timeAgo": "1s",
         "subHeader": locationText,
         "mediaType": currentMediaType,
         "mediaSource": currentMediaSource,
@@ -368,6 +369,9 @@ async function submitPostDataToServer(groupId) {
 
     if (groupId) {
         newPost.groupId = groupId;
+        if (groupAdminId) {
+            newPost.groupAdminId = groupAdminId;
+        }
     }
 
     // Create the post
