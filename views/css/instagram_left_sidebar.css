@@ -8,12 +8,20 @@
   align-items: flex-start;
   padding: 10px 0;
   position: fixed;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   top: 0;
   left: 0;
   transition: width 0.1s ease;
   box-sizing: border-box;
   z-index: 8;
+  overscroll-behavior: contain;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.left-sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .left-sidebar:hover {

@@ -1,0 +1,40 @@
+.dashboard-section {
+    padding-right: 2rem;
+    transition: all 0.3s ease;
+}
+
+.dashboard-main-title {
+    color: #212529;
+}
+
+.dashboard-card {
+    background-color: #ffffff;
+}
+
+.chart-title {
+    color: #6c757d;
+}
+
+.chart-axis-text {
+    fill: #6c757d;
+    font-size: 13px;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+.chart-grid-line {
+    stroke: #e9ecef;
+    stroke-dasharray: 4,4;
+}
+
+.d3-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.85);
+    color: #ffffff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 9999;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}

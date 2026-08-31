@@ -757,6 +757,37 @@ class UserController {
       return res.status(500).json({ error: 'Server error' });
     }
   }
+  // get the username and photo bt given userID
+  async getBasicInfo(req, res) {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+
+      const User = require('../models/usersModel'); 
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      let username = 'Unknown';
+      try {
+        username = user.decryptUsername();
+      } catch { }
+
+      const profilePic = user.profilePic || '/images/profiles/Default_pfp.jpg';
+
+      return res.json({ username, profilePic });
+    } catch (err) {
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
 }
 
 module.exports = new UserController();

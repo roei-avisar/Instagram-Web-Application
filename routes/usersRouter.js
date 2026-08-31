@@ -38,4 +38,6 @@ router.delete('/removePersonalPost/:postId', userController.removePersonalPost);
 
 router.get('/getFollowingAndPersonalPosts', userController.getFollowingAndPersonalPosts);
 
+router.post("/getBasicInfo", userController.getBasicInfo)
+
 module.exports = router; // export all the router functions to be used by server.js
