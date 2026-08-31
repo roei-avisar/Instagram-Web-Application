@@ -78,6 +78,18 @@ window.addEventListener('scroll', () => {
 // Toggle dark mode
 themeToggle.addEventListener('click', () => {
     document.body.classList.toggle('dark-mode');
+    // storage the user choise on browser
+    if (document.body.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark');
+    } else {
+        localStorage.setItem('theme', 'light');
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
 });
 
 function closePostCreationForm() {
