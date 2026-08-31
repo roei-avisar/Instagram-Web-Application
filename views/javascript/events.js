@@ -341,7 +341,7 @@ async function submitPostDataToServer(groupId) {
     let locationText = document.querySelector('.js-location-input').value;
     
     const newPost = {
-        "authors": [currentUserId], 
+        "authors": [CURRENT_USER_ID],
         "isVerified": false,
         "timeAgo": "1s",
         "subHeader": locationText,

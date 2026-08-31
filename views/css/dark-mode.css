@@ -349,3 +349,29 @@ body.dark-mode #editPostModal textarea {
     background-color: #262B33 !important;
     color: white !important;
 }
+
+/* Upload Modals (Choice & Groups) Fix */
+body.dark-mode #postUploadChoiceModal .bg-white,
+body.dark-mode #groupsSelectionModal .bg-white {
+    background-color: #0C1014 !important;
+    border: 1px solid #262B33 !important;
+}
+
+body.dark-mode #postUploadChoiceModal .btn-light,
+body.dark-mode #groupsSelectionModal .btn-light {
+    background-color: transparent !important;
+    color: white !important;
+    border: none !important;
+    outline: none !important;
+}
+
+body.dark-mode #postUploadChoiceModal .btn-light:hover,
+body.dark-mode #groupsSelectionModal .btn-light:hover {
+    background-color: #262B33 !important;
+}
+
+body.dark-mode #postUploadChoiceModal .border-bottom,
+body.dark-mode #groupsSelectionModal .border-bottom,
+body.dark-mode #groupsSelectionModal .border-top {
+    border-color: #262B33 !important;
+}
