@@ -415,3 +415,22 @@ body.dark-mode .chart-axis-text {
 body.dark-mode .chart-grid-line {
     stroke: #262B33 !important;
 }
+
+.dark-mode #groupsOverlay .bg-white,
+.dark-mode #groupsOverlay .bg-light {
+    background-color: #121212 !important;
+}
+
+.dark-mode #groupsOverlay .text-dark {
+    color: #ffffff !important;
+}
+
+.dark-mode #groupsOverlay .form-control {
+    background-color: #262626 !important;
+    color: #ffffff !important;
+    border: 1px solid #444444 !important;
+}
+
+.dark-mode #groupsOverlay .form-control::placeholder {
+    color: #a0a0a0 !important;
+}
