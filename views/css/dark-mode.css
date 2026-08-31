@@ -375,3 +375,24 @@ body.dark-mode #groupsSelectionModal .border-bottom,
 body.dark-mode #groupsSelectionModal .border-top {
     border-color: #262B33 !important;
 }
+
+body.dark-mode .dashboard-main-title {
+    color: #ffffff !important;
+}
+
+body.dark-mode .dashboard-card {
+    background-color: #0C1014 !important;
+    border: 1px solid #262B33 !important;
+}
+
+body.dark-mode .chart-title {
+    color: #ffffff !important;
+}
+
+body.dark-mode .chart-axis-text {
+    fill: #a8a8a8 !important;
+}
+
+body.dark-mode .chart-grid-line {
+    stroke: #262B33 !important;
+}

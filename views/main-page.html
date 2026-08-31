@@ -18,6 +18,8 @@
     <link rel="stylesheet" href="./css/dark-mode.css">
     <link rel="stylesheet" href="./css/userSettings.css">
     <link rel="stylesheet" href="./css/follow.css">
+    <link rel="stylesheet" href="./css/statistics.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script> <!-- should be on top of the page -->
 </head>
 
 <body id="top">
@@ -162,7 +164,7 @@
                     </button>
 
                     <!-- Messages -->
-                    <button class="menu-item" onclick="openMessagesPopup()">
+                    <button class="menu-item" id="messages-toggle" onclick="openMessagesPopup()">
                         <i class="bi bi-send"></i>
                         <span>Messages</span>
                     </button>
@@ -183,6 +185,12 @@
                     <button class="menu-item js-menu-create-btn">
                         <i class="bi bi-plus-square"></i>
                         <span>Create</span>
+                    </button>
+
+                    <!-- Dashboard -->
+                    <button class="menu-item js-dashboard-btn" onclick="openDashboard()">
+                        <i class="bi bi-bar-chart"></i>
+                        <span>Dashboard</span>
                     </button>
 
                     <!-- Filter -->
@@ -449,6 +457,58 @@
 
                 <div class="instagram-posts container"> <!-- Posts section - render by javascript file: posts.js -->
 
+                </div>
+            </section>
+            <section id="dashboard-section" class="dashboard-section w-100 d-none mt-4 ms-4 text-center">
+                <div class="dashboard-header mb-4">
+                    <h3 class="dashboard-main-title fw-bold">System Analytics</h3>
+                </div>
+                
+                <div class="row w-100">
+                    <div class="col-12 col-xl-6 mb-4">
+                        <div class="card dashboard-card shadow-sm border-0 rounded-4">
+                            <div class="card-body text-center">
+                                <h5 class="chart-title fw-semibold mb-4">Members per Group</h5>
+                                <div id="communitySizeChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-6 mb-4">
+                        <div class="card dashboard-card shadow-sm border-0 rounded-4">
+                            <div class="card-body text-center">
+                                <h5 class="chart-title fw-semibold mb-4">Most Active Creators</h5>
+                                <div id="topCreatorsChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-6 mb-4">
+                        <div class="card dashboard-card shadow-sm border-0 rounded-4">
+                            <div class="card-body text-center">
+                                <h5 class="chart-title fw-semibold mb-4">Group Engagement Rate</h5>
+                                <div id="engagementRateChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-6 mb-4">
+                        <div class="card dashboard-card shadow-sm border-0 rounded-4">
+                            <div class="card-body text-center">
+                                <h5 class="chart-title fw-semibold mb-4">Media Types</h5>
+                                <div id="mediaDistributionChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mb-4">
+                        <div class="card dashboard-card shadow-sm border-0 rounded-4">
+                            <div class="card-body text-center">
+                                <h5 class="chart-title fw-semibold mb-4">Daily Uploads</h5>
+                                <div id="postsTimelineChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -1002,6 +1062,7 @@
     <script src="javascript/sidebar.js"></script>
     <script src="javascript/userSettings.js"></script>
     <script src="javascript/follow.js"></script>
+    <script src="javascript/statistics.js"></script>
 </body>
 
 </html>
