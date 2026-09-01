@@ -65,3 +65,27 @@ body.dark-mode .modal-terms a {
 body.dark-mode .meta-logo {
     filter: invert(1);
 }
+
+body.dark-mode .error-box {
+    background-color: #2d1215 !important;
+    border-color: #5c2127 !important;
+    color: #ff6b6b !important;
+}
+
+body.dark-mode .error-box span {
+    color: #ff6b6b !important;
+}
+
+body.dark-mode .error-box a {
+    color: #4db8ff !important;
+}
+
+body.dark-mode .success-box {
+    background-color: #0d2818 !important;
+    border-color: #1a5c2e !important;
+    color: #4ade80 !important;
+}
+
+body.dark-mode .success-box span {
+    color: #4ade80 !important;
+}
