@@ -208,3 +208,119 @@ function handleSignup() {
       signupBtn.textContent = 'Sign up';
     });
 }
+// Close modal when clicking on the dark overlay (outside the box)
+document.getElementById('forgotModal').addEventListener('mousedown', function (e) {
+  if (e.target === this) {
+    closeForgotModal();
+  }
+});
+// Open forgot password modal
+function openForgotModal() {
+  document.getElementById('forgotModal').classList.add('active');
+  
+  document.getElementById('forgot-step-1').style.display = 'block';
+  document.getElementById('forgot-step-2').style.display = 'none';
+  document.getElementById('forgot-msg-box').style.display = 'none';
+  document.getElementById('forgot-success-box').style.display = 'none';
+  
+  const identifierInput = document.getElementById('forgot-identifier');
+  identifierInput.value = '';
+  identifierInput.disabled = false; // Re-enable in case they closed and reopened
+  
+  document.getElementById('forgot-code').value = '';
+  document.getElementById('forgot-new-password').value = '';
+}
+
+// Close forgot password modal
+function closeForgotModal() {
+  document.getElementById('forgotModal').classList.remove('active');
+}
+
+// Step 1: Request Reset Code
+async function requestResetCode() {
+  const identifier = document.getElementById('forgot-identifier').value.trim();
+  const msgBox = document.getElementById('forgot-msg-box');
+  const msgText = document.getElementById('forgot-msg-text');
+  const successBox = document.getElementById('forgot-success-box');
+  const successText = document.getElementById('forgot-success-text');
+
+  msgBox.style.display = 'none'; // Hide previous errors
+  successBox.style.display = 'none';
+
+  if (!identifier) {
+    msgText.textContent = 'Please enter your email or phone.';
+    msgBox.style.display = 'flex';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/user/requestPasswordReset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      document.getElementById('forgot-step-1').style.display = 'none';
+      document.getElementById('forgot-step-2').style.display = 'block';
+      document.getElementById('forgot-identifier').disabled = true;
+      
+      successText.textContent = 'Verification code simulated! Check your terminal.';
+      successBox.style.display = 'flex';
+    } else {
+      msgText.textContent = data.error || 'Failed to send code.';
+      msgBox.style.display = 'flex';
+    }
+  } catch (err) {
+    msgText.textContent = 'Connection error. Please try again.';
+    msgBox.style.display = 'flex';
+  }
+}
+
+// Step 2: Submit Code and New Password
+async function submitNewPassword() {
+const identifier = document.getElementById('forgot-identifier').value.trim();
+  const code = document.getElementById('forgot-code').value.trim();
+  const newPassword = document.getElementById('forgot-new-password').value.trim();
+  const msgBox = document.getElementById('forgot-msg-box');
+  const msgText = document.getElementById('forgot-msg-text');
+  const successBox = document.getElementById('forgot-success-box');
+  const successText = document.getElementById('forgot-success-text');
+
+  msgBox.style.display = 'none'; // Hide previous errors
+  successBox.style.display = 'none';
+
+  if (!code || !newPassword) {
+    msgText.textContent = 'Please fill in all fields.';
+    msgBox.style.display = 'flex';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/user/resetPasswordWithCode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier, code, newPassword })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      // Hide inputs and show success message
+      document.getElementById('forgot-step-2').style.display = 'none';
+      successText.textContent = 'Password reset successfully! You can now log in.';
+      successBox.style.display = 'flex';
+      
+      // Automatically close modal after 2.5 seconds
+      setTimeout(() => {
+        closeForgotModal();
+      }, 2500);
+    } else {
+      msgText.textContent = data.error || 'Failed to reset password.';
+      msgBox.style.display = 'flex';
+    }
+  } catch (err) {
+    msgText.textContent = 'Connection error. Please try again.';
+    msgBox.style.display = 'flex';
+  }
+}

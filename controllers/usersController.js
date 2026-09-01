@@ -857,6 +857,84 @@ class UserController {
       return res.status(500).json({ error: 'Server error.' });
     }
   }
+  // POST /api/user/requestPasswordReset
+  async requestPasswordReset(req, res) {
+    try {
+      const { identifier } = req.body;
+      if (!identifier) return res.status(400).json({ error: 'Email or phone is required.' });
+
+      const user = await User.findOne({
+        $or: [{ email: identifier.toLowerCase() }, { phone: identifier }]
+      });
+
+      if (!user) return res.status(404).json({ error: 'Account not found.' });
+
+      // Generate a 6-digit random code
+      const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Assign the plain text code. The Model's pre('save') hook will hash it automatically!
+      user.resetCode = resetCode;
+      user.resetCodeExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
+      
+      await user.save();
+
+      // SIMULATION: Print the plain code to the server console
+      console.log(`\n=== PASSWORD RESET CODE FOR ${identifier}: ${resetCode} ===\n`);
+
+      return res.json({ message: 'Reset code sent successfully.' });
+    } catch (err) {
+      console.error('requestPasswordReset error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+
+ // POST /api/user/resetPasswordWithCode
+  async resetPasswordWithCode(req, res) {
+    try {
+      const { identifier, code, newPassword } = req.body;
+
+      if (!identifier || !code || !newPassword) {
+        return res.status(400).json({ error: 'All fields are required.' });
+      }
+
+      // Original validation matching your registration logic
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+      }
+      if (newPassword.includes(' ')) {
+        return res.status(400).json({ error: 'Password cannot contain spaces.' });
+      }
+
+      const user = await User.findOne({
+        $or: [{ email: identifier.toLowerCase() }, { phone: identifier }]
+      });
+
+      if (!user) return res.status(404).json({ error: 'Account not found.' });
+
+      // Validate expiration
+      if (user.resetCodeExpires < Date.now()) {
+        return res.status(400).json({ error: 'Reset code has expired. Please request a new one.' });
+      }
+
+      // Use the Model method to compare the code
+      const isValidCode = await user.compareResetCode(code);
+      if (!isValidCode) {
+        return res.status(400).json({ error: 'Invalid reset code. Please check and try again.' });
+      }
+
+      // Update password and clear fields
+      user.password = newPassword; 
+      user.resetCode = null;
+      user.resetCodeExpires = null;
+      
+      await user.save();
+
+      return res.json({ message: 'Password reset successfully. You can now log in.' });
+    } catch (err) {
+      console.error('resetPasswordWithCode error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
 }
 
 module.exports = new UserController();
