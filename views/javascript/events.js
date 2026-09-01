@@ -5,11 +5,15 @@ const menusConfig = [
     },
     {
         menuClass: '.create-form-overlay',
-        dontRemoveOn: '.js-menu-create-btn, .create-form-overlay, .js-discard-overlay, #postUploadChoiceModal, #groupsSelectionModal'
+        dontRemoveOn: '.js-menu-create-btn, .create-form-overlay, .js-discard-overlay, #postUploadChoiceModal, #groupsSelectionModal, #mapModal, .leaflet-marker-icon, .leaflet-popup'
     },
     {
         menuClass: '.js-notifications-panel',
         dontRemoveOn: '.js-notifications-btn, .js-notifications-panel'
+    },
+    {
+        menuClass: '#globalPostsMapOverlay',
+        dontRemoveOn: '.js-global-map-btn, .js-global-map-content,.leaflet-marker-icon, .leaflet-popup'
     }
 ];
 
@@ -17,6 +21,10 @@ const menusConfig = [
 let currentMediaType = '';
 let currentMediaSource = '';
 let isMuted = false;
+// Map-related globals for location selection during post creation
+let mapInstance = null;           // Leaflet map instance
+let currentMarker = null;         // Current marker on the map
+let selectedLocation = { name: "", lat: null, lng: null }; // Selected location data
 
 // Theme element
 const themeToggle = document.getElementById('theme-toggle');
@@ -88,6 +96,9 @@ function closePostCreationForm() {
     document.body.style.overflow = '';
     document.getElementById('postUploadChoiceModal')?.classList.replace('d-flex', 'd-none');
     document.getElementById('groupsSelectionModal')?.classList.replace('d-flex', 'd-none');
+    // Close map and reset selected location on full discard
+    document.getElementById('mapModal')?.classList.replace('d-flex', 'd-none');
+    selectedLocation = { name: "", lat: null, lng: null };
 }
 
 function switchCreatePostFormState() {
@@ -336,7 +347,8 @@ async function submitPostDataToServer(groupId, groupAdminId = null) {
     const newPost = {
         "authors": [CURRENT_USER_ID],
         "isVerified": false,
-        "subHeader": locationText,
+        // Send location data with post (name, lat, lng)
+        "location": selectedLocation,
         "mediaType": currentMediaType,
         "mediaSource": currentMediaSource,
         "hasMuteButton": isMuted,
@@ -355,6 +367,8 @@ async function submitPostDataToServer(groupId, groupAdminId = null) {
 
     // Create the post
     await addNewPost(newPost);
+
+    selectedLocation = { name: "", lat: null, lng: null }; // reset the selected location after post creation
 
     // Close the post creation form and reset its state
     closePostCreationForm();
@@ -420,7 +434,7 @@ function openEditModal(postId) {
     if (!post) return;
 
     document.getElementById('editPostId').value = postId;
-    document.getElementById('editSubHeaderInput').value = post.subHeader || '';
+    document.getElementById('editSubHeaderInput').value = post.location?.name || '';
     document.getElementById('editCaptionInput').value = post.caption || '';
 
     const modal = document.getElementById('editPostModal');
@@ -436,9 +450,116 @@ function closeEditModal() {
 
 function saveEditedPost() {
     const postId = document.getElementById('editPostId').value;
-    const newSubHeader = document.getElementById('editSubHeaderInput').value;
+    const newLocationName = document.getElementById('editSubHeaderInput').value;
     const newCaption = document.getElementById('editCaptionInput').value;
     
-    // Call the function to update the post data on the server
-    editPostData(postId, newCaption, newSubHeader);
+    const post = allPostsData.find(p => p._id === postId);
+    const updatedLocation = {
+        name: newLocationName,
+        lat: post?.location?.lat || null,
+        lng: post?.location?.lng || null
+    };
+
+    // Update the post in the local data
+    editPostData(postId, newCaption, updatedLocation);
 }
+
+
+// ===== Map Logic for Location Selection =====
+// Initializes and manages Leaflet map for post location selection
+function initMap() {
+    // Avoid re-initializing if map already exists
+    if (mapInstance !== null) return; 
+
+    mapInstance = L.map('leafletMap').setView([32.0853, 34.7818], 13); // Default center
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(mapInstance);
+
+    mapInstance.on('click', function(e) {
+        setMapMarker(e.latlng.lat, e.latlng.lng);
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${e.latlng.lat}&lon=${e.latlng.lng}`)
+            .then(response => response.json())
+            .then(data => {
+                const placeName = data.address.city || data.address.town || data.address.village || data.name || "Selected Location";
+                selectedLocation = { name: placeName, lat: e.latlng.lat, lng: e.latlng.lng };
+                document.getElementById('mapSearchInput').value = placeName;
+            })
+            .catch(() => {
+                selectedLocation = { name: "Selected Pin", lat: e.latlng.lat, lng: e.latlng.lng };
+                document.getElementById('mapSearchInput').value = "Selected Pin";
+            });
+    });
+}
+
+function setMapMarker(lat, lng) {
+    if (currentMarker) {
+        mapInstance.removeLayer(currentMarker);
+    }
+    currentMarker = L.marker([lat, lng]).addTo(mapInstance);
+}
+
+document.getElementById('openMapBtn')?.addEventListener('click', function() {
+    document.getElementById('mapModal').classList.replace('d-none', 'd-flex');
+    setTimeout(() => {
+        initMap();
+        
+        // Reset the map view to a default location and remove any existing marker when the modal is opened
+        if (mapInstance) {
+            mapInstance.setView([32.0853, 34.7818], 13);
+            if (currentMarker) {
+                mapInstance.removeLayer(currentMarker);
+                currentMarker = null;
+            }
+        }
+        
+        // Reset the search input when the map modal is opened
+        const searchInput = document.getElementById('mapSearchInput');
+        if (searchInput) searchInput.value = '';
+        
+        mapInstance.invalidateSize();
+    }, 100);
+});
+
+document.querySelector('.js-close-map-btn')?.addEventListener('click', function() {
+    // Trigger the main discard overlay to close the entire post creation flow
+    discardBtn.setAttribute('discard-action', 'close');
+    discardOverlay.classList.remove('d-none');
+});
+
+document.getElementById('confirmLocationBtn')?.addEventListener('click', function() {
+    if (selectedLocation.name) {
+        document.querySelector('.js-location-input').value = selectedLocation.name;
+    }
+    document.getElementById('mapModal').classList.replace('d-flex', 'd-none');
+});
+
+document.getElementById('mapSearchBtn')?.addEventListener('click', function() {
+    const query = document.getElementById('mapSearchInput').value;
+    if (!query) return;
+
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                const lat = parseFloat(data[0].lat);
+                const lng = parseFloat(data[0].lon);
+                mapInstance.setView([lat, lng], 13);
+                setMapMarker(lat, lng);
+                selectedLocation = { name: data[0].name, lat: lat, lng: lng };
+            }
+        });
+});
+
+// Listener to close the entire post creation flow when clicking outside the map modal
+document.getElementById('mapModal')?.addEventListener('click', function(event) {
+    // Check if the actual element clicked is the dark background overlay itself, 
+    // not the white content box (.map-modal-content) inside it
+    if (event.target === this) {
+        // Trigger the discard process instead of just hiding the map
+        discardBtn.setAttribute('discard-action', 'close');
+        discardOverlay.classList.remove('d-none');
+    }
+});

@@ -442,6 +442,53 @@ body.dark-mode .chart-grid-line {
 .dark-mode #allUsersModal .form-control::placeholder {
     color: #a0a0a0 !important;
 }
+
+/* Leaflet Map Modal in Dark Mode */
+body.dark-mode #mapModal .bg-white,
+body.dark-mode #globalPostsMapOverlay .bg-white {
+    background-color: #0C1014 !important;
+    border: 1px solid #262B33 !important;
+}
+
+body.dark-mode #mapModal h5,
+body.dark-mode #globalPostsMapOverlay h4 {
+    color: white !important;
+}
+
+body.dark-mode #mapSearchInput {
+    background-color: #262B33 !important;
+    color: white !important;
+    border-color: #3a3f47 !important;
+}
+
+body.dark-mode #mapSearchInput::placeholder {
+    color: #a8a8a8 !important;
+}
+
+body.dark-mode #leafletMap,
+body.dark-mode #globalLeafletMap {
+    border-color: #262B33 !important;
+}
+
+/* Leaflet Zoom Buttons in Dark Mode */
+body.dark-mode .leaflet-bar a {
+    background-color: #262B33 !important;
+    color: #e4e6eb !important;
+    border-bottom: 1px solid #3a3f47 !important;
+}
+
+body.dark-mode .leaflet-bar a:hover {
+    background-color: #3a3f47 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .leaflet-bar {
+    border: 1px solid #3a3f47 !important;
+}
+
+body.dark-mode .leaflet-bar a.leaflet-disabled {
+    background-color: #1a1d21 !important;
+    color: #6c757d !important;
 body.dark-mode .feed-advanced-search-panel {
     background-color: #121212;
     border-right: 1px solid #333;
