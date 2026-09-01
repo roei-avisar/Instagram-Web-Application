@@ -337,6 +337,24 @@ document.querySelector('.js-final-postUpload-groups-btn').addEventListener('clic
     submitPostDataToServer(selectedRadio.value, selectedGroupAdminId);
 });
 
+function showPostUploadError(container, msg) {
+    let errorDiv = container.querySelector('.post-action-error');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'post-action-error text-danger small mt-2 p-1 fw-bold d-flex align-items-start text-start w-100';
+        container.appendChild(errorDiv);
+    }
+    
+    errorDiv.innerHTML = `
+        <svg class="me-2 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="#ed4956" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px; margin-top:2px;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span style="word-break: break-word;">${msg}</span>
+    `;
+}
+
 async function submitPostDataToServer(groupId, groupAdminId = null) {
     let captionText = document.querySelector('.js-caption-input').value;
     let locationText = document.querySelector('.js-location-input').value;
@@ -371,18 +389,33 @@ async function submitPostDataToServer(groupId, groupAdminId = null) {
     if (loadingScreen) loadingScreen.classList.remove('d-none');
 
     try {
-        await addNewPost(newPost);
+        // Here we target the caption container so it sits nicely without breaking the flexbox!
+        const errorContainer = document.querySelector('.caption-container');
+        const oldError = errorContainer.querySelector('.post-action-error');
+        if (oldError) oldError.remove();
 
-    // Close the post creation form and reset its state
-    closePostCreationForm();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-        selectedLocation = { name: "", lat: null, lng: null };
-        closePostCreationForm();
-        uploadNewPostNotification(currentMediaSource, currentMediaType);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const result = await addNewPost(newPost);
+        
+        if (result && result.success) {
+            // Close the post creation form and reset its state
+            closePostCreationForm();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            selectedLocation = { name: "", lat: null, lng: null };
+            
+            if (typeof uploadNewPostNotification === 'function') {
+                uploadNewPostNotification(currentMediaSource, currentMediaType);
+            }
+        } else {
+            document.getElementById('postUploadChoiceModal').classList.replace('d-flex', 'd-none');
+            document.getElementById('groupsSelectionModal').classList.replace('d-flex', 'd-none');
+            showPostUploadError(errorContainer, result ? result.error : "Failed to upload post.");
+        }
     } catch (error) {
         console.error('Error uploading post:', error);
-        alert('Failed to upload post. Please try again.');
+        document.getElementById('postUploadChoiceModal').classList.replace('d-flex', 'd-none');
+        document.getElementById('groupsSelectionModal').classList.replace('d-flex', 'd-none');
+        const errorContainer = document.querySelector('.caption-container');
+        showPostUploadError(errorContainer, "Connection error. Please try again.");
     } finally {
         // Re-enable submission buttons and hide loading screen
         if (followersBtn) followersBtn.disabled = false;
@@ -463,7 +496,7 @@ function closeEditModal() {
     document.body.style.overflow = '';
 }
 
-function saveEditedPost() {
+async function saveEditedPost() {
     const saveBtn = document.querySelector('#editPostModal .btn-primary');
     if (saveBtn) saveBtn.disabled = true; // Disable save button immediately on click
 
@@ -476,10 +509,20 @@ function saveEditedPost() {
         lng: selectedLocation.lng || null
     };
 
+    const modalBody = document.querySelector('#editPostModal .bg-white');
+    const oldError = modalBody.querySelector('.post-action-error');
+    if (oldError) oldError.remove();
+
     // editPostData handles the async request and will re-enable the button in its finally block
-    editPostData(postId, newCaption, updatedLocation);
+    const result = await editPostData(postId, newCaption, updatedLocation);
     
-    selectedLocation = { name: "", lat: null, lng: null };
+    if (result && !result.success) {
+        showPostUploadError(modalBody, result.error);
+        if (saveBtn) saveBtn.disabled = false;
+    } else {
+        selectedLocation = { name: "", lat: null, lng: null };
+        if (saveBtn) saveBtn.disabled = false;
+    }
 }
 
 

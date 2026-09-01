@@ -12,32 +12,22 @@ function handleLogin() {
 
   if (!username) {
     errorText.innerHTML =
-      'Please enter your mobile number or email. <a href="#">Find your account and log in.</a>';
+      'Please enter your mobile number, email, or username. <a href="#">Find your account and log in.</a>';
     errorBox.style.display = 'flex';
     return;
   }
 
   const phoneRegex = /^(?:\+?972[- ]?(?:5[0-9]|[23489]|7[1-9])|0(?:5[0-9]|[23489]|7[1-9]))[- ]?\d{3}[- ]?\d{4}$|^\+?[1-9]\d{9,14}$/;
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const usernameRegex = /^[a-zA-Z0-9_.]+$/;
 
   const isPhone = phoneRegex.test(username);
   const isEmail = emailRegex.test(username);
+  const isUsernameValid = usernameRegex.test(username);
 
-  if (!isPhone && !isEmail) {
-    if (/[\u0590-\u05FF]/.test(username)) {
-      errorText.innerHTML =
-        'Please enter a valid email address or mobile number. <a href="#">Find your account and log in.</a>';
-    } else if (username.includes('@')) {
-      errorText.innerHTML =
-        'Please enter a valid email address. <a href="#">Find your account and log in.</a>';
-    } else if (/^\d+$/.test(username)) {
-      errorText.innerHTML =
-        'Please enter a valid mobile number.';
-    } else {
-      errorText.innerHTML =
-        'Please enter a valid email address or mobile number. <a href="#">Find your account and log in.</a>';
-    }
-
+  if (!isPhone && !isEmail && !isUsernameValid) {
+    errorText.innerHTML =
+      'Please enter a valid email, mobile number, or username. <a href="#">Find your account and log in.</a>';
     errorBox.style.display = 'flex';
     return;
   }

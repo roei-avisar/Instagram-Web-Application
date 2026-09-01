@@ -130,17 +130,19 @@ class UserController {
   // POST /api/user/login
   async login(req, res) {
     try {
-      const identifier = req.body.identifier; // email or phone
+      const identifier = req.body.identifier; // email, phone or username
       const password = req.body.password;
 
       if (!identifier) {
-        return res.status(400).json({ error: 'Email or phone number is required.' });
+        return res.status(400).json({ error: 'Email, phone number, or username is required.' });
       }
-      // Validate identifier format (must be a valid email or phone number)
+      
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       const phoneRegex = /^(?:\+?972[- ]?(?:5[0-9]|[23489]|7[1-9])|0(?:5[0-9]|[23489]|7[1-9]))[- ]?\d{3}[- ]?\d{4}$|^\+?[1-9]\d{9,14}$/;
-      if (!emailRegex.test(identifier) && !phoneRegex.test(identifier)) {
-        return res.status(400).json({ error: 'Please enter a valid email address or phone number.' });
+      const usernameRegex = /^[a-zA-Z0-9_.]+$/;
+
+      if (!emailRegex.test(identifier) && !phoneRegex.test(identifier) && !usernameRegex.test(identifier)) {
+        return res.status(400).json({ error: 'Please enter a valid email, phone number, or username.' });
       }
       if (!password) {
         return res.status(400).json({ error: 'Password is required.' });
@@ -152,9 +154,7 @@ class UserController {
         return res.status(400).json({ error: 'Password cannot contain spaces.' });
       }
 
-
-      // Find user by email or phone
-      const user = await User.findOne({
+      let user = await User.findOne({
         $or: [
           { email: identifier.toLowerCase() },
           { phone: identifier }
@@ -162,16 +162,25 @@ class UserController {
       });
 
       if (!user) {
-        return res.status(401).json({ error: 'No account found with that email or phone number.' });
+        const allUsers = await User.find({});
+        user = allUsers.find(u => {
+          try {
+            return u.decryptUsername().toLowerCase() === identifier.toLowerCase();
+          } catch {
+            return false;
+          }
+        });
       }
 
-      // Compare password
+      if (!user) {
+        return res.status(401).json({ error: 'No account found with that information.' });
+      }
+
       const isMatch = await user.comparePassword(password);
       if (!isMatch) {
         return res.status(401).json({ error: 'Incorrect password. Please try again.' });
       }
 
-      // Create session (decrypt the username so the user sees the original plaintext)
       req.session.userId = user._id;
       req.session.username = user.decryptUsername();
 
@@ -181,7 +190,6 @@ class UserController {
       return res.status(500).json({ error: 'Server error. Please try again.' });
     }
   }
-
 
 
   // POST /api/user/uploadProfilePic

@@ -1,6 +1,22 @@
 let globalGroups = [];
 let currentOpenGroupId = null;
 let pendingHighlightGroupId = null;
+let isCreatingGroup = false;
+
+function showGroupError(element, msg) {
+    let errorDiv = element.parentNode.querySelector(':scope > .group-action-error');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'group-action-error text-danger small mt-2 fw-bold w-100';
+        element.parentNode.insertBefore(errorDiv, element.nextSibling);
+    }
+    errorDiv.innerHTML = `<i class="bi bi-exclamation-circle-fill me-1"></i>${msg}`;
+}
+
+function clearGroupError(element) {
+    let errorDiv = element.parentNode.querySelector(':scope > .group-action-error');
+    if (errorDiv) errorDiv.remove();
+}
 
 function openGroupsPopup() {
     const overlay = document.getElementById('groupsOverlay');
@@ -8,6 +24,23 @@ function openGroupsPopup() {
     overlay.classList.add('d-flex'); // groups popup become visiable
     document.body.style.overflow = 'hidden';
     
+    const input = document.getElementById('newGroupName');
+    input.setAttribute('maxlength', '60');
+    
+    let counterDiv = document.getElementById('create-group-counter');
+    if (!counterDiv) {
+        counterDiv = document.createElement('div');
+        counterDiv.id = 'create-group-counter';
+        counterDiv.className = 'text-muted small mt-1 w-100';
+        input.parentElement.parentNode.insertBefore(counterDiv, input.parentElement.nextSibling);
+    }
+    counterDiv.textContent = `${input.value.length}/60`;
+    
+    input.oninput = () => {
+        counterDiv.textContent = `${input.value.length}/60`;
+        clearGroupError(input.parentElement);
+    };
+
     filterGroups(); // filter and then render the groups on the screen
 }
 
@@ -20,7 +53,14 @@ function closeGroupsPopup(event, forceClose = false) {
         document.body.style.overflow = '';
         // remove the popup
         
-        document.getElementById('newGroupName').value = '';
+        const input = document.getElementById('newGroupName');
+        input.value = '';
+        clearGroupError(input.parentElement);
+        clearGroupError(document.getElementById('groupSearch'));
+        
+        const counterDiv = document.getElementById('create-group-counter');
+        if (counterDiv) counterDiv.textContent = `0/60`;
+
         clearGroupSearch(); // reset all the boxes and fetch default groups
     }
 }
@@ -32,17 +72,25 @@ function clearGroupSearch() { // clear advanced search inputs
     const timeFilter = document.getElementById('groupTimeFilter');
     if (timeFilter) timeFilter.value = 'all';
     
+    clearGroupError(document.getElementById('groupSearch'));
     filterGroups(); // filter and then render the groups on the screen
 }
 
 function createGroup() {
+    if (isCreatingGroup) return;
+
     const input = document.getElementById('newGroupName');
     const groupName = input.value.trim();
+    const inputContainer = input.parentElement;
+
+    clearGroupError(inputContainer);
 
     if (!groupName || groupName.length > 60) {
-        alert("Group name must be between 1 and 60 characters");
+        showGroupError(inputContainer, "Group name must be between 1 and 60 characters");
         return;
     }
+
+    isCreatingGroup = true;
 
     fetch('/api/groups/createGroup', { // create a new group
         method: 'POST',
@@ -54,22 +102,35 @@ function createGroup() {
             adminId: CURRENT_USER_ID
         })
     })
-    .then(res => res.json())
+    .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || data.message || "Failed to create group");
+        return data;
+    })
     .then(data => {
         if (data.success) {
             input.value = '';
+            document.getElementById('create-group-counter').textContent = `0/60`;
             pendingHighlightGroupId = data.data._id; // scroll down and highk+lighting a new group were made
             openGroupsPopup(); // refresh the screen
             // Refresh the feed posts to reflect changes in group membership
             fetchPostsFromServer();
         }
     })
-    .catch(err => console.error(err));
+    .catch(err => {
+        showGroupError(inputContainer, err.message);
+    })
+    .finally(() => {
+        isCreatingGroup = false;
+    });
 }
 
 async function filterGroups() { // executes the advanced search via server
-    const searchTerm = document.getElementById('groupSearch').value.trim();
+    const searchInput = document.getElementById('groupSearch');
+    const searchTerm = searchInput.value.trim();
     const showOnlyMine = document.getElementById('myGroupsFilter').checked; // if the user want to see only his group he is a member
+    
+    clearGroupError(searchInput);
     
     let timeFilter = 'all';
     const timeFilterElement = document.getElementById('groupTimeFilter');
@@ -86,15 +147,17 @@ async function filterGroups() { // executes the advanced search via server
             body: JSON.stringify({ searchTerm, showOnlyMine, timeFilter })
         });
 
-        if (response.ok) {
-            const data = await response.json(); // make the response as an object
-            if (data && data.success) { // success and data were given parameter by the controller response
-                globalGroups = data.data; // save all the groups on the global parameter
-                renderGroups(globalGroups);
-            }
+        const data = await response.json(); // make the response as an object
+
+        if (response.ok && data && data.success) { // success and data were given parameter by the controller response
+            globalGroups = data.data; // save all the groups on the global parameter
+            renderGroups(globalGroups);
+        } else {
+            showGroupError(searchInput, data.error || "Failed to execute search");
         }
     } catch (error) {
         console.error('Error fetching filtered groups:', error);
+        showGroupError(searchInput, "Connection error. Please try again.");
     }
 }
 
@@ -135,39 +198,54 @@ function renderGroups(groupsArray) {
                 nameSpan.classList.add('d-none');
                 editBtn.classList.add('d-none');
 
+                const editWrapper = document.createElement('div');
+                editWrapper.className = 'flex-grow-1 me-3 d-flex flex-column';
+
                 const editContainer = document.createElement('div'); // make the container to write the new name
-                editContainer.className = 'd-flex align-items-center flex-grow-1';
+                editContainer.className = 'd-flex align-items-center w-100';
 
                 const editInput = document.createElement('input');
                 editInput.type = 'text';
                 editInput.className = 'form-control form-control-sm w-75';
                 editInput.value = group.name; // show group name at first while edit the group name
+                editInput.setAttribute('maxlength', '60');
+
+                const charCounter = document.createElement('span');
+                charCounter.className = 'text-muted small ms-2 text-nowrap';
+                charCounter.textContent = `${editInput.value.length}/60`;
+
+                editInput.oninput = () => {
+                    charCounter.textContent = `${editInput.value.length}/60`;
+                    clearGroupError(editContainer);
+                };
 
                 const saveBtn = document.createElement('button');
                 saveBtn.className = 'btn btn-sm btn-success ms-2';
                 saveBtn.textContent = 'Save';
 
                 editContainer.appendChild(editInput);
+                editContainer.appendChild(charCounter);
                 editContainer.appendChild(saveBtn);
                 
-                row.insertBefore(editContainer, btnGroup);
+                editWrapper.appendChild(editContainer);
+                row.insertBefore(editWrapper, btnGroup);
 
                 saveBtn.onclick = () => { // add save button functionality
                     const newName = editInput.value.trim();
+                    clearGroupError(editContainer);
 
                     if (newName === group.name) {
                         nameSpan.classList.remove('d-none');
                         editBtn.classList.remove('d-none');
-                        editContainer.remove();
+                        editWrapper.remove();
                         return;
                     }
                     if (newName === '' || newName.length > 60) {
-                        nameSpan.classList.remove('d-none');
-                        editBtn.classList.remove('d-none');
-                        editContainer.remove();
-                        alert("Group name must be between 1 and 60 characters");
+                        showGroupError(editContainer, "Group name must be between 1 and 60 characters");
                         return;
                     }
+
+                    saveBtn.disabled = true;
 
                     fetch(`/api/groups/renameGroup/${group._id}`, {
                         method: 'PATCH',
@@ -176,19 +254,21 @@ function renderGroups(groupsArray) {
                         },
                         body: JSON.stringify({ newName: newName })
                     })
-                    .then(response => {
-                        if (response.ok) {
-                            nameSpan.textContent = newName;
-                            group.name = newName;
-                            nameSpan.classList.remove('d-none');
-                            editBtn.classList.remove('d-none');
-                            editContainer.remove();
-                        } else {
-                            alert('Failed to update group name');
-                        }
+                    .then(async response => {
+                        const data = await response.json();
+                        if (!response.ok) throw new Error(data.error || "Failed to update group name");
+                        return data;
+                    })
+                    .then(data => {
+                        nameSpan.textContent = newName;
+                        group.name = newName;
+                        nameSpan.classList.remove('d-none');
+                        editBtn.classList.remove('d-none');
+                        editWrapper.remove();
                     })
                     .catch(error => {
-                        console.error('Error:', error);
+                        showGroupError(editContainer, error.message);
+                        saveBtn.disabled = false;
                     });
                 };
             };

@@ -71,10 +71,15 @@ async function addNewPost(newPostData) {
                 }, 100); // Small delay to allow DOM to render
             }
             const createdPost = await response.json();
-            return createdPost;
+            return { success: true, post: createdPost };
+        } else {
+            // If the server blocked it (like XSS), extract the error message
+            const errData = await response.json();
+            return { success: false, error: errData.error || errData.message || "Failed to upload post." };
         }
     } catch (error) {
         console.error('Error adding new post:', error);
+        return { success: false, error: "Connection error. Please try again." };
     }
 }
 
@@ -136,15 +141,16 @@ async function editPostData(postId, newCaption, newLocation) {
             }
             renderPosts(allPostsData);
             closeEditModal();
+            return { success: true };
         } else {
             const errData = await response.json();
-            alert(errData.message || "Failed to update post");
+            return { success: false, error: errData.error || errData.message || "Failed to update post" };
         }
     } catch (error) {
         console.error('Error updating post:', error);
+        return { success: false, error: "Connection error. Please try again." };
     } finally {
         // Re-enable save button and reset loading screen
-        if (saveBtn) saveBtn.disabled = false;
         if (loadingScreen) loadingScreen.classList.add('d-none');
         if (loadingText) loadingText.innerText = originalText;
     }
