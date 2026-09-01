@@ -477,6 +477,114 @@ class PostController {
             res.status(500).json({ message: "Error updating post in database", error });
         }
     }
+    // Controller method to handle advanced post search with 3 parameters
+    async advancedFeedSearch(req, res) {
+        try {
+            const userId = req.session.userId;
+            if (!userId) return res.status(401).json({ message: "User not logged in" });
+
+            const { searchText, mediaTypes, timeFilter } = req.body;
+            const baseUrl = `${req.protocol}://${req.get('host')}`;
+            const fetchOptions = {
+                method: 'GET',
+                headers: { 'Cookie': req.headers.cookie }
+            };
+
+            // Get only allowed post IDs (Same logic as getFeedPosts)
+            let userPostIds = [];
+            let groupPostIds = [];
+
+            try {
+                const userRes = await fetch(`${baseUrl}/api/user/getFollowingAndPersonalPosts`, fetchOptions);
+                if (userRes.ok) {
+                    const userData = await userRes.json();
+                    if (userData.success && userData.postIds) userPostIds = userData.postIds;
+                }
+            } catch (err) { console.error("Error fetching user posts:", err); }
+
+            try {
+                const groupRes = await fetch(`${baseUrl}/api/groups/getMyGroupsPosts`, fetchOptions);
+                if (groupRes.ok) {
+                    const groupData = await groupRes.json();
+                    if (groupData.success && groupData.postIds) groupPostIds = groupData.postIds;
+                }
+            } catch (err) { console.error("Error fetching group posts:", err); }
+
+            const uniquePostIds = [...new Set([...userPostIds, ...groupPostIds])]; // Make a set without duplicate
+
+            // Find matching encrypted usernames
+            let matchedUserIds = [];
+            if (searchText && searchText.trim() !== '') {
+                const User = require('../models/usersModel'); 
+                const allUsers = await User.find({});
+                
+                matchedUserIds = allUsers.filter(u => {
+                    try {
+                        // Decrypting and checking for a match
+                        const decryptedName = u.decryptUsername().toLowerCase();
+                        return decryptedName.includes(searchText.toLowerCase());
+                    } catch {
+                        return false;
+                    }
+                }).map(u => u._id);
+            }
+
+            // Build the Advanced MongoDB Query
+            let query = { _id: { $in: uniquePostIds } }; // Search only in uniquePostIds
+
+            // Text Search (Caption or Username)
+            if (searchText && searchText.trim() !== '') {
+                query.$or = [
+                    { caption: { $regex: searchText, $options: 'i' } }, //search text that is a part of the full text and ignore uppercase
+                    { authors: { $in: matchedUserIds } }
+                ];
+            }
+
+            // Media Type Filter
+            if (mediaTypes && mediaTypes.length > 0) {
+                query.mediaType = { $in: mediaTypes };
+            }
+
+            // Time Filter
+            if (timeFilter && timeFilter !== 'all') {
+                const date = new Date();
+                if (timeFilter === '24h') date.setHours(date.getHours() - 24);
+                else if (timeFilter === 'week') date.setDate(date.getDate() - 7);
+                query.createdAt = { $gte: date }; // graeter than or equal date
+            }
+
+            // Execute Query and Format
+            const searchResults = await Post.find(query)
+                .sort({ createdAt: -1 })
+                .populate('authors')
+                .populate('likedByUsers')
+                .populate('savedByUsers')
+                .populate('group')
+                .populate({ path: 'comments', populate: { path: 'userId' } });
+
+            // Decrypt usernames identically to getFeedPosts
+            const formattedPosts = searchResults.map(post => {
+                const postObj = post.toObject();
+                postObj.authors = normalizePostAuthors(postObj.authors);
+
+                if (postObj.authors) postObj.authors.forEach(u => { if (u && u.username) u.username = decrypt(u.username); });
+                if (postObj.likedByUsers) postObj.likedByUsers.forEach(u => { if (u && u.username) u.username = decrypt(u.username); });
+                if (postObj.savedByUsers) postObj.savedByUsers.forEach(u => { if (u && u.username) u.username = decrypt(u.username); });
+                if (postObj.comments) {
+                    postObj.comments.forEach(c => {
+                        if (c.userId && c.userId.username) c.userId.username = decrypt(c.userId.username);
+                    });
+                }
+                postObj.stats.comments = postObj.comments?.length || 0;
+                return postObj;
+            });
+
+            res.status(200).json(formattedPosts);
+        } catch (error) {
+            console.error("Error executing advanced search:", error);
+            res.status(500).json({ message: "Error searching posts", error });
+        }
+    }
 }
 
 module.exports = new PostController();

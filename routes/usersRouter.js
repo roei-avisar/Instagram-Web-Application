@@ -40,4 +40,6 @@ router.get('/getFollowingAndPersonalPosts', userController.getFollowingAndPerson
 
 router.post("/getBasicInfo", userController.getBasicInfo)
 
+router.post('/advancedSearch', userController.advancedUserSearch);
+
 module.exports = router; // export all the router functions to be used by server.js

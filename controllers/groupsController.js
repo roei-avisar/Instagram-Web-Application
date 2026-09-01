@@ -315,6 +315,44 @@ class GroupsController {
             return res.status(500).json({ success: false, error: error.message });
         }
     }
+    async advancedGroupSearch(req, res) { 
+        try {
+            const { searchTerm, showOnlyMine, timeFilter } = req.body;
+            const userId = req.session.userId;
+            
+            // Build the Advanced MongoDB Query
+            let query = {};
+            
+            // Search by group name
+            if (searchTerm && searchTerm.trim() !== '') {
+                query.name = { $regex: searchTerm, $options: 'i' };
+            }
+            
+            // Filter by membership (my groups only)
+            if (showOnlyMine && userId) {
+                query.users = userId; 
+            }
+            
+            // Filter by creation time
+            if (timeFilter && timeFilter !== 'all') {
+                const date = new Date();
+                if (timeFilter === '24h') {
+                    date.setHours(date.getHours() - 24);
+                } else if (timeFilter === 'week') {
+                    date.setDate(date.getDate() - 7);
+                }
+                query.createdAt = { $gte: date };
+            }
+            
+            // Execute Query in DB
+            const groups = await Group.find(query).sort({ createdAt: -1 });
+            
+            res.status(200).json({ success: true, count: groups.length, data: groups });
+        } catch (error) {
+            console.error("Error executing group advanced search:", error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
 }
 
 module.exports = new GroupsController();

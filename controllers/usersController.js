@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const { sendTweet } = require('../utils/twitterServices');
+const gitService = require('../utils/gitService');
 
 // Configure multer for profile picture uploads
 // Files are saved to views/elements/media/profile-pictures/ and named by the user's ID
@@ -211,6 +212,10 @@ class UserController {
       // The file is already saved as <userId>.jpg by multer's storage config
       // (if an old file existed, multer overwrites it automatically)
       const profilePicUrl = '/elements/media/profile-pictures/' + req.session.userId + '.jpg?t=' + Date.now();
+
+      // Push the saved profile picture to Git so it's available for all users
+      const profilePicRelativePath = '/../views/elements/media/profile-pictures/' + req.session.userId + '.jpg';
+      gitService.pushExistingFileToGit(profilePicRelativePath);
 
       try {
         const user = await User.findById(req.session.userId);
@@ -657,15 +662,9 @@ class UserController {
         { $pull: { following: userId } }
       );
 
-      // Delete user's profile picture file from disk if it exists
-      const userProfilePicPath = path.join(__dirname, '..', 'views', 'elements', 'media', 'profile-pictures', `${userId}.jpg`);
-      if (fs.existsSync(userProfilePicPath)) {
-        try {
-          fs.unlinkSync(userProfilePicPath);
-        } catch (fileErr) {
-          console.error('Error deleting profile pic file:', fileErr);
-        }
-      }
+      // Delete user's profile picture file from disk and push deletion to Git
+      const profilePicRelativePath = '/../views/elements/media/profile-pictures/' + userId + '.jpg';
+      gitService.deleteMediaAndPushToGit(profilePicRelativePath);
 
       // Delete the user document from the database
       await User.findByIdAndDelete(userId);
@@ -785,6 +784,76 @@ class UserController {
 
       return res.json({ username, profilePic });
     } catch (err) {
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+
+  // POST /api/user/advancedSearch
+  async advancedUserSearch(req, res) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+      const { searchTerm, iAmFollowing, isFollowingMe } = req.body;
+      const currentUserId = req.session.userId;
+      
+      const currentUser = await User.findById(currentUserId);
+      if (!currentUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Build query
+      let andConditions = [{ _id: { $ne: currentUserId } }]; // $ne - not equal, give all the users exept me
+
+      // Filter by users I am following
+      if (iAmFollowing === 'yes') {
+        andConditions.push({ _id: { $in: currentUser.following } }); // only users in my following array
+      } else if (iAmFollowing === 'no') {
+        andConditions.push({ _id: { $nin: currentUser.following } }); // only users NOT in my following array
+      }
+
+      // Filter by users following me
+      if (isFollowingMe === 'yes') {
+        andConditions.push({ _id: { $in: currentUser.followers } }); // only users in my followers array
+      } else if (isFollowingMe === 'no') {
+        andConditions.push({ _id: { $nin: currentUser.followers } }); // only users NOT in my followers array
+      }
+
+      // Execute DB query
+      const dbQuery = { $and: andConditions }; // make and between all the conditions
+      const allUsers = await User.find(dbQuery);
+      const usersList = [];
+
+      for (const user of allUsers) {
+        let username = 'Unknown';
+        try {
+          username = user.decryptUsername();
+        } catch {
+          // keep Unknown
+        }
+
+        if (searchTerm && searchTerm.trim() !== '') {
+          if (!username.toLowerCase().includes(searchTerm.toLowerCase().trim())) {
+            continue; // filter search name
+          }
+        }
+
+        let profilePic = user.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg';
+        const isFollowing = currentUser.following.includes(user._id.toString());
+
+        usersList.push({
+          userId: user._id,
+          username: username,
+          bio: user.bio || '',
+          profilePic: profilePic,
+          isFollowing: isFollowing
+        });
+      }
+
+      return res.json({ users: usersList });
+    } catch (err) {
+      console.error('advancedUserSearch error:', err);
       return res.status(500).json({ error: 'Server error.' });
     }
   }
