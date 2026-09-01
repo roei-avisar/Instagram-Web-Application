@@ -259,61 +259,107 @@ async function renderPostsTimelineChart() {
         }));
 
         const container = document.getElementById("postsTimelineChart");
+        const canvas = document.getElementById("postsTimelineCanvas");
         const width = container.clientWidth || 800;
-        const height = 300; 
+        const height = 300;
         const margin = { top: 20, right: 20, bottom: 80, left: 40 };
         const innerWidth = width - margin.left - margin.right;
         const innerHeight = height - margin.top - margin.bottom;
+        const maxCount = Math.max(10, ...formattedData.map(d => d.count));
+        const devicePixelRatio = window.devicePixelRatio || 1;
 
-        d3.select("#postsTimelineChart").selectAll("*").remove();
+        // Scale the backing store for sharp rendering on high-density displays.
+        canvas.width = width * devicePixelRatio;
+        canvas.height = height * devicePixelRatio;
+        canvas.style.width = "100%";
+        canvas.style.height = `${height}px`;
+
+        const context = canvas.getContext("2d");
+        context.scale(devicePixelRatio, devicePixelRatio);
+        context.clearRect(0, 0, width, height);
+        context.font = "13px Segoe UI, sans-serif";
+        context.lineWidth = 1;
+        context.strokeStyle = "#e9ecef";
+        context.fillStyle = "#6c757d";
+
+        // Keep data-to-pixel conversion in one place for the axes, line, and points.
+        const getX = index => margin.left + (formattedData.length === 1
+            ? innerWidth / 2
+            : index * innerWidth / (formattedData.length - 1));
+        const getY = count => margin.top + innerHeight - (count / maxCount) * innerHeight;
+        const tickCount = 5;
+
+        for (let tick = 0; tick <= tickCount; tick++) {
+            const value = maxCount * tick / tickCount;
+            const y = getY(value);
+            context.beginPath();
+            context.moveTo(margin.left, y);
+            context.lineTo(width - margin.right, y);
+            context.stroke();
+            context.fillText(Math.round(value), 8, y + 4);
+        }
+
+        context.textAlign = "center";
+        formattedData.forEach((item, index) => {
+            const x = getX(index);
+            context.save();
+            context.translate(x - 8, height - margin.bottom + 15);
+            context.rotate(-Math.PI / 4);
+            context.fillText(item.label, 0, 0);
+            context.restore();
+        });
+
+        context.beginPath();
+        formattedData.forEach((item, index) => {
+            const x = getX(index);
+            const y = getY(item.count);
+            if (index === 0) context.moveTo(x, y);
+            else context.lineTo(x, y);
+        });
+        context.strokeStyle = "#00c6ff";
+        context.lineWidth = 3;
+        context.stroke();
+
+        formattedData.forEach((item, index) => {
+            context.beginPath();
+            context.arc(getX(index), getY(item.count), 5, 0, Math.PI * 2);
+            context.fillStyle = "#0C1014";
+            context.fill();
+            context.strokeStyle = "#00c6ff";
+            context.lineWidth = 2;
+            context.stroke();
+        });
 
         let tooltip = d3.select("body").select(".d3-tooltip");
         if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
 
-        const svg = d3.select("#postsTimelineChart").append("svg")
-            .attr("width", "100%").attr("height", height).attr("viewBox", `0 0 ${width} ${height}`)
-            .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+        // Canvas has no individual point elements, so find the nearest point manually.
+        canvas.onmousemove = event => {
+            const bounds = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - bounds.left;
+            const mouseY = event.clientY - bounds.top;
+            const nearestIndex = formattedData.reduce((closest, item, index) =>
+                Math.abs(getX(index) - mouseX) < Math.abs(getX(closest) - mouseX) ? index : closest, 0);
+            const nearestX = getX(nearestIndex);
+            const nearestY = getY(formattedData[nearestIndex].count);
+            const isNearPoint = Math.hypot(mouseX - nearestX, mouseY - nearestY) < 14;
 
-        const x = d3.scalePoint().domain(formattedData.map(d => d.label)).range([0, innerWidth]).padding(0.5);
-        const y = d3.scaleLinear().domain([0, (d3.max(formattedData, d => d.count) || 10)]).nice().range([innerHeight, 0]);
+            canvas.style.cursor = isNearPoint ? "pointer" : "default";
+            if (isNearPoint) {
+                const item = formattedData[nearestIndex];
+                tooltip.style("opacity", 1)
+                    .html(`<strong>${item.label}</strong><br/>${item.count} Posts`)
+                    .style("left", `${event.pageX + 15}px`)
+                    .style("top", `${event.pageY - 35}px`);
+            } else {
+                tooltip.style("opacity", 0);
+            }
+        };
 
-        svg.append("g").attr("transform", `translate(0,${innerHeight})`)
-            .call(d3.axisBottom(x)).selectAll("text").attr("class", "chart-axis-text")
-            .attr("transform", "translate(-10,15)rotate(-45)").style("text-anchor", "end");
-
-        svg.append("g").call(d3.axisLeft(y).ticks(5).tickSize(-innerWidth))
-            .selectAll("text").attr("class", "chart-axis-text");
-
-        svg.selectAll(".domain").remove();
-        svg.selectAll(".tick line").attr("class", "chart-grid-line");
-
-        const line = d3.line().x(d => x(d.label)).y(d => y(d.count)).curve(d3.curveMonotoneX);
-
-        const path = svg.append("path").datum(formattedData)
-            .attr("fill", "none").attr("stroke", "#00c6ff").attr("stroke-width", 3)
-            .attr("d", line);
-
-        const totalLength = path.node().getTotalLength();
-        path.attr("stroke-dasharray", totalLength + " " + totalLength)
-            .attr("stroke-dashoffset", totalLength)
-            .transition().duration(1500).ease(d3.easeLinear).attr("stroke-dashoffset", 0);
-
-        svg.selectAll(".dot").data(formattedData).enter().append("circle").attr("class", "dot")
-            .attr("cx", d => x(d.label)).attr("cy", d => y(d.count)).attr("r", 5)
-            .attr("fill", "#0C1014").attr("stroke", "#00c6ff").attr("stroke-width", 2)
-            .style("opacity", 0)
-            .on("mouseover", function(event, d) {
-                d3.select(this).transition().duration(200).attr("r", 8);
-                tooltip.transition().duration(200).style("opacity", 1);
-                tooltip.html(`<strong>${d.label}</strong><br/>${d.count} Posts`)
-                    .style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 35) + "px");
-            })
-            .on("mousemove", function(event) { tooltip.style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 35) + "px"); })
-            .on("mouseout", function() {
-                d3.select(this).transition().duration(200).attr("r", 5);
-                tooltip.transition().duration(500).style("opacity", 0);
-            })
-            .transition().duration(500).delay(1500).style("opacity", 1);
+        canvas.onmouseleave = () => {
+            canvas.style.cursor = "default";
+            tooltip.style("opacity", 0);
+        };
 
     } catch (error) { console.error(error); }
 }

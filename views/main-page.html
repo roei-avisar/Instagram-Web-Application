@@ -142,7 +142,8 @@
 
         <main class="main-page d-flex">
 
-            <nav class="left-sidebar">
+            <header>
+                <nav class="left-sidebar">
 
                 <!-- Logo -->
                 <div class="logo">
@@ -260,7 +261,8 @@
 
                 </div>
 
-            </nav>
+                </nav>
+            </header>
             <div class="notifications-panel js-notifications-panel shadow-lg d-none">
                 <div class="p-4 border-bottom">
                     <h4 class="fw-bold mb-0">Notifications</h4>
@@ -527,14 +529,17 @@
                         <div class="card dashboard-card shadow-sm border-0 rounded-4">
                             <div class="card-body text-center">
                                 <h5 class="chart-title fw-semibold mb-4">Daily Uploads</h5>
-                                <div id="postsTimelineChart" class="chart-container"></div>
+                                <div id="postsTimelineChart" class="chart-container">
+                                    <canvas id="postsTimelineCanvas" class="canvas-chart"
+                                        aria-label="Daily post uploads chart" role="img"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <div class="right-sidebar mt-5 me-5">
+            <aside class="right-sidebar mt-5 me-5">
                 <div class="user-row d-flex justify-content-between align-items-center mb-4">
                     <div class="user-info d-flex align-items-center gap-3">
                         <img src="/elements/media/profile-pictures/Default_pfp.jpg"
@@ -597,7 +602,7 @@
                 <div class="mt-3">
                     <span class="text-muted fs-8">&copy; 2026 INSTAGRAM FROM BEST TEAM EVER :)</span>
                 </div>
-            </div>
+            </aside>
             <div class="weather-container position-absolute top-0 end-0 m-3 rounded-3 shadow-sm border p-2 d-flex align-items-center gap-2 user-select-none"
                 onclick="loadWeatherWidget()">
                 <div class="fs-5">☀️</div>
