@@ -6,6 +6,7 @@ const postsRouter = require('./postsRouter');
 const groupsRouter = require('./groupsRouter');
 const chatsRouter = require('./chatsRouter');
 
+const statisticsRouter = require('./statisticsRouter');
 
 // Mount each resource router under its own prefix
 router.use('/user', userRouter);
@@ -13,6 +14,7 @@ router.use('/posts', postsRouter);
 router.use('/groups', groupsRouter);
 router.use('/chats', chatsRouter);
 
+router.use('/statistics', statisticsRouter);
 
 // Future routers can be added here, for example:
 // const postRouter = require('./postRouter');

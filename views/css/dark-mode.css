@@ -331,17 +331,36 @@ body.dark-mode #membersList button:not(.btn-primary):not(.btn-danger) {
     border: 1px solid #3a3f47 !important;
 }
 
+body.dark-mode .post-options-dropdown {
+    background-color: #0C1014 !important;
+    border-color: #262B33 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+}
+
 body.dark-mode .edit-post-btn {
+    background-color: transparent !important;
     color: white !important;
 }
 
 body.dark-mode .edit-post-btn:hover {
-    background-color: #3a3f47 !important;
+    background-color: #262B33 !important;
+    color: white !important;
 }
 
 body.dark-mode #editPostModal .bg-white {
     background-color: #0C1014 !important;
     border-color: #262B33 !important;
+}
+
+body.dark-mode #editPostModal .btn-light {
+    background-color: #262B33 !important;
+    color: white !important;
+    border-color: #3a3f47 !important;
+}
+
+body.dark-mode #editPostModal .btn-light:hover {
+    background-color: #3a3f47 !important;
+    color: white !important;
 }
 
 body.dark-mode #editPostModal input, 
@@ -485,5 +504,44 @@ body.dark-mode #editMessageModal .modal-content textarea.form-control {
 body.dark-mode #editMessageModal .btn-close,
 body.dark-mode #deleteMessageModal .btn-close,
 body.dark-mode #shareResultModal .btn-close {
-    filter: invert(1) grayscale(100%) brightness(200%);
+        filter: invert(1) grayscale(100%) brightness(200%);
+    body.dark-mode .dashboard-main-title {
+        color: #ffffff !important;
+    }
+}
+
+body.dark-mode .dashboard-card {
+    background-color: #0C1014 !important;
+    border: 1px solid #262B33 !important;
+}
+
+body.dark-mode .chart-title {
+    color: #ffffff !important;
+}
+
+body.dark-mode .chart-axis-text {
+    fill: #a8a8a8 !important;
+}
+
+body.dark-mode .chart-grid-line {
+    stroke: #262B33 !important;
+}
+
+.dark-mode #groupsOverlay .bg-white,
+.dark-mode #groupsOverlay .bg-light {
+    background-color: #121212 !important;
+}
+
+.dark-mode #groupsOverlay .text-dark {
+    color: #ffffff !important;
+}
+
+.dark-mode #groupsOverlay .form-control {
+    background-color: #262626 !important;
+    color: #ffffff !important;
+    border: 1px solid #444444 !important;
+}
+
+.dark-mode #groupsOverlay .form-control::placeholder {
+    color: #a0a0a0 !important;
 }

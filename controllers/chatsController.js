@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Chat = require('../models/chatsModel');
 
 class chatsController {
@@ -268,10 +269,17 @@ class chatsController {
 
     async getAllMessages(req, res) {
         try {
-            const { senderId, receiverId } = req.body; 
+            // The user must be logged in — we never trust the body alone for identity
+            if (!req.session || !req.session.userId) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Not authenticated"
+                });
+            }
+
+            const { senderId, receiverId } = req.body;
 
             // Check to make sure all the needed parameters are there!
-            // If not- return an accurate response
             if (!senderId || !receiverId) {
                 return res.status(400).json({
                     success: false,
@@ -279,12 +287,53 @@ class chatsController {
                 });
             }
 
-            let chat = await Chat.findOne({ 
-                users: { $all: [senderId, receiverId] } 
-            }).populate('messages.postId');
+            // Both IDs must be well-formed ObjectId strings.
+            // Without this guard a stale/invalid id (e.g. the very first chat-open
+            // right after a page load, before the client knows the current user)
+            // makes Mongoose throw a CastError that would surface as a confusing 500.
+            if (typeof senderId !== 'string' || typeof receiverId !== 'string' ||
+                !mongoose.Types.ObjectId.isValid(senderId) ||
+                !mongoose.Types.ObjectId.isValid(receiverId)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid user id"
+                });
+            }
+
+            // A user cannot open a chat with themselves
+            if (senderId === receiverId) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Cannot open a chat with yourself"
+                });
+            }
+
+            // A user may only read their own chats
+            if (req.session.userId.toString() !== senderId) {
+                return res.status(403).json({
+                    success: false,
+                    message: "You are not authorized to view this chat"
+                });
+            }
+
+            // Try to load the chat with shared-post references populated.
+            // If populate ever fails (bad ref, unregistered model, corrupted
+            // postId) we fall back to the raw messages — the client already
+            // renders a "This post has been deleted." placeholder for missing posts.
+            let chat;
+            try {
+                chat = await Chat.findOne({
+                    users: { $all: [senderId, receiverId] }
+                }).populate('messages.postId');
+            } catch (populateError) {
+                console.error("getAllMessages populate error:", populateError);
+                chat = await Chat.findOne({
+                    users: { $all: [senderId, receiverId] }
+                });
+            }
 
             // Check to make sure the chat between these two users exist!
-            // If not- return an accurate response
+            // If not- this is a brand new conversation, not an error
             if (!chat){
                 return res.status(200).json({
                     success: true,
@@ -301,10 +350,86 @@ class chatsController {
             });
 
         } catch (error) { // Handle the error if it occurs and return an accurate response
+            console.error("getAllMessages error:", error);
             res.status(500).json({
                 success: false,
-                message: "Error fetching all messages",
-                error: error.message
+                message: "Error fetching all messages"
+            });
+        }
+    }
+
+    async getMyChatsSummary(req, res) {
+        try {
+            // The user must be logged in
+            if (!req.session || !req.session.userId) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Not authenticated"
+                });
+            }
+
+            const myId = req.session.userId.toString();
+
+            // Only the Chat model is queried here — the client merges this data
+            // with the follow lists it gets separately from the User routes.
+            const chats = await Chat.find({ users: myId });
+
+            const summary = [];
+
+            for (const chat of chats) {
+                const userIds = (chat.users || []).map(id => id.toString());
+
+                // Identify the other participant of this 2-person chat
+                const otherUserId = userIds.find(id => id !== myId);
+                if (!otherUserId) {
+                    continue; // malformed / self chat — skip defensively
+                }
+
+                const messages = chat.messages || [];
+                const lastMsg = messages.length ? messages[messages.length - 1] : null;
+
+                // Build a SAFE preview string. For shared posts we never read the
+                // post object / postId — just a fixed label.
+                let lastMessageText = "";
+                let lastMessageAt = chat.updatedAt || chat.createdAt || null;
+
+                if (lastMsg) {
+                    lastMessageAt = lastMsg.createdAt || lastMessageAt;
+
+                    if (lastMsg.type === 'shared_post') {
+                        lastMessageText = (lastMsg.sender && lastMsg.sender.toString() === myId)
+                            ? "You shared a post"
+                            : "Shared a post";
+                    } else if (lastMsg.type === 'text') {
+                        lastMessageText = typeof lastMsg.content === 'string' ? lastMsg.content : "";
+                    } else {
+                        lastMessageText = "";
+                    }
+                }
+
+                // Did the other person send me at least one message in this chat?
+                const theyMessagedMe = messages.some(
+                    m => m.sender && m.sender.toString() === otherUserId
+                );
+
+                summary.push({
+                    otherUserId: otherUserId,
+                    lastMessageText: lastMessageText,
+                    lastMessageAt: lastMessageAt,
+                    theyMessagedMe: theyMessagedMe
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                chats: summary
+            });
+
+        } catch (error) {
+            console.error("getMyChatsSummary error:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Error loading chats summary"
             });
         }
     }

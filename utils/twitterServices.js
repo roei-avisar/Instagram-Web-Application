@@ -17,9 +17,9 @@ const sendTweet = async (text) => {
     } catch(error){
     if (error.code === 402) {
         console.error("====================================================================================================================================================================================");
-        console.error("STSTEM MESSAGE TO THE LECTURER: Integration with the Twitter API was successful, but we do not have the tokens required to post via the Twitter API. See the relevant error below:");
+        console.error("SYSTEM MESSAGE TO THE LECTURER: Integration with the Twitter API was successful, but we do not have the tokens required to post via the Twitter API. See the relevant error below:");
         console.error(error);
-        console.error("STSTEM MESSAGE TO THE LECTURER: Integration with the Twitter API was successful, but we do not have the tokens required to post via the Twitter API. See the relevant error above:");
+        console.error("SYSTEM MESSAGE TO THE LECTURER: Integration with the Twitter API was successful, but we do not have the tokens required to post via the Twitter API. See the relevant error above:");
         console.error("====================================================================================================================================================================================");
   }
   else {

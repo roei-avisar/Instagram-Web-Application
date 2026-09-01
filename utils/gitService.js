@@ -82,6 +82,35 @@ class GitService {
             console.error("Background delete task error:", error);
         }
     }
+    // Background method to push an already-saved file to Git (e.g. after multer upload)
+    pushExistingFileToGit(relativePath) {
+        try {
+            const targetPath = path.join(__dirname, relativePath);
+
+            // Verify the file exists before trying to push
+            if (!fs.existsSync(targetPath)) {
+                console.error("File not found for Git push:", targetPath);
+                return;
+            }
+
+            const token = process.env.GIT_ACCESS_TOKEN;
+            const repoURL = "gitlab.com/internet-web-applications/Internet-web-apps.git";
+            const remoteUrlWithToken = `https://oauth2:${token}@${repoURL}`;
+            const filename = path.basename(relativePath);
+
+            const gitCommand = `git add "${targetPath}" && git -c user.name="Media Uploader" -c user.email="media@uploader.com" commit "${targetPath}" -m "Update profile picture: ${filename}" && git push ${remoteUrlWithToken} HEAD`;
+
+            exec(gitCommand, { env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } }, (execErr, stdout, stderr) => {
+                if (execErr) {
+                    console.error("Git push failed:", execErr);
+                    return;
+                }
+                console.log("Successfully pushed profile picture to git:", stdout);
+            });
+        } catch (error) {
+            console.error("Background push task error:", error);
+        }
+    }
 }
 
 // Export a single instance of the class

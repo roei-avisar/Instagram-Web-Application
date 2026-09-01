@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const { sendTweet } = require('../utils/twitterServices');
+const gitService = require('../utils/gitService');
 
 // Configure multer for profile picture uploads
 // Files are saved to views/elements/media/profile-pictures/ and named by the user's ID
@@ -211,6 +212,10 @@ class UserController {
       // The file is already saved as <userId>.jpg by multer's storage config
       // (if an old file existed, multer overwrites it automatically)
       const profilePicUrl = '/elements/media/profile-pictures/' + req.session.userId + '.jpg?t=' + Date.now();
+
+      // Push the saved profile picture to Git so it's available for all users
+      const profilePicRelativePath = '/../views/elements/media/profile-pictures/' + req.session.userId + '.jpg';
+      gitService.pushExistingFileToGit(profilePicRelativePath);
 
       try {
         const user = await User.findById(req.session.userId);
@@ -657,15 +662,9 @@ class UserController {
         { $pull: { following: userId } }
       );
 
-      // Delete user's profile picture file from disk if it exists
-      const userProfilePicPath = path.join(__dirname, '..', 'views', 'elements', 'media', 'profile-pictures', `${userId}.jpg`);
-      if (fs.existsSync(userProfilePicPath)) {
-        try {
-          fs.unlinkSync(userProfilePicPath);
-        } catch (fileErr) {
-          console.error('Error deleting profile pic file:', fileErr);
-        }
-      }
+      // Delete user's profile picture file from disk and push deletion to Git
+      const profilePicRelativePath = '/../views/elements/media/profile-pictures/' + userId + '.jpg';
+      gitService.deleteMediaAndPushToGit(profilePicRelativePath);
 
       // Delete the user document from the database
       await User.findByIdAndDelete(userId);
@@ -755,6 +754,37 @@ class UserController {
     } catch (err) {
       console.error("Error getting personal posts:", err);
       return res.status(500).json({ error: 'Server error' });
+    }
+  }
+  // get the username and photo bt given userID
+  async getBasicInfo(req, res) {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+
+      const User = require('../models/usersModel'); 
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      let username = 'Unknown';
+      try {
+        username = user.decryptUsername();
+      } catch { }
+
+      const profilePic = user.profilePic || '/images/profiles/Default_pfp.jpg';
+
+      return res.json({ username, profilePic });
+    } catch (err) {
+      return res.status(500).json({ error: 'Server error.' });
     }
   }
 }

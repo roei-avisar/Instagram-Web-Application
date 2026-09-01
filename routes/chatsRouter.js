@@ -11,5 +11,6 @@ router.patch('/updateMessage', chatsController.updateMessage);
 router.post('/deleteSpecificMessage', chatsController.deleteMessage);
 router.post('/searchForAMessage', chatsController.searchMessage);
 router.post('/getAllMessages', chatsController.getAllMessages);
+router.get('/getMyChatsSummary', chatsController.getMyChatsSummary);
 
 module.exports = router; // export all the router functions to be used by server.js
