@@ -1,3 +1,7 @@
+if (localStorage.getItem('theme') === 'dark' || localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark-mode');
+    }
+
 function handleLogin() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
