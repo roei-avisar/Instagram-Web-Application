@@ -43,4 +43,8 @@ router.post("/getBasicInfo", requireLogin, userController.getBasicInfo);
 
 router.post('/advancedSearch', requireLogin, userController.advancedUserSearch);
 
+router.post('/requestPasswordReset', userController.requestPasswordReset);
+
+router.post('/resetPasswordWithCode', userController.resetPasswordWithCode);
+
 module.exports = router; // export all the router functions to be used by server.js

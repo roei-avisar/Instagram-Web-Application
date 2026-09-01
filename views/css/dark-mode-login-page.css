@@ -1,0 +1,67 @@
+html:has(body.dark-mode),
+body.dark-mode {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode footer,
+body.dark-mode .main,
+body.dark-mode .left {
+    background-color: #000000 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+body.dark-mode .right {
+    background-color: #121212 !important;
+    border: 1px solid #262626 !important;
+    box-shadow: none !important;
+}
+
+body.dark-mode .modal-box {
+    background-color: #262626 !important;
+    border: 1px solid #363636 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+}
+
+body.dark-mode .form-title,
+body.dark-mode .modal-title,
+body.dark-mode .forgot,
+body.dark-mode .headline,
+body.dark-mode .modal-login-link {
+    color: #ffffff !important;
+}
+
+body.dark-mode .form-input {
+    background-color: #000000 !important;
+    border: 1px solid #363636 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .form-input::placeholder {
+    color: #a8a8a8 !important;
+}
+
+body.dark-mode .form-input:focus {
+    border-color: #555555 !important;
+}
+
+body.dark-mode .divider,
+body.dark-mode .modal-divider {
+    background-color: #262626 !important;
+    border-color: #262626 !important;
+}
+
+body.dark-mode footer .footer-links a,
+body.dark-mode footer .footer-bottom,
+body.dark-mode .modal-terms {
+    color: #a8a8a8 !important;
+}
+
+body.dark-mode .modal-terms a {
+    color: #ffffff !important;
+}
+
+body.dark-mode .meta-logo {
+    filter: invert(1);
+}

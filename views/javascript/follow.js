@@ -15,6 +15,7 @@ function closeAllUsersPopup() {
   // Reset fields on close
   const searchInput = document.getElementById('allUsersSearchInput');
   if (searchInput) searchInput.value = '';
+  clearUserSearchError();
 
   const filterIAmFollowing = document.getElementById('filterIAmFollowing');
   if (filterIAmFollowing) filterIAmFollowing.value = 'all';
@@ -212,11 +213,31 @@ async function loadSidebarSuggestedUsers() {
 // Call it when the page loads
 document.addEventListener('DOMContentLoaded', loadSidebarSuggestedUsers);
 
+function showUserSearchError(msg) {
+    const input = document.getElementById('allUsersSearchInput');
+    let errorDiv = input.parentElement.querySelector('.user-search-error');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'user-search-error text-danger small mt-2 fw-bold w-100';
+        input.parentElement.insertBefore(errorDiv, input.nextSibling);
+    }
+    errorDiv.innerHTML = `<i class="bi bi-exclamation-circle-fill me-1"></i>${msg}`;
+}
+
+function clearUserSearchError() {
+    const input = document.getElementById('allUsersSearchInput');
+    if (input) {
+        let errorDiv = input.parentElement.querySelector('.user-search-error');
+        if (errorDiv) errorDiv.remove();
+    }
+}
+
 function clearUserSearch() {
     document.getElementById('allUsersSearchInput').value = '';
     document.getElementById('filterIAmFollowing').value = 'all';
     document.getElementById('filterIsFollowingMe').value = 'all';
     
+    clearUserSearchError();
     executeUserAdvancedSearch();
 }
 
@@ -227,6 +248,8 @@ async function executeUserAdvancedSearch() {
   const searchTerm = document.getElementById('allUsersSearchInput').value.trim();
   const iAmFollowing = document.getElementById('filterIAmFollowing').value;
   const isFollowingMe = document.getElementById('filterIsFollowingMe').value;
+
+  clearUserSearchError();
 
   try {
     const res = await fetch('/api/user/advancedSearch', {
@@ -240,10 +263,12 @@ async function executeUserAdvancedSearch() {
     if (res.ok) {
       renderAllUsers(data.users);
     } else {
-      listContainer.innerHTML = `<div class="text-center text-danger my-3">${data.error || 'Failed to load users'}</div>`;
+      listContainer.innerHTML = '';
+      showUserSearchError(data.error || 'Failed to load users');
     }
   } catch (err) {
     console.error('Error executing user search:', err);
-    listContainer.innerHTML = '<div class="text-center text-danger my-3">Connection error.</div>';
+    listContainer.innerHTML = '';
+    showUserSearchError('Connection error.');
   }
 }
