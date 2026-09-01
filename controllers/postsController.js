@@ -628,6 +628,8 @@ class PostController {
         }
     }
     async deleteComment(req, res) {
+        if (!req.session || !req.session.userId) {
+         return res.status(401).json({ error: 'Not authenticated' });}
         try {
             const userId = req.session.userId;
             const { postId, commentId } = req.params;
