@@ -488,7 +488,8 @@ body.dark-mode .leaflet-bar {
 
 body.dark-mode .leaflet-bar a.leaflet-disabled {
     background-color: #1a1d21 !important;
-    color: #6c757d !important;
+    color: #6c757d !important;}
+    
 body.dark-mode .feed-advanced-search-panel {
     background-color: #121212;
     border-right: 1px solid #333;
