@@ -6,7 +6,8 @@ const userRouter = require('./usersRouter');
 const postsRouter = require('./postsRouter');
 const groupsRouter = require('./groupsRouter');
 const storiesRouter = require('./storiesRouter');
-const { requireLogin } = require('../middleware/userMiddleware');
+const chatsRouter = require('./chatsRouter');
+const statisticsRouter = require('./statisticsRouter');
 
 // Mount each resource router under its own prefix
 router.use('/user', userRouter);
