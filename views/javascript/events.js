@@ -4,14 +4,6 @@ const menusConfig = [
         dontRemoveOn: '.options-btn, .post-options-dropdown'
     },
     {
-        menuClass: '.js-search-container',
-        dontRemoveOn: '.js-search-container, .js-filter-menu, button'
-    },
-    {
-        menuClass: '.js-filter-menu',
-        dontRemoveOn: '.js-filter-menu, .js-search-container, button'
-    },
-    {
         menuClass: '.create-form-overlay',
         dontRemoveOn: '.js-menu-create-btn, .create-form-overlay, .js-discard-overlay, #postUploadChoiceModal, #groupsSelectionModal'
     },
@@ -28,15 +20,6 @@ let isMuted = false;
 
 // Theme element
 const themeToggle = document.getElementById('theme-toggle');
-
-// filter and search posts elements
-const searchMenuBtn = document.querySelector('.js-search-btn');
-const searchContainerWrapper = document.querySelector('.js-search-container');
-const searchInput = document.querySelector('.js-posts-search-input');
-const filterBtn = document.querySelector('.js-filter-btn');
-const filterMenu = document.querySelector('.js-filter-menu');
-const filterAllCheckboxes = document.querySelector('.js-filter-all');
-const filterSingleCheckbox = document.querySelectorAll('.js-filter-single');
 
 // Create new post form elemments
 const menuCreateBtn = document.querySelector('.js-menu-create-btn');
@@ -140,10 +123,6 @@ document.addEventListener('click', function(event) {
             const openElements = document.querySelectorAll(`${config.menuClass}:not(.d-none)`);
             openElements.forEach(element => {
                 element.classList.add('d-none');
-                if (element.classList.contains('js-search-container')) {
-                    updateSearchFilter('');
-                    searchInput.value = '';
-                }
             });
         }
     });
@@ -382,58 +361,6 @@ async function submitPostDataToServer(groupId, groupAdminId = null) {
     uploadNewPostNotification(currentMediaSource, currentMediaType);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
-// Open the search container when clicking on the search logo
-searchMenuBtn.addEventListener('click', function(event) {
-    updateSearchFilter('');
-    searchInput.value = '';
-    searchContainerWrapper.classList.toggle('d-none');
-    searchInput.focus();
-});
-
-// Use the search input to filter posts
-searchInput.addEventListener('input', function(event) {
-
-    const searchString = event.target.value;
-    updateSearchFilter(searchString);
-});
-
-// Open the posts filter menu when clicking on the logo
-filterBtn.addEventListener('click', function() {
-    filterMenu.classList.toggle('d-none');
-});
-
-// Used for updating the mediaType filter with the current checkboxes values
-function triggerFilterUpdate() {
-    const checkedTypes = Array.from(filterSingleCheckbox)
-        .filter(cb => cb.checked)
-        .map(cb => cb.value);
-
-    updateMediaFilter(checkedTypes);
-}
-
-// Mark or un-mark every checkbox in accordance to the 'all' checkbox mark
-filterAllCheckboxes.addEventListener('change', function(event) {
-    const isChecked = event.target.checked;
-
-    filterSingleCheckbox.forEach(cb => {
-        cb.checked = isChecked;
-    });
-
-    triggerFilterUpdate();
-});
-
-// Upon 'change' event in the regular checkboxes (all checkboxes other then 'all'), change the 'all' checkbox accordingly, and trigger the mediaFilterUpdate
-filterSingleCheckbox.forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-
-        const areAllChecked = Array.from(filterSingleCheckbox).every(cb => cb.checked);
-
-        filterAllCheckboxes.checked = areAllChecked;
-
-        triggerFilterUpdate();
-    });
-});
 
 function togglePostAudio(button, postId) {
     let postContainer = button.closest('.js-post-media');
