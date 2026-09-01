@@ -8,10 +8,6 @@ const menusConfig = [
         dontRemoveOn: '.js-menu-create-btn, .create-form-overlay, .js-discard-overlay, #postUploadChoiceModal, #groupsSelectionModal, #mapModal, .leaflet-marker-icon, .leaflet-popup'
     },
     {
-        menuClass: '.js-notifications-panel',
-        dontRemoveOn: '.js-notifications-btn, .js-notifications-panel'
-    },
-    {
         menuClass: '#globalPostsMapOverlay',
         dontRemoveOn: '.js-global-map-btn, .js-global-map-content,.leaflet-marker-icon, .leaflet-popup'
     }
@@ -373,7 +369,6 @@ async function submitPostDataToServer(groupId, groupAdminId = null) {
 
     // Close the post creation form and reset its state
     closePostCreationForm();
-    uploadNewPostNotification(currentMediaSource, currentMediaType);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 

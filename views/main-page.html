@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="css/messages.css" />
     <link rel="stylesheet" href="./css/instagram_left_sidebar.css">
     <link rel="stylesheet" href="./css/create-post.css">
-    <link rel="stylesheet" href="./css/notifications.css">
     <link rel="stylesheet" href="./css/dark-mode.css">
     <link rel="stylesheet" href="./css/userSettings.css">
     <link rel="stylesheet" href="./css/follow.css">
@@ -180,12 +179,6 @@
                         <span>Filter Posts</span>
                     </button>
 
-                    <!-- Notifications -->
-                    <button class="menu-item js-notifications-btn">
-                        <i class="bi bi-heart"></i>
-                        <span>Notifications</span>
-                    </button>
-
                     <!-- Create -->
                     <button class="menu-item js-menu-create-btn">
                         <i class="bi bi-plus-square"></i>
@@ -202,12 +195,6 @@
                     <button class="menu-item js-global-map-btn" onclick="showAllPostsOnMap()">
                         <i class="bi bi-geo-alt"></i>
                         <span>Map</span>
-                    </button>
-
-                    <!-- Filter -->
-                    <button class="menu-item js-filter-btn">
-                        <div class="bi bi-funnel small-icon"></div>
-                        <span>Filter Posts</span>
                     </button>
 
                     <!-- Profile -->
@@ -263,13 +250,6 @@
 
                 </nav>
             </header>
-            <div class="notifications-panel js-notifications-panel shadow-lg d-none">
-                <div class="p-4 border-bottom">
-                    <h4 class="fw-bold mb-0">Notifications</h4>
-                </div>
-                <div class="notifications-list js-notifications-list p-4 overflow-y-auto">
-                </div>
-            </div>
 
             <!-- Feed Advanced Search Sidebar -->
             <div class="feed-advanced-search-panel js-feed-advanced-search-panel hidden-panel">
@@ -865,10 +845,6 @@
             </div>
         </div>
 
-        <div class="new-post-notification-bubble js-new-post-notification">
-            <span class="fw-semibold">New Post created !</span>
-        </div>
-
         <!-- Edit Post Modal -->
         <div id="editPostModal"
             class="dark-overlay upload-choice-overlay d-none align-items-center justify-content-center"
@@ -1152,7 +1128,6 @@
     <script src="javascript/posts.js"></script>
     <script src="javascript/post-buttons.js"></script>
     <script src="javascript/events.js"></script>
-    <script src="javascript/notifications.js"></script>
     <script src="javascript/messages.js"></script>
     <script src="javascript/groups.js"></script>
     <script src="javascript/sidebar.js"></script>
