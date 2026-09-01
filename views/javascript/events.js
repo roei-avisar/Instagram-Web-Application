@@ -13,7 +13,7 @@ const menusConfig = [
     },
     {
         menuClass: '.create-form-overlay',
-        dontRemoveOn: '.js-menu-create-btn, .create-form-overlay, .js-discard-overlay, #postUploadChoiceModal, #groupsSelectionModal'
+        dontRemoveOn: '.js-menu-create-btn, .create-form-overlay, .js-discard-overlay, #postUploadChoiceModal, #groupsSelectionModal, .story-add-btn, .your-story-item'
     },
     {
         menuClass: '.js-notifications-panel',
@@ -177,6 +177,7 @@ document.addEventListener('click', function(event) {
 
 // Open the create post form
 menuCreateBtn.addEventListener('click', function(event) {
+    window.isUploadingStory = false;
     createFormOverlay.classList.toggle('d-none');
     if (createFormOverlay.classList.contains('d-none')) {
         document.body.style.overflow = '';
@@ -279,7 +280,11 @@ postShareBtn.addEventListener('click', function(event) {
         return;
     }
     
-    document.getElementById('postUploadChoiceModal').classList.replace('d-none', 'd-flex');
+    if (window.isUploadingStory) {
+        document.querySelector('.js-postUpload-story-btn').click();
+    } else {
+        document.getElementById('postUploadChoiceModal').classList.replace('d-none', 'd-flex');
+    }
 });
 
 document.querySelector('.js-postUpload-followers-btn').addEventListener('click', function() {
@@ -334,6 +339,48 @@ document.querySelector('.js-final-postUpload-groups-btn').addEventListener('clic
     
     // Submit the post data to the server
     submitPostDataToServer(selectedRadio.value);
+});
+
+document.querySelector('.js-postUpload-story-btn').addEventListener('click', async function() {
+    document.getElementById('postUploadChoiceModal').classList.replace('d-flex', 'd-none');
+    
+    if (currentMediaType === 'text') {
+        alert("Text stories are not supported!");
+        return;
+    }
+
+    if (!currentMediaSource || currentMediaSource === "") {
+        alert("Cannot upload an empty story!");
+        return;
+    }
+
+    const payload = {
+        mediaType: currentMediaType,
+        mediaSource: currentMediaSource
+    };
+
+    try {
+        const response = await fetch('/api/stories/createStory', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            closePostCreationForm();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (typeof loadStories === 'function') {
+                loadStories();
+            }
+        } else {
+            alert("Error creating story: " + (result.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error("Error creating story:", error);
+    }
 });
 
 async function submitPostDataToServer(groupId) {

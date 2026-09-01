@@ -57,6 +57,7 @@ body.dark-mode .border-right,
 body.dark-mode .border-left {
     border-color: #262B33 !important;
 }
+
 /* Inputs */
 body.dark-mode input,
 body.dark-mode textarea {
@@ -84,6 +85,7 @@ body.dark-mode .messages {
     background-color: rgb(56, 57, 62);
     color: white;
 }
+
 body.dark-mode .messages:hover {
     background-color: rgb(72, 73, 80);
 }
@@ -133,6 +135,7 @@ body.dark-mode .discard-container h5 {
 body.dark-mode .upload-post-btn {
     color: #4150F7 !important;
 }
+
 body.dark-mode .discard-btn {
     color: #ed4956 !important;
 }
@@ -150,17 +153,21 @@ body.dark-mode .js-preview-text {
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
     color: white !important;
 }
+
 body.dark-mode .js-preview-text::placeholder {
     color: rgba(255, 255, 255, 0.7) !important;
 }
 
-body.dark-mode span.text-primary{ /* for the verfied icon still be blue */
+body.dark-mode span.text-primary {
+    /* for the verfied icon still be blue */
     color: #0d6efd !important;
 }
 
-body.dark-mode .bi-heart-fill.text-danger { /* for the like icon still be red */
+body.dark-mode .bi-heart-fill.text-danger {
+    /* for the like icon still be red */
     color: #ed4956 !important;
 }
+
 body.dark-mode .js-posts-search-input {
     background-color: #262B33 !important;
     color: white !important;
@@ -174,11 +181,11 @@ body.dark-mode .js-posts-search-input::placeholder {
 body.dark-mode #storyModal input.story-reply {
     background-color: transparent !important;
     color: white !important;
-    border: 1px solid rgba(255,255,255,0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
 }
 
 body.dark-mode #storyModal input.story-reply::placeholder {
-    color: rgba(255,255,255,0.8) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
 body.dark-mode .white-arrow {
@@ -198,8 +205,18 @@ body.dark-mode #storyModal .story-nav {
 body.dark-mode #storyModal .story-nav i {
     color: #ffffff !important;
 }
+
 body.dark-mode #storyModal .bi-heart-fill.text-danger {
     color: #ed4956 !important;
+}
+
+/* Story '+' button dark mode */
+body.dark-mode .story-add-btn {
+    border-color: #0C1014;
+}
+
+body.dark-mode .story-avatar {
+    border-color: #0C1014 !important;
 }
 
 /* Settings Modal */
@@ -320,7 +337,7 @@ body.dark-mode .weather-container strong {
 body.dark-mode .following-btn {
     background-color: #262B33 !important;
     color: white !important;
-    border: 1px solid #555 !important; 
+    border: 1px solid #555 !important;
     opacity: 1 !important;
 }
 
@@ -344,7 +361,7 @@ body.dark-mode #editPostModal .bg-white {
     border-color: #262B33 !important;
 }
 
-body.dark-mode #editPostModal input, 
+body.dark-mode #editPostModal input,
 body.dark-mode #editPostModal textarea {
     background-color: #262B33 !important;
     color: white !important;

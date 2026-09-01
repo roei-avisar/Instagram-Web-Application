@@ -43,6 +43,7 @@
                 <!-- Previous Story 2 -->
                 <div class="side-story side-story-far">
                     <img id="prev2StoryImage" src="">
+                    <video id="prev2StoryVideo" src="" style="display:none;" muted playsinline></video>
                     <div class="side-story-user">
                         <img id="prev2ProfileImage" src="">
                         <div id="prev2ProfileName"></div>
@@ -52,6 +53,7 @@
                 <!-- Previous Story -->
                 <div class="side-story">
                     <img id="prevStoryImage" src="">
+                    <video id="prevStoryVideo" src="" style="display:none;" muted playsinline></video>
 
                     <div class="side-story-user">
                         <img id="prevProfileImage" src="">
@@ -69,8 +71,7 @@
                         <i class="bi bi-chevron-right"></i>
                     </span>
 
-                    <div class="story-progress-bg"></div>
-                    <div class="story-progress"></div>
+                    <div class="story-progress-container js-story-progress-container d-flex gap-1 mb-2 w-100 px-2" style="position:absolute; top:10px; z-index:100; height:3px;"></div>
                     <div class="story-header">
 
                         <img src="" class="story-header-avatar">
@@ -81,9 +82,9 @@
                         </div>
 
                         <span class="story-actions">
-                            <i class="bi bi-volume-up-fill"></i>
-                            <i id="pauseStory" class="bi bi-pause-fill"></i>
-                            <i class="bi bi-three-dots"></i>
+                            <i id="storyMuteBtn" class="bi bi-volume-mute-fill" style="cursor:pointer; display:none;"></i>
+                            <i id="pauseStory" class="bi bi-pause-fill ms-2" style="cursor:pointer;"></i>
+                            <i id="deleteStoryBtn" class="bi bi-trash-fill text-danger ms-2 d-none" style="cursor:pointer;" onclick="deleteCurrentStory(event)"></i>
                         </span>
 
 
@@ -92,29 +93,13 @@
                     <img id="storyImage" src="" alt="Story">
                     <video id="storyVideo" autoplay muted loop playsinline style="display:none;"></video>
 
-                    <div class="story-footer">
-
-                        <div class="reply-wrapper">
-
-                            <input type="text" id="storyReplyInput" placeholder="Reply to" class="story-reply">
-
-                            <span id="storySendBtn" class="send-btn">
-                                Send
-                            </span>
-
-                        </div>
-
-                        <i class="bi bi-heart story-icon"></i>
-                        <i class="bi bi-send story-icon"></i>
-
-                    </div>
-
                 </div>
 
                 <!-- Next Story -->
                 <div class="side-story">
 
                     <img id="nextStoryImage" src="">
+                    <video id="nextStoryVideo" src="" style="display:none;" muted playsinline></video>
 
                     <div class="side-story-user">
                         <img id="nextProfileImage" src="">
@@ -125,6 +110,7 @@
                 <!-- Next Story 2 -->
                 <div class="side-story side-story-far">
                     <img id="next2StoryImage" src="">
+                    <video id="next2StoryVideo" src="" style="display:none;" muted playsinline></video>
                     <div class="side-story-user">
                         <img id="next2ProfileImage" src="">
                         <div id="next2ProfileName"></div>
@@ -303,133 +289,7 @@
                     </button>
                     <div class="stories-scroll d-flex gap-3 px-2 py-1">
 
-                        <div class="story-item" data-story="elements/media/stories-section/story1.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d01d53850f0e0dbcdd8.jpg" data-name="maya_99"
-                            data-video="elements/media/stories-section/videoStory.mp4">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d01d53850f0e0dbcdd8.jpg" alt="maya's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">maya_99</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story2.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d02d53850f0e0dbcdd9.jpg" data-name="tomer19">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d02d53850f0e0dbcdd9.jpg" alt="tomer's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">tomer19</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story3.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d03d53850f0e0dbcdda.jpg" data-name="sara22">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d03d53850f0e0dbcdda.jpg" alt="sara's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">sara22</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story4.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d03d53850f0e0dbcddb.jpg"
-                            data-name="jamil.abukhaima">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d03d53850f0e0dbcddb.jpg" alt="jamil's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">jamil.abukhaima</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story5.jpg"
-                            data-profile="elements/media/profile-pictures/6a908eef7b56e93a2c1078b5.jpg" data-name="nalin12">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a908eef7b56e93a2c1078b5.jpg" alt="nalin's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">nalin12</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story6.jpg"
-                            data-profile="elements/media/profile-pictures/Default_pfp.jpg"
-                            data-name="jacob_ashkenazi2">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/Default_pfp.jpg" alt="jacob's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">jacob_ashkenazi2</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story7.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d04d53850f0e0dbcddd.jpg" data-name="noa.nesh1">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d04d53850f0e0dbcddd.jpg" alt="noa's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">noa.nesh1</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story8.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d04d53850f0e0dbcdde.jpg" data-name="omer_44">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d04d53850f0e0dbcdde.jpg" alt="omer's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-
-                            <p class="story-username">omer_44</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story9.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d04d53850f0e0dbcddf.jpg" data-name="alex_56">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d04d53850f0e0dbcddf.jpg" alt="alex's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-
-                            <p class="story-username">alex_56</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story10.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d05d53850f0e0dbcde0.jpg" data-name="lili_18">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d05d53850f0e0dbcde0.jpg" alt="lili's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-
-                            <p class="story-username">lili_18</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story11.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d05d53850f0e0dbcde1.jpg" data-name="guy_13">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d05d53850f0e0dbcde1.jpg" alt="guy's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-
-                            <p class="story-username">guy_13</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story12.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d05d53850f0e0dbcde2.jpg" data-name="dan_11">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d05d53850f0e0dbcde2.jpg" alt="dan's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-
-                            <p class="story-username">dan_11</p>
-                        </div>
+                        <!-- Dynamic stories will be injected here by stories.js -->
 
                     </div>
 
@@ -730,8 +590,9 @@
                 <div class="p-3 text-center border-bottom fw-bold fs-5">Upload to</div>
                 <button class="btn btn-light rounded-0 py-3 border-bottom fs-6 js-postUpload-followers-btn">Upload to
                     Followers</button>
-                <button class="btn btn-light rounded-0 py-3 rounded-bottom-4 fs-6 js-postUpload-groups-btn">Upload to my
+                <button class="btn btn-light rounded-0 py-3 border-bottom fs-6 js-postUpload-groups-btn">Upload to my
                     Groups</button>
+                <button class="btn btn-light rounded-0 py-3 rounded-bottom-4 fs-6 js-postUpload-story-btn">Share as Story</button>
             </div>
         </div>
 
