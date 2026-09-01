@@ -63,12 +63,12 @@ function handleLogin() {
         window.location.href = '/main';
       } else {
         // Show server error message
-        errorText.innerHTML = data.error + ' <a href="#">Find your account and log in.</a>'; //will add forgot password later
+        errorText.innerHTML = 'Invalid username or password. Please try again . <br><a href="#" onclick="openForgotModal(); return false;">Reset your password.</a>';
         errorBox.style.display = 'flex';
       }
     })
     .catch(() => {
-      errorText.innerHTML = 'Connection error. Please try again. <a href="#">Find your account and log in.</a>'; //will add forgot password later
+      errorText.innerHTML = 'Connection error. Please try again. <a href="#">Find your account and log in.</a>';
       errorBox.style.display = 'flex';
     })
     .finally(() => {
