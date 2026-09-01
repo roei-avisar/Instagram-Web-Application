@@ -25,6 +25,7 @@ let isMuted = false;
 let mapInstance = null;           // Leaflet map instance
 let currentMarker = null;         // Current marker on the map
 let selectedLocation = { name: "", lat: null, lng: null }; // Selected location data
+let editingPostId = null;         // Track if we're editing a post (used for map modal)
 
 // Theme element
 const themeToggle = document.getElementById('theme-toggle');
@@ -450,18 +451,21 @@ function closeEditModal() {
 
 function saveEditedPost() {
     const postId = document.getElementById('editPostId').value;
-    const newLocationName = document.getElementById('editSubHeaderInput').value;
     const newCaption = document.getElementById('editCaptionInput').value;
     
-    const post = allPostsData.find(p => p._id === postId);
+    // Use the newly selected location from the map (selectedLocation is updated when user selects on map)
+    // selectedLocation contains { name, lat, lng } from the map interaction
     const updatedLocation = {
-        name: newLocationName,
-        lat: post?.location?.lat || null,
-        lng: post?.location?.lng || null
+        name: selectedLocation.name || "",
+        lat: selectedLocation.lat || null,
+        lng: selectedLocation.lng || null
     };
 
     // Update the post in the local data
     editPostData(postId, newCaption, updatedLocation);
+    
+    // Reset selectedLocation after saving
+    selectedLocation = { name: "", lat: null, lng: null };
 }
 
 
@@ -531,9 +535,16 @@ document.querySelector('.js-close-map-btn')?.addEventListener('click', function(
 
 document.getElementById('confirmLocationBtn')?.addEventListener('click', function() {
     if (selectedLocation.name) {
-        document.querySelector('.js-location-input').value = selectedLocation.name;
+        if (editingPostId) {
+            // Edit mode: update the edit form input
+            document.getElementById('editSubHeaderInput').value = selectedLocation.name;
+        } else {
+            // Post creation mode: update the location input
+            document.querySelector('.js-location-input').value = selectedLocation.name;
+        }
     }
     document.getElementById('mapModal').classList.replace('d-flex', 'd-none');
+    editingPostId = null; // Clear the edit mode flag
 });
 
 document.getElementById('mapSearchBtn')?.addEventListener('click', function() {
@@ -553,13 +564,67 @@ document.getElementById('mapSearchBtn')?.addEventListener('click', function() {
         });
 });
 
-// Listener to close the entire post creation flow when clicking outside the map modal
+// Listener to close the map modal when clicking outside
 document.getElementById('mapModal')?.addEventListener('click', function(event) {
     // Check if the actual element clicked is the dark background overlay itself, 
     // not the white content box (.map-modal-content) inside it
     if (event.target === this) {
-        // Trigger the discard process instead of just hiding the map
-        discardBtn.setAttribute('discard-action', 'close');
-        discardOverlay.classList.remove('d-none');
+        // If editing, just close the map modal; otherwise trigger discard for post creation
+        if (editingPostId) {
+            document.getElementById('mapModal').classList.replace('d-flex', 'd-none');
+            editingPostId = null;
+        } else {
+            discardBtn.setAttribute('discard-action', 'close');
+            discardOverlay.classList.remove('d-none');
+        }
     }
+});
+
+// Open map for editing post location
+document.getElementById('editLocationBtn')?.addEventListener('click', function() {
+    const postId = document.getElementById('editPostId').value;
+    const post = allPostsData.find(p => p._id === postId);
+    
+    // Always reset selectedLocation with the post's current location data (handles undefined/null cases)
+    selectedLocation = {
+        name: (post && post.location && post.location.name) ? post.location.name : "",
+        lat: (post && post.location && post.location.lat) ? post.location.lat : null,
+        lng: (post && post.location && post.location.lng) ? post.location.lng : null
+    };
+    
+    editingPostId = postId; // Set flag to indicate we're in edit mode
+    
+    // Destroy the old map instance to ensure fresh initialization for each edit
+    if (mapInstance !== null) {
+        mapInstance.remove();
+        mapInstance = null;
+    }
+    if (currentMarker !== null) {
+        currentMarker = null;
+    }
+    
+    document.getElementById('mapModal').classList.replace('d-none', 'd-flex');
+    setTimeout(() => {
+        initMap();
+        
+        // Ensure map container is properly sized before setting view
+        mapInstance.invalidateSize();
+        
+        // If the post has location coordinates, show them on the map
+        if (selectedLocation.lat !== null && selectedLocation.lng !== null) {
+            mapInstance.setView([selectedLocation.lat, selectedLocation.lng], 13);
+            setMapMarker(selectedLocation.lat, selectedLocation.lng);
+        } else {
+            // Reset the map view to default
+            mapInstance.setView([32.0853, 34.7818], 13);
+            if (currentMarker) {
+                mapInstance.removeLayer(currentMarker);
+                currentMarker = null;
+            }
+        }
+        
+        // Reset the search input
+        const searchInput = document.getElementById('mapSearchInput');
+        if (searchInput) searchInput.value = selectedLocation.name;
+    }, 100);
 });
