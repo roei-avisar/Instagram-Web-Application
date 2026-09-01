@@ -4,6 +4,10 @@ const { GetUsernameByUserID } = require('../utils/userHelper');
 
 class StatisticsController {
     async getCommunitySize(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const stats = await Group.aggregate([ // foreach group in groups
                 {
@@ -27,6 +31,10 @@ class StatisticsController {
 
 
     async getTopCreators(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const stats = await Post.aggregate([ // foreach post in posts
                 { $unwind: "$authors" }, // make duplicate post for each author (while you have post with more than 1 author)
@@ -60,6 +68,10 @@ class StatisticsController {
     }
 
     async getEngagementRate(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const stats = await Group.aggregate([ // foreach group in groups
                 {
@@ -92,6 +104,10 @@ class StatisticsController {
     }
 
     async getMediaDistribution(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const stats = await Post.aggregate([ // for each post at posts
                 {
@@ -109,6 +125,9 @@ class StatisticsController {
     }
 
     async getPostsTimeline(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
         try {
             const stats = await Post.aggregate([ // for each post at posts
                 {

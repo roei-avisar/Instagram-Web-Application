@@ -4,6 +4,10 @@ const Chat = require('../models/chatsModel');
 class chatsController {
 
     async createMessage(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             
             const { sender, receiver, type, content, postId } = req.body;
@@ -79,6 +83,10 @@ class chatsController {
     }
 
     async updateMessage(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             
             const { updatedContent, messageId, senderId, receiverId } = req.body;
@@ -155,6 +163,10 @@ class chatsController {
     }
 
     async deleteMessage(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             
             const { messageId, senderId, receiverId } = req.body; 
@@ -221,6 +233,10 @@ class chatsController {
     }
 
     async searchMessage(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             
             const { messageSearch, senderId, receiverId } = req.body; 
@@ -268,15 +284,11 @@ class chatsController {
     }
 
     async getAllMessages(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+        
         try {
-            // The user must be logged in — we never trust the body alone for identity
-            if (!req.session || !req.session.userId) {
-                return res.status(401).json({
-                    success: false,
-                    message: "Not authenticated"
-                });
-            }
-
             const { senderId, receiverId } = req.body;
 
             // Check to make sure all the needed parameters are there!
@@ -359,15 +371,11 @@ class chatsController {
     }
 
     async getMyChatsSummary(req, res) {
-        try {
-            // The user must be logged in
-            if (!req.session || !req.session.userId) {
-                return res.status(401).json({
-                    success: false,
-                    message: "Not authenticated"
-                });
-            }
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
 
+        try {
             const myId = req.session.userId.toString();
 
             // Only the Chat model is queried here — the client merges this data
