@@ -375,3 +375,115 @@ body.dark-mode #groupsSelectionModal .border-bottom,
 body.dark-mode #groupsSelectionModal .border-top {
     border-color: #262B33 !important;
 }
+
+/* ============================================================
+   Chat feature — dark mode
+   ============================================================ */
+
+/* Chat history background (the .white-back light ground would swallow bubbles) */
+body.dark-mode .js-chat-history-container.white-back {
+    background-color: #0C1014 !important;
+}
+
+/* Contact list rows */
+body.dark-mode .chat-row-name {
+    color: #ffffff !important;
+}
+body.dark-mode .chat-row-preview {
+    color: #a8a8a8 !important;
+}
+
+/* Incoming bubble — was turning black on the dark ground and became unreadable */
+body.dark-mode .chat-bubble--in {
+    background-color: #262B33 !important;
+    color: #ffffff !important;
+    border-color: #3a3f47 !important;
+}
+/* Outgoing bubble — keep it a readable blue with white text */
+body.dark-mode .chat-bubble--out {
+    background-color: #2b5cff !important;
+    color: #ffffff !important;
+}
+
+/* Shared-post card */
+body.dark-mode .chat-shared-card {
+    background-color: #1e2530 !important;
+    border-color: #3a3f47 !important;
+    color: #ffffff !important;
+}
+body.dark-mode .chat-shared-card .text-primary {
+    color: #6ea8fe !important;
+}
+
+/* "Text Post" placeholder keeps dark text — it sits on a light gradient */
+body.dark-mode .chat-textpost-label {
+    color: #1a1a1a !important;
+}
+
+/* 3-dots action menu */
+body.dark-mode .chat-msg-menu-toggle {
+    color: #a8a8a8 !important;
+}
+body.dark-mode .chat-msg-menu-toggle:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+body.dark-mode .chat-msg-actions {
+    background-color: #1e2530 !important;
+    border-color: #3a3f47 !important;
+}
+body.dark-mode .chat-msg-actions button {
+    color: #ffffff !important;
+}
+body.dark-mode .chat-msg-actions button:hover {
+    background-color: #262B33 !important;
+}
+body.dark-mode .chat-msg-actions .js-msg-delete {
+    color: #ff6b6b !important;
+}
+
+/* Chat input pill */
+body.dark-mode .chat-window-container .border.rounded-pill {
+    border-color: #3a3f47 !important;
+}
+
+/* Chat-related Bootstrap modals (edit / delete message, share result) —
+   plain .modal-content has no dark theme, so text was white-on-white */
+body.dark-mode #editMessageModal .modal-content,
+body.dark-mode #deleteMessageModal .modal-content,
+body.dark-mode #shareResultModal .modal-content {
+    background-color: #1e2530 !important;
+    border: 1px solid #3a3f47 !important;
+}
+body.dark-mode #editMessageModal .modal-title,
+body.dark-mode #deleteMessageModal .modal-title,
+body.dark-mode #shareResultModal .modal-title,
+body.dark-mode #editMessageModal .modal-body,
+body.dark-mode #deleteMessageModal .modal-body,
+body.dark-mode #shareResultModal .modal-body,
+body.dark-mode #editMessageModal .modal-body p,
+body.dark-mode #deleteMessageModal .modal-body p,
+body.dark-mode #shareResultModal .modal-body p {
+    color: #ffffff !important;
+}
+/* Keep the destructive / error titles red */
+body.dark-mode #deleteMessageModal .modal-title,
+body.dark-mode #shareResultModal .modal-title.text-danger {
+    color: #ff6b6b !important;
+}
+body.dark-mode #editMessageModal .btn-light,
+body.dark-mode #deleteMessageModal .btn-light {
+    background-color: #262B33 !important;
+    color: #ffffff !important;
+    border-color: #3a3f47 !important;
+}
+body.dark-mode #editMessageModal .modal-content textarea.form-control {
+    background-color: #262B33 !important;
+    color: #ffffff !important;
+    border-color: #3a3f47 !important;
+}
+body.dark-mode #editMessageModal .btn-close,
+body.dark-mode #deleteMessageModal .btn-close,
+body.dark-mode #shareResultModal .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
