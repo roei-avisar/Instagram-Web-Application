@@ -256,7 +256,7 @@ class PostController {
             const updatedPost = await Post.findByIdAndUpdate(postId, {
                 $push: { comments: newComment._id },
                 $inc: { 'stats.comments': 1 }
-            }, { new: true });
+            }, { returnDocument: 'after' });
 
             res.status(201).json({ comment: newComment, commentsCount: updatedPost.comments.length });
         } catch (error) {
@@ -468,7 +468,7 @@ class PostController {
             const updatedPost = await Post.findByIdAndUpdate(
                 postId,
                 { $set: updateFields },
-                { new: true } // Return the updated document
+                { returnDocument: 'after' } // Return the updated document
             );
 
             res.status(200).json({ message: "Post updated successfully", post: updatedPost });
