@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const timeDictionary = {
     's': 'seconds',
     'm': 'minutes',
@@ -6,70 +5,6 @@ const timeDictionary = {
     'd': 'days',
     'w': 'weeks'
 };
-=======
-const friends = [
-    { 
-        id: "jamil-1",
-        username: "jamil.abukhaima", 
-        fullName: "Jamil", 
-    },
-    { 
-        id: "sara-2",
-        username: "sara22", 
-        fullName: "Sara Haya", 
-    },
-    { 
-        id: "tomer-3",
-        username: "tomer19", 
-        fullName: "TOMER ;)", 
-    },
-    { 
-        id: "maya-4",
-        username: "maya_99", 
-        fullName: "Mayosh", 
-    },
-    { 
-        id: "nalin-5",
-        username: "nalin12", 
-        fullName: "נלין", 
-    },
-    { 
-        id: "jacob-6",
-        username: "jacob-ashkenazi2", 
-        fullName: "jacob the king", 
-    },
-    { 
-        id: "noa-7",
-        username: "noa.nesh1", 
-        fullName: "NOA NESHIKA", 
-    },
-    { 
-        id: "omer-8",
-        username: "omer_44", 
-        fullName: "omer isha", 
-    },
-    { 
-        id: "alex-9",
-        username: "alex_56", 
-        fullName: "אלכס קורקינט", 
-    },
-    { 
-        id: "lili-10",
-        username: "lili_18", 
-        fullName: "lola", 
-    },
-    { 
-        id: "guy-11",
-        username: "guy_13", 
-        fullName: "some guy ;0", 
-    },
-    { 
-        id: "dan-12",
-        username: "dan_11", 
-        fullName: "danny din", 
-    }
-];
->>>>>>> 8da847c0719d056e2a1d5a603f55bf7caac3d153
 
 let selectedShareFriends = {};
 let shareContactsCache = []; // last contact list rendered in the Share popup (same source as the chat list)

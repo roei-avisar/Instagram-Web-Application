@@ -161,20 +161,24 @@ async function getSmartContactList() {
 
     if (leftoverIds.length > 0) {
         try {
-            let basicRes = await fetch('/api/user/getUsersBasicInfo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userIds: leftoverIds })
-            });
+            // Reuse the existing endpoint — it returns every user except me
+            // with userId / username / profilePic, which is all we need here.
+            let allUsersRes = await fetch('/api/user/allUsers');
 
-            if (basicRes.ok) {
-                let basicData = await basicRes.json();
-                if (basicData && Array.isArray(basicData.users)) {
-                    basicData.users.forEach(user => {
+            if (allUsersRes.ok) {
+                let allUsersData = await allUsersRes.json();
+                let leftoverSet = new Set(leftoverIds);
+
+                if (allUsersData && Array.isArray(allUsersData.users)) {
+                    allUsersData.users.forEach(user => {
+                        let id = String(user.userId);
+                        if (!leftoverSet.has(id)) {
+                            return; // only resolve the contacts we're still missing
+                        }
                         // The user exists: use their real name and their real
                         // picture, falling back to the default picture ONLY
                         // when the profilePic field itself is empty.
-                        displayInfo.set(String(user.userId), {
+                        displayInfo.set(id, {
                             username: user.username || "Unknown",
                             profilePic: user.profilePic || DEFAULT_PROFILE_PIC
                         });
@@ -182,7 +186,7 @@ async function getSmartContactList() {
                 }
             }
         } catch (error) {
-            console.error("Error fetching basic user info for chat contacts:", error);
+            console.error("Error fetching user info for chat contacts:", error);
         }
 
         // Any leftover id STILL unresolved => the fetch failed, or the user
@@ -709,18 +713,21 @@ function renderChatHistory(messagesArray){
                     mediaTag = `<div class="d-flex justify-content-center align-items-center p-2 w-100 h-100" style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); overflow: hidden;"><span class="text-center fw-bold chat-textpost-label" style="font-size: 12px;">${captionText}</span></div>`;
                 }
 
-                // Creating and adding the complete message, including all the checks and tags we have created so far
+                let safePostId = escapeHTML(String(actualPostId));
+
+                // The postId lives ONLY in data-shared-post-id; viewSharedPost reads
+                // it back from the DOM — it's never interpolated into a JS handler.
                 let bubbleHTML = `
                 <div class="d-flex align-items-center ${alignmentClass} mb-3 chat-msg-row">
                     ${actionMenuHTML}
-                    <div class="chat-shared-card rounded-4 p-2 shadow-sm" style="max-width: 75%;">
-                        <div class="d-flex align-items-center gap-2 mb-2 px-1 cursor-pointer" onclick="openSharedPostComments('${actualPostId}')">
+                    <div class="chat-shared-card js-shared-post-card rounded-4 p-2 shadow-sm" data-shared-post-id="${safePostId}" style="max-width: 75%;">
+                        <div class="d-flex align-items-center gap-2 mb-2 px-1 cursor-pointer" onclick="viewSharedPost(this)">
                             <span class="fw-semibold text-12 text-muted">${shareText}</span>
                         </div>
-                        <div class="rounded-3 overflow-hidden position-relative cursor-pointer" style="height: 200px; width: 150px; display: flex; align-items: center; justify-content: center; background-color: #000;" onclick="openSharedPostComments('${actualPostId}')">
+                        <div class="rounded-3 overflow-hidden position-relative cursor-pointer" style="height: 200px; width: 150px; display: flex; align-items: center; justify-content: center; background-color: #000;" onclick="viewSharedPost(this)">
                             ${mediaTag}
                         </div>
-                        <div class="mt-2 text-center fw-semibold text-12 py-1 cursor-pointer text-primary" onclick="openSharedPostComments('${actualPostId}')">View Post</div>
+                        <div class="mt-2 text-center fw-semibold text-12 py-1 cursor-pointer text-primary" onclick="viewSharedPost(this)">View Post</div>
                     </div>
                 </div>
                 `;
@@ -990,27 +997,65 @@ async function submitDeleteMessage() {
     }
 }
 
+// Click handler for a shared-post card / "View Post" button inside a chat bubble.
+// Runs the exact required sequence:
+//   1. read the postId straight from the card's data-attribute
+//   2. minimize the chat UI (collapses to the capsule but remembers the
+//      open conversation, so reopening lands back in the same chat)
+//   3. hand off to the app's standard post-view logic
+function viewSharedPost(element) {
+    let card = element.closest(".js-shared-post-card");
+    if (!card) {
+        return;
+    }
+
+    let postId = card.dataset.sharedPostId;
+    if (!postId) {
+        return;
+    }
+
+    // Step 2 — minimizeChatUI sets chatWasInConversation, so restoreChatUI
+    // (triggered from the capsule) reopens this exact conversation.
+    minimizeChatUI();
+
+    // Step 3 — standard "open / view / scroll to post" logic
+    openSharedPostComments(postId);
+}
+
 function openSharedPostComments(postId) {
     let commentPopupBackground = document.querySelector(".comment-popup-background");
-    let allPost = document.querySelector(`[data-post-id="${postId}"]`);
-    
-    if (!commentPopupBackground || !allPost) return;
-    
+    if (!commentPopupBackground) {
+        return;
+    }
+
+    let allPost = document.querySelector(`.js-all-post[data-post-id="${postId}"]`);
+
+    // The shared post isn't on the current feed (filtered out, or not loaded).
+    // Tell the user cleanly instead of silently doing nothing (the old bug).
+    if (!allPost) {
+        if (typeof showShareResultModal === "function") {
+            showShareResultModal("View Post", "This post isn't available in your feed right now.", true);
+        }
+        return;
+    }
+
+    // Bring the post into view in the feed (visible once the popup is closed)
+    allPost.scrollIntoView({ behavior: "smooth", block: "center" });
+
     commentPopupBackground.dataset.postId = postId;
-    
+
     commentPopupBackground.classList.remove('d-none');
     commentPopupBackground.classList.add('d-flex');
     commentPopupBackground.querySelector(".comment-popup-container").classList.add('comment-popup-animation');
     document.body.classList.add('overflow-hidden');
 
-    syncLikePost(postId, 0);
-    syncSavePost(postId);
+    // Same population sequence as popupCommentMaker() in post-buttons.js
     addPostToPopupComment(commentPopupBackground, allPost);
     addHeaderToPopupComment(commentPopupBackground, allPost);
     addLikedByToPopupComment(commentPopupBackground, allPost);
     addCommentsToPopupComment(commentPopupBackground, allPost);
     addTypingLineToPopupComment(commentPopupBackground, allPost);
-    handleVideoMedia(commentPopupBackground);
+    updatePostButtonsUI(postId);
 }
 
 function backToMessages() {
