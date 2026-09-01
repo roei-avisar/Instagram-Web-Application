@@ -441,7 +441,6 @@ class PostController {
         try {
             const postId = req.params.id;
             const userId = req.session.userId;
-    // Update post with new caption and/or location data (replaces old subHeader string field)
             const { caption, location } = req.body;
 
             if (!userId) {

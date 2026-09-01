@@ -133,7 +133,6 @@ async function deletePostById(deleteId) {
     }
 }
 
-// Updates post data on server - now sends location object instead of subHeader string
 async function editPostData(postId, newCaption, newLocation) {
     try {
         const response = await fetch(`/api/posts/updatePost/${postId}`, {
@@ -141,7 +140,6 @@ async function editPostData(postId, newCaption, newLocation) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            // location object contains { name, lat, lng } - replaces old string-based subHeader
             body: JSON.stringify({ caption: newCaption, location: newLocation })
         });
 
@@ -293,7 +291,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
         </div>`;
     }
 
-    // Extract location name from new location object (was previously string-based subHeader)
+    // Extract location name from new location object
     let combinedSubHeaderText = '';
     let postLocationName = post.location && post.location.name ? post.location.name : '';
     

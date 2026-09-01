@@ -368,7 +368,7 @@ async function submitPostDataToServer(groupId, groupAdminId = null) {
     const newPost = {
         "authors": [CURRENT_USER_ID],
         "isVerified": false,
-        // Send location data with post (name, lat, lng) - replaces old 'subHeader' string field
+        // Send location data with post (name, lat, lng)
         "location": selectedLocation,
         "mediaType": currentMediaType,
         "mediaSource": currentMediaSource,
