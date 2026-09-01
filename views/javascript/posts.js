@@ -34,6 +34,8 @@ async function fetchPostsFromServer() {
             }
         });
         allPostsData = await response.json();
+        if (typeof clearFeedAdvancedSearch === 'function') {
+        clearFeedAdvancedSearch();} // clear filter button
         renderPosts(allPostsData);
     } catch (error) {
         console.error('Error fetching posts:', error);
@@ -439,10 +441,6 @@ function createCaptionHTML(post) {
 
 function renderPosts(postsData) {
     let allPostsHTML = ''; // Accumulate all HTML here
-
-    if (typeof clearFeedAdvancedSearch === 'function') {
-        clearFeedAdvancedSearch(); // clear filter button
-    }
 
     postsData.forEach(post => {
         let profilePicsHTML = createProfilePicsHTML(post);

@@ -416,22 +416,30 @@ body.dark-mode .chart-grid-line {
     stroke: #262B33 !important;
 }
 
+/* Popup Backgrounds */
 .dark-mode #groupsOverlay .bg-white,
-.dark-mode #groupsOverlay .bg-light {
+.dark-mode #groupsOverlay .bg-light,
+.dark-mode #allUsersModal .bg-light {
     background-color: #121212 !important;
 }
 
-.dark-mode #groupsOverlay .text-dark {
+.dark-mode #groupsOverlay .text-dark,
+.dark-mode #allUsersModal .text-dark {
     color: #ffffff !important;
 }
 
-.dark-mode #groupsOverlay .form-control {
+/* Inputs and Selects for Popups */
+.dark-mode #groupsOverlay .form-control,
+.dark-mode #groupsOverlay .form-select,
+.dark-mode #allUsersModal .form-control
+.dark-mode #allUsersModal .form-select {
     background-color: #262626 !important;
     color: #ffffff !important;
     border: 1px solid #444444 !important;
 }
 
-.dark-mode #groupsOverlay .form-control::placeholder {
+.dark-mode #groupsOverlay .form-control::placeholder,
+.dark-mode #allUsersModal .form-control::placeholder {
     color: #a0a0a0 !important;
 }
 body.dark-mode .feed-advanced-search-panel {
@@ -466,5 +474,16 @@ body.dark-mode .feed-advanced-search-panel .btn-light {
 }
 
 body.dark-mode .feed-advanced-search-panel .btn-light:hover {
+    background-color: #333333 !important;
+}
+.dark-mode #groupsOverlay .btn-light,
+.dark-mode #allUsersModal .btn-light {
+    background-color: #262626 !important;
+    color: #ffffff !important;
+    border-color: #444444 !important;
+}
+
+.dark-mode #groupsOverlay .btn-light:hover,
+.dark-mode #allUsersModal .btn-light:hover {
     background-color: #333333 !important;
 }

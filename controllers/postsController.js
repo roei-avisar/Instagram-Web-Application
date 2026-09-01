@@ -532,11 +532,10 @@ class PostController {
             // Build the Advanced MongoDB Query
             let query = { _id: { $in: uniquePostIds } }; // Search only in uniquePostIds
 
-            // Text Search (Caption, SubHeader, or Username)
+            // Text Search (Caption or Username)
             if (searchText && searchText.trim() !== '') {
                 query.$or = [
-                    { caption: { $regex: searchText, $options: 'i' } }, //search text that is a part of the fukk texr ad ignore uppercase
-                    { subHeader: { $regex: searchText, $options: 'i' } },
+                    { caption: { $regex: searchText, $options: 'i' } }, //search text that is a part of the full text and ignore uppercase
                     { authors: { $in: matchedUserIds } }
                 ];
             }
