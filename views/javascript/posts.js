@@ -80,6 +80,16 @@ async function addNewPost(newPostData) {
 
 // Update the deletePostById function to send delete request to the server
 async function deletePostById(deleteId) {
+    // Disable any clicked delete button to prevent duplicate triggers
+    const deleteBtn = document.querySelector(`.delete-post-btn[data-id="${deleteId}"]`);
+    if (deleteBtn) deleteBtn.classList.add('pe-none');
+
+    let deleteLoadingScreen = document.getElementById('postDeleteLoadingScreen');
+    if (deleteLoadingScreen) {
+        deleteLoadingScreen.classList.remove('d-none');
+        deleteLoadingScreen.classList.add('d-flex');
+    }
+
     try {
         const response = await fetch(`/api/posts/deletePost/${deleteId}`, {
             method: 'DELETE'
@@ -87,15 +97,28 @@ async function deletePostById(deleteId) {
 
         if (response.ok) {
             closePopupComment(null, true);
-            // Refresh the posts from the server after deleting
             await fetchPostsFromServer();
         }
     } catch (error) {
         console.error('Error deleting post:', error);
+    } finally {
+        if (deleteBtn) deleteBtn.classList.remove('pe-none');
+        if (deleteLoadingScreen) {
+            deleteLoadingScreen.classList.remove('d-flex');
+            deleteLoadingScreen.classList.add('d-none');
+        }
     }
 }
 
 async function editPostData(postId, newCaption, newLocation) {
+    const loadingScreen = document.getElementById('postUploadLoadingScreen');
+    const loadingText = loadingScreen ? loadingScreen.querySelector('h5') : null;
+    const originalText = loadingText ? loadingText.innerText : "";
+    const saveBtn = document.querySelector('#editPostModal .btn-primary');
+
+    if (loadingText) loadingText.innerText = "Saving your edits...";
+    if (loadingScreen) loadingScreen.classList.remove('d-none');
+
     try {
         const response = await fetch(`/api/posts/updatePost/${postId}`, {
             method: 'PATCH',
@@ -106,13 +129,12 @@ async function editPostData(postId, newCaption, newLocation) {
         });
 
         if (response.ok) {
-            // Update the local array to avoid the need for a fresh fetch of the entire feed
             const postIndex = allPostsData.findIndex(p => p._id === postId);
             if (postIndex !== -1) {
                 allPostsData[postIndex].caption = newCaption;
                 allPostsData[postIndex].location = newLocation;
             }
-            renderPosts(allPostsData); // Re-render the posts with the updated data
+            renderPosts(allPostsData);
             closeEditModal();
         } else {
             const errData = await response.json();
@@ -120,6 +142,11 @@ async function editPostData(postId, newCaption, newLocation) {
         }
     } catch (error) {
         console.error('Error updating post:', error);
+    } finally {
+        // Re-enable save button and reset loading screen
+        if (saveBtn) saveBtn.disabled = false;
+        if (loadingScreen) loadingScreen.classList.add('d-none');
+        if (loadingText) loadingText.innerText = originalText;
     }
 }
 

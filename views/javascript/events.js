@@ -341,10 +341,15 @@ async function submitPostDataToServer(groupId, groupAdminId = null) {
     let captionText = document.querySelector('.js-caption-input').value;
     let locationText = document.querySelector('.js-location-input').value;
     
+    // Select and disable submission buttons to prevent multiple clicks
+    const followersBtn = document.querySelector('.js-postUpload-followers-btn');
+    const groupsFinalBtn = document.querySelector('.js-final-postUpload-groups-btn');
+    if (followersBtn) followersBtn.disabled = true;
+    if (groupsFinalBtn) groupsFinalBtn.disabled = true;
+
     const newPost = {
         "authors": [CURRENT_USER_ID],
         "isVerified": false,
-        // Send location data with post (name, lat, lng)
         "location": selectedLocation,
         "mediaType": currentMediaType,
         "mediaSource": currentMediaSource,
@@ -362,14 +367,28 @@ async function submitPostDataToServer(groupId, groupAdminId = null) {
         }
     }
 
-    // Create the post
-    await addNewPost(newPost);
+    const loadingScreen = document.getElementById('postUploadLoadingScreen');
+    if (loadingScreen) loadingScreen.classList.remove('d-none');
 
-    selectedLocation = { name: "", lat: null, lng: null }; // reset the selected location after post creation
+    try {
+        await addNewPost(newPost);
 
     // Close the post creation form and reset its state
     closePostCreationForm();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+        selectedLocation = { name: "", lat: null, lng: null };
+        closePostCreationForm();
+        uploadNewPostNotification(currentMediaSource, currentMediaType);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+        console.error('Error uploading post:', error);
+        alert('Failed to upload post. Please try again.');
+    } finally {
+        // Re-enable submission buttons and hide loading screen
+        if (followersBtn) followersBtn.disabled = false;
+        if (groupsFinalBtn) groupsFinalBtn.disabled = false;
+        if (loadingScreen) loadingScreen.classList.add('d-none');
+    }
 }
 
 function togglePostAudio(button, postId) {
@@ -445,21 +464,21 @@ function closeEditModal() {
 }
 
 function saveEditedPost() {
+    const saveBtn = document.querySelector('#editPostModal .btn-primary');
+    if (saveBtn) saveBtn.disabled = true; // Disable save button immediately on click
+
     const postId = document.getElementById('editPostId').value;
     const newCaption = document.getElementById('editCaptionInput').value;
     
-    // Use the newly selected location from the map (selectedLocation is updated when user selects on map)
-    // selectedLocation contains { name, lat, lng } from the map interaction
     const updatedLocation = {
         name: selectedLocation.name || "",
         lat: selectedLocation.lat || null,
         lng: selectedLocation.lng || null
     };
 
-    // Update the post in the local data
+    // editPostData handles the async request and will re-enable the button in its finally block
     editPostData(postId, newCaption, updatedLocation);
     
-    // Reset selectedLocation after saving
     selectedLocation = { name: "", lat: null, lng: null };
 }
 

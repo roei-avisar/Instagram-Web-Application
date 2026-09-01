@@ -834,6 +834,16 @@
             </div>
         </div>
 
+        <!-- Post Upload Loading Screen -->
+        <div id="postUploadLoadingScreen" class="dark-overlay d-none align-items-center justify-content-center post-upload-loading">
+            <div class="d-flex flex-column align-items-center">
+                <div class="spinner-border text-white post-upload-spinner" role="status">
+                    <span class="visually-hidden">Uploading...</span>
+                </div>
+                <h5 class="mt-3 text-white fw-semibold">Uploading your post...</h5>
+            </div>
+        </div>
+
         <div class="dark-overlay discard-overlay js-discard-overlay d-none">
             <div class="discard-container">
                 <div class="p-4 text-center">
@@ -871,6 +881,16 @@
                     <button class="btn btn-light fw-bold text-dark border" onclick="closeEditModal()">Cancel</button>
                     <button class="btn btn-primary fw-bold" onclick="saveEditedPost()">Save</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Post Delete Loading Screen -->
+        <div id="postDeleteLoadingScreen" class="dark-overlay d-none align-items-center justify-content-center post-delete-loading">
+            <div class="d-flex flex-column align-items-center">
+                <div class="spinner-border text-danger post-delete-spinner" role="status">
+                    <span class="visually-hidden">Deleting...</span>
+                </div>
+                <h5 class="mt-3 text-white fw-semibold">Deleting post...</h5>
             </div>
         </div>
 
