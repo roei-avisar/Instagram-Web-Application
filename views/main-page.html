@@ -875,8 +875,13 @@
                 <h5 class="fw-bold mb-3 text-dark">Edit Post</h5>
                 <input type="hidden" id="editPostId">
                 <div class="mb-3">
-                    <label class="form-label fw-semibold text-dark fs-7">Location / Sub Header</label>
-                    <input type="text" id="editSubHeaderInput" class="form-control bg-light border-0 shadow-none">
+                    <label class="form-label fw-semibold text-dark fs-7">Location</label>
+                    <div class="d-flex gap-2">
+                        <input type="text" id="editSubHeaderInput" class="form-control bg-light border-0 shadow-none" placeholder="Tap to select location" readonly>
+                        <button class="btn btn-outline-secondary" id="editLocationBtn" style="width: 40px; padding: 0;">
+                            <i class="bi bi-geo-alt"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-semibold text-dark fs-7">Caption</label>

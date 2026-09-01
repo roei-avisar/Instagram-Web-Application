@@ -112,7 +112,7 @@ async function editPostData(postId, newCaption, newLocation) {
                 allPostsData[postIndex].caption = newCaption;
                 allPostsData[postIndex].location = newLocation;
             }
-            applyFilters(); // Re-render the posts with the updated data
+            renderPosts(allPostsData); // Re-render the posts with the updated data
             closeEditModal();
         } else {
             const errData = await response.json();
