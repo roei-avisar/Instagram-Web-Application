@@ -330,3 +330,13 @@ transition: background-color 0.2s ease-in-out;
 .weather-container:hover {
     background-color: #efefef;
 }
+
+/* Global Posts Map Styles */
+#globalPostsMapOverlay {
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 15;
+}
+
+#globalLeafletMap {
+    z-index: 1;
+}

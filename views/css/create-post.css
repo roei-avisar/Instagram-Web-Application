@@ -130,6 +130,7 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    cursor: pointer;
 }
 
 .location-input {
@@ -174,7 +175,7 @@
 }
 
 .discard-overlay {
-    z-index: 15;
+    z-index: 18;
     justify-content: center;
     align-items: center;
     display: flex;
@@ -246,4 +247,19 @@
     80% { opacity: 0.2; transform: scale(1); }
     90% { opacity: 1; transform: scale(1); }
     100% { opacity: 0; transform: scale(1); }
+}
+
+/* Map Modal Styles */
+#mapModal {
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 15;
+}
+
+.map-modal-content {
+    max-width: 500px;
+}
+
+#leafletMap {
+    height: 300px;
+    width: 100%;
 }
