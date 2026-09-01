@@ -8,6 +8,34 @@ const timeDictionary = {
 
 let selectedShareFriends = {};
 let shareContactsCache = []; // last contact list rendered in the Share popup (same source as the chat list)
+let isSubmittingComment = false; // Lock to prevent spamming comments
+
+function showCommentError(msg) {
+    let commentSlot = document.querySelector(".js-popup-add-comment-slot");
+    if (!commentSlot) return;
+    
+    let errorDiv = document.querySelector('.comment-action-error');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'comment-action-error text-danger small px-3 py-2 fw-bold d-flex align-items-start border-top bg-white w-100';
+        // insert the error right above the add-comment input area
+        commentSlot.parentNode.insertBefore(errorDiv, commentSlot);
+    }
+    
+    errorDiv.innerHTML = `
+        <svg class="me-2 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="#ed4956" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px; margin-top:2px;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span style="word-break: break-word;">${msg}</span>
+    `;
+}
+
+function clearCommentError() {
+    let errorDiv = document.querySelector('.comment-action-error');
+    if (errorDiv) errorDiv.remove();
+}
 
 async function likePost(button) {
     let idDiv = button.closest('[data-post-id]');
@@ -71,6 +99,7 @@ async function savePost(button) {
 
 // Main comments function to open and startup a post comments popup
 function popupCommentMaker(comment) {
+    clearCommentError();
     let commentPopupBackground = document.querySelector(".comment-popup-background");
     commentPopupBackground.classList.remove('d-none');
     commentPopupBackground.classList.add('d-flex'); // display the pop up window (changing from d-none to d-flex) 
@@ -183,6 +212,10 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
         `;
     }
 
+    // Determine if user has permission to delete comments
+    const isPostAuthor = currentPost && currentPost.authors && currentPost.authors.some(a => (a._id || a) === CURRENT_USER_ID);
+    const isGroupAdmin = currentPost && currentPost.groupAdminId && currentPost.groupAdminId === CURRENT_USER_ID;
+
     // Render actual comments from the database
     if (postComments && postComments.length > 0) {
         postComments.forEach((comment, index) => {
@@ -194,7 +227,8 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
             let heartClass = isLiked ? "bi-heart-fill text-danger" : "bi-heart text-muted";
             let commentLikes = comment.likes || 0;
             
-            // Extract username and profile picture from populated userId object
+            // Extract username, profile picture and user ID
+            let commentUserId = comment.userId && comment.userId._id ? comment.userId._id : comment.userId;
             let commentUsername = comment.userId && comment.userId.username ? comment.userId.username : "Unknown";
             let commentProfilePic = comment.userId && comment.userId.profilePic ? comment.userId.profilePic : "elements/media/profile-pictures/default.jpg";
             let commentText = comment.text || "";
@@ -202,8 +236,18 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
             // Format comment date if available
             let commentTime = comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : "Just now";
             
+            // Check if current user can delete this comment
+            let isCommentAuthor = commentUserId === CURRENT_USER_ID;
+            let canDelete = isCommentAuthor || isPostAuthor || isGroupAdmin;
+            
+            let deleteBtnHTML = canDelete ? `
+                <button class="bg-transparent border-0 p-0 text-muted ms-3 hover-extend" onclick="deleteComment('${postId}', '${comment._id}')" title="Delete comment">
+                    <i class="bi bi-trash3 text-danger"></i>
+                </button>
+            ` : '';
+
             let commentHTML = `
-                <div class="d-flex m-3 align-items-start js-comment-row">
+                <div class="d-flex m-3 align-items-start js-comment-row" data-comment-id="${comment._id}">
                     <div class="flex-shrink-0">
                         <img src="${commentProfilePic}" data-username="${commentUsername}" class="rounded-circle" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" style="width: 32px; height: 32px; object-fit: cover;">
                     </div>
@@ -215,6 +259,7 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
                             <span>${commentTime}</span>
                             <span class="fw-semibold js-comment-likes-count" style="cursor: pointer;">${commentLikes} likes</span>
                             <button class="bg-transparent border-0 p-0 text-muted fw-semibold" onclick="prepareReply('${commentUsername}')">Reply</button>
+                            ${deleteBtnHTML}
                         </div>
                     </div>
                     <div class="ms-3 mt-1">
@@ -245,7 +290,8 @@ function addTypingLineToPopupComment(commentPopupBackground, allPost){
 
     commentInput.oninput = () =>
          {
-        if (commentInput.value.trim() !== "") // if someome wrote something that is not a blank line make posting available
+        clearCommentError();
+        if (commentInput.value.trim() !== "" && !isSubmittingComment) // if someome wrote something that is not a blank line make posting available
         {
             if (postButton.classList.contains("pe-none")) // only on first letter that have been written the screen will scroll down
             {
@@ -269,8 +315,8 @@ function addTypingLineToPopupComment(commentPopupBackground, allPost){
     {
         if (event.key === "Enter") {
             event.preventDefault(); // do not get line down
-
-            if (commentInput.value.trim() !== "") { //if enter pressed then publish a comment
+            
+            if (commentInput.value.trim() !== "" && !isSubmittingComment) { //if enter pressed then publish a comment
                 publishNewComment();
             }
         }
@@ -286,6 +332,8 @@ function addTypingLineToPopupComment(commentPopupBackground, allPost){
 
 // 4. Publish a new comment by sending a POST request to the server
 async function publishNewComment() {
+    if (isSubmittingComment) return; // Prevent spam clicking/pressing enter
+    
     let commentInput = document.querySelector(".js-comment-input");
     let postButton = document.querySelector(".js-post-button");
     let typingElement = document.querySelector(".someone-is-typing");
@@ -293,6 +341,16 @@ async function publishNewComment() {
     let newCommentText = commentInput.value.trim();
     
     if (newCommentText !== "") {
+        isSubmittingComment = true; // Lock
+        clearCommentError();
+        
+        // Disable input and button while submitting
+        commentInput.disabled = true;
+        postButton.classList.add("opacity-50");
+        postButton.classList.remove("opacity-100");
+        postButton.classList.add("pe-none");
+        if (typingElement) typingElement.classList.add("d-none");
+        
         let currentPostId = postButton.dataset.postId;
 
         try {
@@ -310,10 +368,6 @@ async function publishNewComment() {
             if (response.ok) {
                 // 2. Clear input fields immediately
                 commentInput.value = "";
-                postButton.classList.add("opacity-50");
-                postButton.classList.remove("opacity-100");
-                postButton.classList.add("pe-none");
-                if (typingElement) typingElement.classList.add("d-none");
                 
                 // 3. Fetch all posts again to update local data with the new comment
                 await fetchPostsFromServer();
@@ -335,11 +389,70 @@ async function publishNewComment() {
                     commentPopupList.scrollTop = commentPopupList.scrollHeight;
                 }
             } else {
+                const data = await response.json();
                 console.error("Server failed to add comment");
+                showCommentError(data.error || data.message || "Failed to post comment.");
             }
         } catch (error) {
             console.error("Error connecting to server for adding comment:", error);
+            showCommentError("Connection error. Please try again.");
+        } finally {
+            // Unlock and re-enable input
+            isSubmittingComment = false;
+            commentInput.disabled = false;
+            
+            // Re-check input state
+            if (commentInput.value.trim() !== "") {
+                postButton.classList.remove("opacity-50");
+                postButton.classList.add("opacity-100");
+                postButton.classList.remove("pe-none");
+                if (typingElement) typingElement.classList.remove("d-none");
+            }
+            
+            setTimeout(() => {
+                commentInput.focus();
+            }, 50);
         }
+    }
+}
+
+async function deleteComment(postId, commentId) {
+    // Disable UI temporarily
+    const commentRow = document.querySelector(`.js-comment-row[data-comment-id="${commentId}"]`);
+    if (commentRow) commentRow.style.opacity = '0.5';
+    
+    try {
+        const response = await fetch(`/api/posts/deleteComment/${postId}/${commentId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+            // Refresh posts to get updated data
+            await fetchPostsFromServer();
+            
+            // Re-render popup
+            let commentPopupBackground = document.querySelector(".comment-popup-background");
+            let allPost = document.querySelector(`[data-post-id="${postId}"]`);
+            
+            if (commentPopupBackground && allPost) {
+                addCommentsToPopupComment(commentPopupBackground, allPost);
+                
+                // Update comments counter
+                const commentsCounter = allPost.querySelector('.js-comments-counter');
+                if (commentsCounter) {
+                    commentsCounter.textContent = allPostsData.find(post => post._id === postId)?.comments.length || 0;
+                }
+            }
+        } else {
+            const data = await response.json();
+            alert(data.message || data.error || "Failed to delete comment");
+            if (commentRow) commentRow.style.opacity = '1';
+        }
+    } catch (error) {
+        console.error("Error deleting comment:", error);
+        alert("Connection error. Please try again.");
+        if (commentRow) commentRow.style.opacity = '1';
     }
 }
 
@@ -405,6 +518,7 @@ function closePopupComment(event, forcedExit)
         commentPopupBackground.classList.add('d-none'); // delete the pop up window (changing from d-flex to d-none) 
         commentPopupBackground.querySelector(".comment-popup-container").classList.remove('comment-popup-animation'); // removing animation class from the pop up window 
         document.body.classList.remove('overflow-hidden'); // make scrolling available again 
+        clearCommentError();
     }
 }
 

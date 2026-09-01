@@ -35,4 +35,7 @@ router.delete('/deleteMultiplePosts', postController.deleteMultiplePosts);
 // Route to get filtered post
 router.post('/advancedSearch', postController.advancedFeedSearch);
 
+// Route to delete comment
+router.delete('/deleteComment/:postId/:commentId', postController.deleteComment);
+
 module.exports = router;

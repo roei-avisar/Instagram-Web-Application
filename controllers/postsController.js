@@ -585,6 +585,39 @@ class PostController {
             res.status(500).json({ message: "Error searching posts", error });
         }
     }
+    async deleteComment(req, res) {
+        try {
+            const userId = req.session.userId;
+            const { postId, commentId } = req.params;
+
+            if (!userId) return res.status(401).json({ message: "User not logged in" });
+
+            const comment = await Comment.findById(commentId);
+            if (!comment) return res.status(404).json({ message: "Comment not found" });
+
+            const post = await Post.findById(postId);
+            if (!post) return res.status(404).json({ message: "Post not found" });
+
+            const isCommentAuthor = comment.userId.toString() === userId;
+            const isPostAuthor = post.authors.some(author => author.toString() === userId);
+            const isGroupAdmin = post.groupAdminId && post.groupAdminId.toString() === userId;
+
+            if (!isCommentAuthor && !isPostAuthor && !isGroupAdmin) {
+                return res.status(403).json({ message: "Unauthorized to delete this comment" });
+            }
+
+            await Comment.findByIdAndDelete(commentId);
+            
+            await Post.findByIdAndUpdate(postId, {
+                $pull: { comments: commentId },
+                $inc: { 'stats.comments': -1 }
+            });
+
+            res.status(200).json({ success: true, message: "Comment deleted successfully" });
+        } catch (error) {
+            res.status(500).json({ message: "Error deleting comment", error });
+        }
+    }
 }
 
 module.exports = new PostController();
