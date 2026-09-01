@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const postController = require('../controllers/postsController');
+const xssValidator = require('../middleware/xssValidator');
+
+// Apply XSS validation globally to all routes in this router
+router.use(xssValidator);
 
 // Route to get all posts (GET /api/posts/getAllPosts)
 router.get('/getAllPosts', postController.getAllPosts);
@@ -27,5 +31,11 @@ router.patch('/updatePost/:id', postController.updatePost);
 
 // Route to delete multiple posts by their IDs (DELETE /api/posts/deleteMultiplePosts)
 router.delete('/deleteMultiplePosts', postController.deleteMultiplePosts);
+
+// Route to get filtered post
+router.post('/advancedSearch', postController.advancedFeedSearch);
+
+// Route to delete comment
+router.delete('/deleteComment/:postId/:commentId', postController.deleteComment);
 
 module.exports = router;

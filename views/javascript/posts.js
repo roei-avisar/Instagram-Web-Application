@@ -3,6 +3,27 @@ const commentPopupBackground = document.querySelector('.comment-popup-background
 const textColour = {video: 'text-white', image: 'text-dark', text: 'text-dark'};
 let allPostsData = []; // Start with an empty array
 
+function formatTimeAgo(createdAt) {
+    const createdTime = new Date(createdAt).getTime();
+    if (Number.isNaN(createdTime)) return '';
+
+    const seconds = Math.max(0, Math.floor((Date.now() - createdTime) / 1000));
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d`;
+
+    return new Date(createdTime).toLocaleDateString();
+}
+
+function refreshPostTimes() {
+    document.querySelectorAll('.js-post-time-value').forEach(timeElement => {
+        timeElement.textContent = formatTimeAgo(timeElement.dataset.createdAt);
+    });
+}
+
+setInterval(refreshPostTimes, 60000);
+
 // Fetch initial post data from the server
 async function fetchPostsFromServer() {
     try {
@@ -13,31 +34,13 @@ async function fetchPostsFromServer() {
             }
         });
         allPostsData = await response.json();
+        if (typeof clearFeedAdvancedSearch === 'function') {
+        clearFeedAdvancedSearch();} // clear filter button
         renderPosts(allPostsData);
     } catch (error) {
         console.error('Error fetching posts:', error);
     }
 }
-
-const filtersList = {
-    mediaType: [ "image", "video", "text" ],
-    searchString: ''
-};
-
-const filtersFunctions = {
-    mediaType: function(postsData, values) {
-        return postsData.filter(post => values.includes(post.mediaType));
-    },
-    searchString: function(postsData, value) {
-        return postsData.filter(post => {
-            const inCaption = post.caption.toLowerCase().includes(value.toLowerCase());
-            // Checking against populated username object
-            const inAuthors = post.authors.some(author => author.username.toLowerCase().includes(value.toLowerCase()));
-            const inText = post.mediaType === 'text' && post.mediaSource.toLowerCase().includes(value.toLowerCase());
-            return inCaption || inAuthors || inText;
-        });
-    }
-};
 
 // Create new post by sending a POST request to the server
 async function addNewPost(newPostData) {
@@ -68,35 +71,30 @@ async function addNewPost(newPostData) {
                 }, 100); // Small delay to allow DOM to render
             }
             const createdPost = await response.json();
-            return createdPost;
+            return { success: true, post: createdPost };
+        } else {
+            // If the server blocked it (like XSS), extract the error message
+            const errData = await response.json();
+            return { success: false, error: errData.error || errData.message || "Failed to upload post." };
         }
     } catch (error) {
         console.error('Error adding new post:', error);
+        return { success: false, error: "Connection error. Please try again." };
     }
-}
-
-function applyFilters() {
-    let currentPosts = allPostsData;
-
-    Object.keys(filtersList).forEach(key => {
-        currentPosts = filtersFunctions[key](currentPosts, filtersList[key]);
-    });
-
-    renderPosts(currentPosts);
-}
-
-function updateSearchFilter(text) {
-    filtersList.searchString = text;
-    applyFilters();
-}
-
-function updateMediaFilter(mediaTypes) {
-    filtersList.mediaType = mediaTypes;
-    applyFilters();
 }
 
 // Update the deletePostById function to send delete request to the server
 async function deletePostById(deleteId) {
+    // Disable any clicked delete button to prevent duplicate triggers
+    const deleteBtn = document.querySelector(`.delete-post-btn[data-id="${deleteId}"]`);
+    if (deleteBtn) deleteBtn.classList.add('pe-none');
+
+    let deleteLoadingScreen = document.getElementById('postDeleteLoadingScreen');
+    if (deleteLoadingScreen) {
+        deleteLoadingScreen.classList.remove('d-none');
+        deleteLoadingScreen.classList.add('d-flex');
+    }
+
     try {
         const response = await fetch(`/api/posts/deletePost/${deleteId}`, {
             method: 'DELETE'
@@ -104,39 +102,57 @@ async function deletePostById(deleteId) {
 
         if (response.ok) {
             closePopupComment(null, true);
-            // Refresh the posts from the server after deleting
             await fetchPostsFromServer();
         }
     } catch (error) {
         console.error('Error deleting post:', error);
+    } finally {
+        if (deleteBtn) deleteBtn.classList.remove('pe-none');
+        if (deleteLoadingScreen) {
+            deleteLoadingScreen.classList.remove('d-flex');
+            deleteLoadingScreen.classList.add('d-none');
+        }
     }
 }
 
-async function editPostData(postId, newCaption, newSubHeader) {
+async function editPostData(postId, newCaption, newLocation) {
+    const loadingScreen = document.getElementById('postUploadLoadingScreen');
+    const loadingText = loadingScreen ? loadingScreen.querySelector('h5') : null;
+    const originalText = loadingText ? loadingText.innerText : "";
+    const saveBtn = document.querySelector('#editPostModal .btn-primary');
+
+    if (loadingText) loadingText.innerText = "Saving your edits...";
+    if (loadingScreen) loadingScreen.classList.remove('d-none');
+
     try {
         const response = await fetch(`/api/posts/updatePost/${postId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ caption: newCaption, subHeader: newSubHeader })
+            body: JSON.stringify({ caption: newCaption, location: newLocation })
         });
 
         if (response.ok) {
-            // Update the local array to avoid the need for a fresh fetch of the entire feed
             const postIndex = allPostsData.findIndex(p => p._id === postId);
             if (postIndex !== -1) {
                 allPostsData[postIndex].caption = newCaption;
-                allPostsData[postIndex].subHeader = newSubHeader;
+                allPostsData[postIndex].location = newLocation;
             }
-            applyFilters(); // Re-render the posts with the updated data
+            renderPosts(allPostsData);
             closeEditModal();
+            return { success: true };
         } else {
             const errData = await response.json();
-            alert(errData.message || "Failed to update post");
+            return { success: false, error: errData.error || errData.message || "Failed to update post" };
         }
     } catch (error) {
         console.error('Error updating post:', error);
+        return { success: false, error: "Connection error. Please try again." };
+    } finally {
+        // Re-enable save button and reset loading screen
+        if (loadingScreen) loadingScreen.classList.add('d-none');
+        if (loadingText) loadingText.innerText = originalText;
     }
 }
 
@@ -172,41 +188,55 @@ async function updatePostButtonsUI(postId) {
     });
 }
 
+function getSafeAuthors(post) {
+    const authors = post?.authors;
+    return (Array.isArray(authors) ? authors : []).filter(Boolean);
+}
+
 function createAuthorsHTML(post) {
+    const safeAuthors = getSafeAuthors(post);
+    const primaryUsername = safeAuthors[0]?.username || 'Unknown';
+    const secondaryUsername = safeAuthors[1]?.username || 'Unknown';
+    const mediaTypeClass = textColour[post?.mediaType] || '';
+
     let authorsNamesHTML = '';
-    if (post.authors.length > 1) {
-        // Access populated username
+    if (safeAuthors.length > 1) {
         authorsNamesHTML = `
-            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[0].username}</a>
+            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${mediaTypeClass} small-text">${primaryUsername}</a>
             <span class="ms-1">and</span>
-            <a href="#!" class="username ms-1 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[1].username}</a>
+            <a href="#!" class="username ms-1 fw-semibold text-decoration-none ${mediaTypeClass} small-text">${secondaryUsername}</a>
         `;
     } else {
         authorsNamesHTML = `
-            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${textColour[post.mediaType]} small-text">${post.authors[0].username}</a>
+            <a href="#!" class="username ms-2 fw-semibold text-decoration-none ${mediaTypeClass} small-text">${primaryUsername}</a>
         `;
     }
     return authorsNamesHTML;
 }
 
 function createProfilePicsHTML(post) {
+    const safeAuthors = getSafeAuthors(post);
+    const primaryProfilePic = safeAuthors[0]?.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg';
+    const secondaryProfilePic = safeAuthors[1]?.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg';
+    const primaryUsername = safeAuthors[0]?.username || 'Unknown';
+    const secondaryUsername = safeAuthors[1]?.username || 'Unknown';
+
     let profilePicsHTML = '';
-    if (post.authors.length > 1) {
-        // Access populated profilePic
+    if (safeAuthors.length > 1) {
         profilePicsHTML = `
             <div>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="${post.authors[0].profilePic}" data-username="${post.authors[0].username}" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
+                    <img src="${primaryProfilePic}" data-username="${primaryUsername}" class="img-fluid rounded-circle joint-first-profile-pic position-relative z-2 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
                 </a>
                 <a href="#!" class="text-decoration-none text-dark">
-                    <img src="${post.authors[1].profilePic}" data-username="${post.authors[1].username}" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
+                    <img src="${secondaryProfilePic}" data-username="${secondaryUsername}" class="img-fluid rounded-circle joint-second-profile-pic position-relative z-1 border border-1 border-white" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
                 </a>
             </div>
         `;
     } else {
         profilePicsHTML = `
             <a href="#!" class="text-decoration-none text-dark profile-circle">
-                <img src="${post.authors[0].profilePic}" data-username="${post.authors[0].username}" class="img-fluid rounded-circle post-profile-pic" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
+                <img src="${primaryProfilePic}" data-username="${primaryUsername}" class="img-fluid rounded-circle post-profile-pic" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" alt="Image">
             </a>
         `;
     }
@@ -216,10 +246,13 @@ function createProfilePicsHTML(post) {
 function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
     let optionsMenuHTML = '';
 
-    // Check if the current user is one of the authors of the post
-    const isCurrentUserAuthor = post.authors.some(author => (author._id || author) === CURRENT_USER_ID);
+    const safeAuthors = getSafeAuthors(post);
 
-    if (isCurrentUserAuthor) {
+    // Check if the current user is one of the authors or the group admin
+    const isCurrentUserAuthor = safeAuthors.some(author => String(author._id || author) === CURRENT_USER_ID);
+    const isGroupAdmin = Boolean(post.groupAdminId && String(post.groupAdminId) === CURRENT_USER_ID);
+
+    if (isCurrentUserAuthor || isGroupAdmin) {
         optionsMenuHTML = `
         <div class="position-relative">
             <button class="bi bi-three-dots fs-4 bg-transparent border-0 p-0 ${textColour[post.mediaType]} options-btn"></button>
@@ -235,7 +268,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
         </div>
         `;
     } else {
-        // If the current user is not an author leave it empty
+        // If the current user is not an author or group admin, leave it empty
         optionsMenuHTML = `<div></div>`;
     }
 
@@ -253,18 +286,19 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
         </div>`;
     }
 
+    // Extract location name from new location object
     let combinedSubHeaderText = '';
+    let postLocationName = post.location && post.location.name ? post.location.name : '';
     
+    // Combine group name with location if both exist
     if (post.group && post.group.name) {
-        // Combine the group name and subHeader if both exist, otherwise just use the group name
-        if (post.subHeader && post.subHeader.trim() !== "") {
-            combinedSubHeaderText = `<span class="fw-bold">${post.group.name}</span> &bull; ${post.subHeader}`;
+        if (postLocationName.trim() !== "") {
+            combinedSubHeaderText = `<span class="fw-bold">${post.group.name}</span> &bull; <span class="text-decoration-none text-muted">${postLocationName}</span>`;
         } else {
             combinedSubHeaderText = `<span class="fw-bold">${post.group.name}</span>`;
         }
     } else {
-        // If there's no group, just use the subHeader as is (or empty if it's not set)
-        combinedSubHeaderText = post.subHeader ? post.subHeader : '';
+        combinedSubHeaderText = postLocationName;
     }
 
     let postContentHTML = '';
@@ -280,7 +314,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                             ${post.isVerified ? '<span class="ms-1 bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
                                 <div class="js-post-time d-flex align-items-center">
                                     <span class="text-white ms-1 fw-medium small-text">&bull;</span>
-                                    <span class="text-white ms-1 small-text">${post.timeAgo}</span>
+                                    <span class="text-white ms-1 small-text js-post-time-value" data-created-at="${post.createdAt}">${formatTimeAgo(post.createdAt)}</span>
                                 </div>
                             </div>
                             <a href="#!" class="ms-2 text-decoration-none text-white text-12 text-start">${combinedSubHeaderText}</a>
@@ -290,9 +324,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                 </div>
                 
                 <div class="js-post-media position-relative">
-                    <video id="video-${post._id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline onended="restartMedia(this)" onerror="this.outerHTML='<img src=&quot;/elements/media/posts/main-posts/error-post.jpg&quot; class=&quot;img-fluid rounded-2 main-post&quot;>'"></video>
-                    ${audioTagHTML}
-                    ${muteButtonHTML}
+                    <video id="video-${post._id}" src="${post.mediaSource}" class="img-fluid rounded-2 main-post w-100" autoplay muted playsinline controls onended="restartMedia(this)" onerror="this.outerHTML='<img src=&quot;/elements/media/posts/main-posts/error-post.jpg&quot; class=&quot;img-fluid rounded-2 main-post&quot;>'"></video>
                 </div>
             </div> 
         `;
@@ -308,7 +340,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                             ${post.isVerified ? '<span class="ms-1 bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
                             <span class="js-post-time">
                                 <span class="text-muted ms-1 fw-bold small-text">&bull;</span>
-                                <span class="text-muted ms-1 small-text">${post.timeAgo}</span>
+                                <span class="text-muted ms-1 small-text js-post-time-value" data-created-at="${post.createdAt}">${formatTimeAgo(post.createdAt)}</span>
                             </span>
                         </div>
                         <button class="bg-transparent border-0 p-0 ms-2 text-12 text-start">${combinedSubHeaderText}</button>
@@ -334,7 +366,7 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
                             ${post.isVerified ? '<span class="ms-1 bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
                             <span class="js-post-time">
                                 <span class="text-muted ms-1 fw-bold small-text">&bull;</span>
-                                <span class="text-muted ms-1 small-text">${post.timeAgo}</span>
+                                <span class="text-muted ms-1 small-text js-post-time-value" data-created-at="${post.createdAt}">${formatTimeAgo(post.createdAt)}</span>
                             </span>
                         </div>
                         <button class="bg-transparent border-0 p-0 ms-2 text-12 text-start">${combinedSubHeaderText}</button>
@@ -427,11 +459,14 @@ function createLikedByHTML(likedByUsers, likes) {
 }
 
 function createCaptionHTML(post) {
+    const safeAuthors = getSafeAuthors(post);
+    const primaryAuthor = safeAuthors[0] || { username: 'Unknown' };
+
     let captionHTML = `
     <div class="js-post-caption">
-        <a href="#!" class="username fw-semibold text-decoration-none text-dark">${post.authors[0].username}</a>
+        <a href="#!" class="username fw-semibold text-decoration-none text-dark">${primaryAuthor.username || 'Unknown'}</a>
         ${post.isVerified ? '<span class="bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
-        <span>${post.caption}</span>
+        <span>${post.caption || ''}</span>
     </div>
     <button class="small-text fw-semibold bg-transparent border-0 p-0"> See translation</button>
     `;
@@ -476,6 +511,53 @@ function renderPosts(postsData) {
     document.getElementById('loadingScreen').classList.remove('d-flex');
     document.getElementById('loadingScreen').classList.add('d-none');
     document.getElementById('mainApp').classList.remove('d-none');
+}
+
+let globalPostsMap = null;
+
+// ===== Global Map Feature =====
+// Renders an interactive map showing all posts with location data
+// Allows users to see geographic distribution of posts and view post info via markers
+function showAllPostsOnMap() {
+    const mapOverlay = document.getElementById('globalPostsMapOverlay');
+    mapOverlay.classList.remove('d-none');
+
+    setTimeout(() => {
+        if (!globalPostsMap) {
+            globalPostsMap = L.map('globalLeafletMap').setView([32.0853, 34.7818], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(globalPostsMap);
+        } else {
+            // Reset the map view to default center and zoom when reopened
+            globalPostsMap.setView([32.0853, 34.7818], 5);
+            
+            // Close any active popups from previous views
+            globalPostsMap.closePopup();
+        }
+
+        // Remove existing markers before rendering new ones
+        globalPostsMap.eachLayer((layer) => {
+            if (layer instanceof L.Marker) {
+                globalPostsMap.removeLayer(layer);
+            }
+        });
+
+        // Render all posts with location markers on map
+        // Each marker shows location name and author info on click
+        allPostsData.forEach(post => {
+            // Only show posts that have valid location coordinates
+            if (post.location && post.location.lat !== null && post.location.lng !== null) {
+                const marker = L.marker([post.location.lat, post.location.lng]).addTo(globalPostsMap);
+                const authorName = post.authors && post.authors[0] ? post.authors[0].username : "Unknown";
+                marker.bindPopup(`<b>${post.location.name}</b><br>Posted by: ${authorName}`);
+            }
+        });
+
+        // Ensure the map resizes correctly inside the modal
+        globalPostsMap.invalidateSize();
+    }, 100);
 }
 
 fetchPostsFromServer(); // Call the fetchPostsFromServer function to fetch posts from the server and then render them

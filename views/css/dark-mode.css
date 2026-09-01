@@ -11,8 +11,7 @@ body.dark-mode .card-body,
 body.dark-mode .comment-popup-container,
 body.dark-mode .messages-popup-container,
 body.dark-mode .chat-window-container,
-body.dark-mode .share-popup-container,
-body.dark-mode .notifications-panel {
+body.dark-mode .share-popup-container {
     background-color: #0C1014 !important;
     color: white !important;
 }
@@ -348,17 +347,37 @@ body.dark-mode #membersList button:not(.btn-primary):not(.btn-danger) {
     border: 1px solid #3a3f47 !important;
 }
 
+body.dark-mode .post-options-dropdown {
+    background-color: #0C1014 !important;
+    border-color: #262B33 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+}
+
 body.dark-mode .edit-post-btn {
+    background-color: transparent !important;
     color: white !important;
 }
 
 body.dark-mode .edit-post-btn:hover {
-    background-color: #3a3f47 !important;
+    background-color: #262B33 !important;
+    color: white !important;
 }
 
 body.dark-mode #editPostModal .bg-white {
     background-color: #0C1014 !important;
     border-color: #262B33 !important;
+}
+
+body.dark-mode #editPostModal input,
+body.dark-mode #editPostModal .btn-light {
+    background-color: #262B33 !important;
+    color: white !important;
+    border-color: #3a3f47 !important;
+}
+
+body.dark-mode #editPostModal .btn-light:hover {
+    background-color: #3a3f47 !important;
+    color: white !important;
 }
 
 body.dark-mode #editPostModal input,
@@ -391,4 +410,272 @@ body.dark-mode #postUploadChoiceModal .border-bottom,
 body.dark-mode #groupsSelectionModal .border-bottom,
 body.dark-mode #groupsSelectionModal .border-top {
     border-color: #262B33 !important;
+}
+
+/* ============================================================
+   Chat feature — dark mode
+   ============================================================ */
+
+/* Chat history background (the .white-back light ground would swallow bubbles) */
+body.dark-mode .js-chat-history-container.white-back {
+    background-color: #0C1014 !important;
+}
+
+/* Contact list rows */
+body.dark-mode .chat-row-name {
+    color: #ffffff !important;
+}
+
+body.dark-mode .chat-row-preview {
+    color: #a8a8a8 !important;
+}
+
+/* Incoming bubble — was turning black on the dark ground and became unreadable */
+body.dark-mode .chat-bubble--in {
+    background-color: #262B33 !important;
+    color: #ffffff !important;
+    border-color: #3a3f47 !important;
+}
+
+/* Outgoing bubble — keep it a readable blue with white text */
+body.dark-mode .chat-bubble--out {
+    background-color: #2b5cff !important;
+    color: #ffffff !important;
+}
+
+/* Shared-post card */
+body.dark-mode .chat-shared-card {
+    background-color: #1e2530 !important;
+    border-color: #3a3f47 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .chat-shared-card .text-primary {
+    color: #6ea8fe !important;
+}
+
+/* "Text Post" placeholder keeps dark text — it sits on a light gradient */
+body.dark-mode .chat-textpost-label {
+    color: #1a1a1a !important;
+}
+
+/* 3-dots action menu */
+body.dark-mode .chat-msg-menu-toggle {
+    color: #a8a8a8 !important;
+}
+
+body.dark-mode .chat-msg-menu-toggle:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode .chat-msg-actions {
+    background-color: #1e2530 !important;
+    border-color: #3a3f47 !important;
+}
+
+body.dark-mode .chat-msg-actions button {
+    color: #ffffff !important;
+}
+
+body.dark-mode .chat-msg-actions button:hover {
+    background-color: #262B33 !important;
+}
+
+body.dark-mode .chat-msg-actions .js-msg-delete {
+    color: #ff6b6b !important;
+}
+
+/* Chat input pill */
+body.dark-mode .chat-window-container .border.rounded-pill {
+    border-color: #3a3f47 !important;
+}
+
+/* Chat-related Bootstrap modals (edit / delete message, share result) —
+   plain .modal-content has no dark theme, so text was white-on-white */
+body.dark-mode #editMessageModal .modal-content,
+body.dark-mode #deleteMessageModal .modal-content,
+body.dark-mode #shareResultModal .modal-content {
+    background-color: #1e2530 !important;
+    border: 1px solid #3a3f47 !important;
+}
+
+body.dark-mode #editMessageModal .modal-title,
+body.dark-mode #deleteMessageModal .modal-title,
+body.dark-mode #shareResultModal .modal-title,
+body.dark-mode #editMessageModal .modal-body,
+body.dark-mode #deleteMessageModal .modal-body,
+body.dark-mode #shareResultModal .modal-body,
+body.dark-mode #editMessageModal .modal-body p,
+body.dark-mode #deleteMessageModal .modal-body p,
+body.dark-mode #shareResultModal .modal-body p {
+    color: #ffffff !important;
+}
+
+/* Keep the destructive / error titles red */
+body.dark-mode #deleteMessageModal .modal-title,
+body.dark-mode #shareResultModal .modal-title.text-danger {
+    color: #ff6b6b !important;
+}
+
+body.dark-mode #editMessageModal .btn-light,
+body.dark-mode #deleteMessageModal .btn-light {
+    background-color: #262B33 !important;
+    color: #ffffff !important;
+    border-color: #3a3f47 !important;
+}
+
+body.dark-mode #editMessageModal .modal-content textarea.form-control {
+    background-color: #262B33 !important;
+    color: #ffffff !important;
+    border-color: #3a3f47 !important;
+}
+
+body.dark-mode #editMessageModal .btn-close,
+body.dark-mode #deleteMessageModal .btn-close,
+body.dark-mode #shareResultModal .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+
+    body.dark-mode .dashboard-main-title {
+        color: #ffffff !important;
+    }
+}
+
+body.dark-mode .dashboard-card {
+    background-color: #0C1014 !important;
+    border: 1px solid #262B33 !important;
+}
+
+body.dark-mode .chart-title {
+    color: #ffffff !important;
+}
+
+body.dark-mode .chart-axis-text {
+    fill: #a8a8a8 !important;
+}
+
+body.dark-mode .chart-grid-line {
+    stroke: #262B33 !important;
+}
+
+/* Popup Backgrounds */
+.dark-mode #groupsOverlay .bg-white,
+.dark-mode #groupsOverlay .bg-light,
+.dark-mode #allUsersModal .bg-light {
+    background-color: #121212 !important;
+}
+
+.dark-mode #groupsOverlay .text-dark,
+.dark-mode #allUsersModal .text-dark {
+    color: #ffffff !important;
+}
+
+/* Inputs and Selects for Popups */
+.dark-mode #groupsOverlay .form-control,
+.dark-mode #groupsOverlay .form-select,
+.dark-mode #allUsersModal .form-control .dark-mode #allUsersModal .form-select {
+    background-color: #262626 !important;
+    color: #ffffff !important;
+    border: 1px solid #444444 !important;
+}
+
+.dark-mode #groupsOverlay .form-control::placeholder,
+.dark-mode #allUsersModal .form-control::placeholder {
+    color: #a0a0a0 !important;
+}
+
+/* Leaflet Map Modal in Dark Mode */
+body.dark-mode #mapModal .bg-white,
+body.dark-mode #globalPostsMapOverlay .bg-white {
+    background-color: #0C1014 !important;
+    border: 1px solid #262B33 !important;
+}
+
+body.dark-mode #mapModal h5,
+body.dark-mode #globalPostsMapOverlay h4 {
+    color: white !important;
+}
+
+body.dark-mode #mapSearchInput {
+    background-color: #262B33 !important;
+    color: white !important;
+    border-color: #3a3f47 !important;
+}
+
+body.dark-mode #mapSearchInput::placeholder {
+    color: #a8a8a8 !important;
+}
+
+body.dark-mode #leafletMap,
+body.dark-mode #globalLeafletMap {
+    border-color: #262B33 !important;
+}
+
+/* Leaflet Zoom Buttons in Dark Mode */
+body.dark-mode .leaflet-bar a {
+    background-color: #262B33 !important;
+    color: #e4e6eb !important;
+    border-bottom: 1px solid #3a3f47 !important;
+}
+
+body.dark-mode .leaflet-bar a:hover {
+    background-color: #3a3f47 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .leaflet-bar {
+    border: 1px solid #3a3f47 !important;
+}
+
+body.dark-mode .leaflet-bar a.leaflet-disabled {
+    background-color: #1a1d21 !important;
+    color: #6c757d !important;
+}
+
+body.dark-mode .feed-advanced-search-panel {
+    background-color: #121212;
+    border-right: 1px solid #333;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .feed-advanced-search-panel .text-dark,
+body.dark-mode .feed-advanced-search-panel h4 {
+    color: #ffffff !important;
+}
+
+body.dark-mode .feed-advanced-search-panel .bg-light {
+    background-color: #262626 !important;
+}
+
+body.dark-mode .feed-advanced-search-panel .form-control,
+body.dark-mode .feed-advanced-search-panel .form-select {
+    background-color: #262626 !important;
+    color: #ffffff !important;
+    border: 1px solid #444444 !important;
+}
+
+body.dark-mode .feed-advanced-search-panel .form-control::placeholder {
+    color: #a0a0a0 !important;
+}
+
+body.dark-mode .feed-advanced-search-panel .btn-light {
+    background-color: #262626 !important;
+    color: #ffffff !important;
+    border-color: #444444 !important;
+}
+
+body.dark-mode .feed-advanced-search-panel .btn-light:hover {
+    background-color: #333333 !important;
+}
+
+.dark-mode #groupsOverlay .btn-light,
+.dark-mode #allUsersModal .btn-light {
+    background-color: #262626 !important;
+    color: #ffffff !important;
+    border-color: #444444 !important;
+}
+
+.dark-mode #groupsOverlay .btn-light:hover,
+.dark-mode #allUsersModal .btn-light:hover {
+    background-color: #333333 !important;
 }

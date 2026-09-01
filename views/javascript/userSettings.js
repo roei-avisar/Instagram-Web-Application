@@ -38,7 +38,7 @@ function closeSettings() {
 }
 
 // Close modal when clicking on the dark overlay (outside the box)
-document.getElementById('settingsModal').addEventListener('click', function (e) {
+document.getElementById('settingsModal').addEventListener('mousedown', function (e) {
   if (e.target === this) {
     closeSettings();
   }

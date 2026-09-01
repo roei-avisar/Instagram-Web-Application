@@ -412,7 +412,7 @@ body {
 .story-progress-segment {
     flex: 1;
     height: 3px;
-    background: rgba(255,255,255,0.5);
+    background: rgba(255, 255, 255, 0.5);
     border-radius: 2px;
     position: relative;
     overflow: hidden;
@@ -425,10 +425,11 @@ body {
     transition: width 0s linear;
 }
 
-#storyImage, #storyVideo {
+#storyImage,
+#storyVideo {
     object-fit: contain !important;
     background-color: black !important;
     width: 100% !important;
     height: 100% !important;
     margin: auto;
-}
+}

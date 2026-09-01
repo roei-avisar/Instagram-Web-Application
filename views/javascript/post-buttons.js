@@ -6,70 +6,36 @@ const timeDictionary = {
     'w': 'weeks'
 };
 
-const friends = [
-    { 
-        id: "jamil-1",
-        username: "jamil.abukhaima", 
-        fullName: "Jamil", 
-    },
-    { 
-        id: "sara-2",
-        username: "sara22", 
-        fullName: "Sara Haya", 
-    },
-    { 
-        id: "tomer-3",
-        username: "tomer19", 
-        fullName: "TOMER ;)", 
-    },
-    { 
-        id: "maya-4",
-        username: "maya_99", 
-        fullName: "Mayosh", 
-    },
-    { 
-        id: "nalin-5",
-        username: "nalin12", 
-        fullName: "נלין", 
-    },
-    { 
-        id: "jacob-6",
-        username: "jacob-ashkenazi2", 
-        fullName: "jacob the king", 
-    },
-    { 
-        id: "noa-7",
-        username: "noa.nesh1", 
-        fullName: "NOA NESHIKA", 
-    },
-    { 
-        id: "omer-8",
-        username: "omer_44", 
-        fullName: "omer isha", 
-    },
-    { 
-        id: "alex-9",
-        username: "alex_56", 
-        fullName: "אלכס קורקינט", 
-    },
-    { 
-        id: "lili-10",
-        username: "lili_18", 
-        fullName: "lola", 
-    },
-    { 
-        id: "guy-11",
-        username: "guy_13", 
-        fullName: "some guy ;0", 
-    },
-    { 
-        id: "dan-12",
-        username: "dan_11", 
-        fullName: "danny din", 
-    }
-];
-
 let selectedShareFriends = {};
+let shareContactsCache = []; // last contact list rendered in the Share popup (same source as the chat list)
+let isSubmittingComment = false; // Lock to prevent spamming comments
+
+function showCommentError(msg) {
+    let commentSlot = document.querySelector(".js-popup-add-comment-slot");
+    if (!commentSlot) return;
+    
+    let errorDiv = document.querySelector('.comment-action-error');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'comment-action-error text-danger small px-3 py-2 fw-bold d-flex align-items-start border-top bg-white w-100';
+        // insert the error right above the add-comment input area
+        commentSlot.parentNode.insertBefore(errorDiv, commentSlot);
+    }
+    
+    errorDiv.innerHTML = `
+        <svg class="me-2 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="#ed4956" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px; margin-top:2px;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span style="word-break: break-word;">${msg}</span>
+    `;
+}
+
+function clearCommentError() {
+    let errorDiv = document.querySelector('.comment-action-error');
+    if (errorDiv) errorDiv.remove();
+}
 
 async function likePost(button) {
     let idDiv = button.closest('[data-post-id]');
@@ -133,6 +99,7 @@ async function savePost(button) {
 
 // Main comments function to open and startup a post comments popup
 function popupCommentMaker(comment) {
+    clearCommentError();
     let commentPopupBackground = document.querySelector(".comment-popup-background");
     commentPopupBackground.classList.remove('d-none');
     commentPopupBackground.classList.add('d-flex'); // display the pop up window (changing from d-none to d-flex) 
@@ -196,17 +163,13 @@ function addHeaderToPopupComment(commentPopupBackground, allPost){
 
 function addLikedByToPopupComment(commentPopupBackground, allPost){
     let commentPopupHeader = commentPopupBackground.querySelector(".js-popup-header-slot");
-    let postTime = commentPopupHeader.querySelector(".js-post-time"); 
     let commentPopuplikedBy = commentPopupBackground.querySelector(".js-popup-likedBy-slot");
     let likedBy = allPost.querySelector(".js-liked-by").outerHTML;
-
-    let time = postTime.innerText.replace('•', '').trim(); // Take the time of the post and slice it to a number and letter
-    let timeNumber = time.slice(0, -1);
-    let timeLetter = time.slice(-1);
+    let currentPost = allPostsData.find(post => post._id === allPost.dataset.postId);
 
     commentPopuplikedBy.innerHTML = `
         ${likedBy}
-        <div class="text-muted text-12 mt-2">${timeNumber} ${timeDictionary[timeLetter]} ago</div>
+        <div class="text-muted text-12 mt-2">${formatTimeAgo(currentPost?.createdAt)} ago</div>
     `;
 
 }
@@ -249,6 +212,10 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
         `;
     }
 
+    // Determine if user has permission to delete comments
+    const isPostAuthor = currentPost && currentPost.authors && currentPost.authors.some(a => (a._id || a) === CURRENT_USER_ID);
+    const isGroupAdmin = currentPost && currentPost.groupAdminId && currentPost.groupAdminId === CURRENT_USER_ID;
+
     // Render actual comments from the database
     if (postComments && postComments.length > 0) {
         postComments.forEach((comment, index) => {
@@ -260,7 +227,8 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
             let heartClass = isLiked ? "bi-heart-fill text-danger" : "bi-heart text-muted";
             let commentLikes = comment.likes || 0;
             
-            // Extract username and profile picture from populated userId object
+            // Extract username, profile picture and user ID
+            let commentUserId = comment.userId && comment.userId._id ? comment.userId._id : comment.userId;
             let commentUsername = comment.userId && comment.userId.username ? comment.userId.username : "Unknown";
             let commentProfilePic = comment.userId && comment.userId.profilePic ? comment.userId.profilePic : "elements/media/profile-pictures/default.jpg";
             let commentText = comment.text || "";
@@ -268,8 +236,18 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
             // Format comment date if available
             let commentTime = comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : "Just now";
             
+            // Check if current user can delete this comment
+            let isCommentAuthor = commentUserId === CURRENT_USER_ID;
+            let canDelete = isCommentAuthor || isPostAuthor || isGroupAdmin;
+            
+            let deleteBtnHTML = canDelete ? `
+                <button class="bg-transparent border-0 p-0 text-muted ms-3 hover-extend" onclick="deleteComment('${postId}', '${comment._id}')" title="Delete comment">
+                    <i class="bi bi-trash3 text-danger"></i>
+                </button>
+            ` : '';
+
             let commentHTML = `
-                <div class="d-flex m-3 align-items-start js-comment-row">
+                <div class="d-flex m-3 align-items-start js-comment-row" data-comment-id="${comment._id}">
                     <div class="flex-shrink-0">
                         <img src="${commentProfilePic}" data-username="${commentUsername}" class="rounded-circle" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" style="width: 32px; height: 32px; object-fit: cover;">
                     </div>
@@ -281,6 +259,7 @@ function addCommentsToPopupComment(commentPopupBackground, allPost) {
                             <span>${commentTime}</span>
                             <span class="fw-semibold js-comment-likes-count" style="cursor: pointer;">${commentLikes} likes</span>
                             <button class="bg-transparent border-0 p-0 text-muted fw-semibold" onclick="prepareReply('${commentUsername}')">Reply</button>
+                            ${deleteBtnHTML}
                         </div>
                     </div>
                     <div class="ms-3 mt-1">
@@ -311,7 +290,8 @@ function addTypingLineToPopupComment(commentPopupBackground, allPost){
 
     commentInput.oninput = () =>
          {
-        if (commentInput.value.trim() !== "") // if someome wrote something that is not a blank line make posting available
+        clearCommentError();
+        if (commentInput.value.trim() !== "" && !isSubmittingComment) // if someome wrote something that is not a blank line make posting available
         {
             if (postButton.classList.contains("pe-none")) // only on first letter that have been written the screen will scroll down
             {
@@ -335,8 +315,8 @@ function addTypingLineToPopupComment(commentPopupBackground, allPost){
     {
         if (event.key === "Enter") {
             event.preventDefault(); // do not get line down
-
-            if (commentInput.value.trim() !== "") { //if enter pressed then publish a comment
+            
+            if (commentInput.value.trim() !== "" && !isSubmittingComment) { //if enter pressed then publish a comment
                 publishNewComment();
             }
         }
@@ -352,6 +332,8 @@ function addTypingLineToPopupComment(commentPopupBackground, allPost){
 
 // 4. Publish a new comment by sending a POST request to the server
 async function publishNewComment() {
+    if (isSubmittingComment) return; // Prevent spam clicking/pressing enter
+    
     let commentInput = document.querySelector(".js-comment-input");
     let postButton = document.querySelector(".js-post-button");
     let typingElement = document.querySelector(".someone-is-typing");
@@ -359,6 +341,16 @@ async function publishNewComment() {
     let newCommentText = commentInput.value.trim();
     
     if (newCommentText !== "") {
+        isSubmittingComment = true; // Lock
+        clearCommentError();
+        
+        // Disable input and button while submitting
+        commentInput.disabled = true;
+        postButton.classList.add("opacity-50");
+        postButton.classList.remove("opacity-100");
+        postButton.classList.add("pe-none");
+        if (typingElement) typingElement.classList.add("d-none");
+        
         let currentPostId = postButton.dataset.postId;
 
         try {
@@ -376,10 +368,6 @@ async function publishNewComment() {
             if (response.ok) {
                 // 2. Clear input fields immediately
                 commentInput.value = "";
-                postButton.classList.add("opacity-50");
-                postButton.classList.remove("opacity-100");
-                postButton.classList.add("pe-none");
-                if (typingElement) typingElement.classList.add("d-none");
                 
                 // 3. Fetch all posts again to update local data with the new comment
                 await fetchPostsFromServer();
@@ -401,11 +389,70 @@ async function publishNewComment() {
                     commentPopupList.scrollTop = commentPopupList.scrollHeight;
                 }
             } else {
+                const data = await response.json();
                 console.error("Server failed to add comment");
+                showCommentError(data.error || data.message || "Failed to post comment.");
             }
         } catch (error) {
             console.error("Error connecting to server for adding comment:", error);
+            showCommentError("Connection error. Please try again.");
+        } finally {
+            // Unlock and re-enable input
+            isSubmittingComment = false;
+            commentInput.disabled = false;
+            
+            // Re-check input state
+            if (commentInput.value.trim() !== "") {
+                postButton.classList.remove("opacity-50");
+                postButton.classList.add("opacity-100");
+                postButton.classList.remove("pe-none");
+                if (typingElement) typingElement.classList.remove("d-none");
+            }
+            
+            setTimeout(() => {
+                commentInput.focus();
+            }, 50);
         }
+    }
+}
+
+async function deleteComment(postId, commentId) {
+    // Disable UI temporarily
+    const commentRow = document.querySelector(`.js-comment-row[data-comment-id="${commentId}"]`);
+    if (commentRow) commentRow.style.opacity = '0.5';
+    
+    try {
+        const response = await fetch(`/api/posts/deleteComment/${postId}/${commentId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+            // Refresh posts to get updated data
+            await fetchPostsFromServer();
+            
+            // Re-render popup
+            let commentPopupBackground = document.querySelector(".comment-popup-background");
+            let allPost = document.querySelector(`[data-post-id="${postId}"]`);
+            
+            if (commentPopupBackground && allPost) {
+                addCommentsToPopupComment(commentPopupBackground, allPost);
+                
+                // Update comments counter
+                const commentsCounter = allPost.querySelector('.js-comments-counter');
+                if (commentsCounter) {
+                    commentsCounter.textContent = allPostsData.find(post => post._id === postId)?.comments.length || 0;
+                }
+            }
+        } else {
+            const data = await response.json();
+            alert(data.message || data.error || "Failed to delete comment");
+            if (commentRow) commentRow.style.opacity = '1';
+        }
+    } catch (error) {
+        console.error("Error deleting comment:", error);
+        alert("Connection error. Please try again.");
+        if (commentRow) commentRow.style.opacity = '1';
     }
 }
 
@@ -471,6 +518,7 @@ function closePopupComment(event, forcedExit)
         commentPopupBackground.classList.add('d-none'); // delete the pop up window (changing from d-flex to d-none) 
         commentPopupBackground.querySelector(".comment-popup-container").classList.remove('comment-popup-animation'); // removing animation class from the pop up window 
         document.body.classList.remove('overflow-hidden'); // make scrolling available again 
+        clearCommentError();
     }
 }
 
@@ -485,59 +533,90 @@ function toggleShareFriend(checkbox, friendId) { // select friends on share popu
         }
 }
 
-function searchShareFriends(query) // function that search on share friend list by first and second name
+function searchShareFriends(query) // filter the Share popup list by username
 {
-    let lowerQuery = query.toLowerCase();
-    
-    let filteredFriends = friends.filter(friend => 
-        friend.username.toLowerCase().includes(lowerQuery) || 
-        friend.fullName.toLowerCase().includes(lowerQuery)
+    let lowerQuery = query.trim().toLowerCase();
+
+    if (lowerQuery === "") {
+        createShareList(shareContactsCache);
+        return;
+    }
+
+    let filtered = shareContactsCache.filter(friend =>
+        friend.username.toLowerCase().includes(lowerQuery)
     );
-    
-    createShareList(filteredFriends);
+
+    createShareList(filtered);
 }
 
-function createShareList(listToRender = friends) //render a share list from all of our friends 
+function createShareList(listToRender = shareContactsCache) // render the Share popup list from the shared smart-contact source
 {
     let friendsContainer = document.querySelector(".share-popup-background .overflow-y-auto");
+    if (!friendsContainer) {
+        return;
+    }
     friendsContainer.innerHTML = "";
 
-    listToRender.forEach(friend => {
-        let isChecked = selectedShareFriends[friend.id] === true ? "checked" : "";
+    // Only real, reachable users can receive a shared post
+    let selectable = (listToRender || []).filter(friend => !friend.unavailable);
 
-        let friendHTML = 
+    if (selectable.length === 0) {
+        friendsContainer.innerHTML = `<div class="text-center text-muted mt-3">No contacts to share with yet.</div>`;
+        return;
+    }
+
+    selectable.forEach(friend => {
+        let isChecked = selectedShareFriends[friend.userId] === true ? "checked" : "";
+        let safeUserId = escapeHTML(String(friend.userId));
+        let safeUsername = escapeHTML(friend.username);
+        let safeProfilePic = escapeHTML(friend.profilePic);
+
+        let friendHTML =
         `<label class="d-flex align-items-center justify-content-between mb-2 p-2 rounded js-friend-row" style="cursor: pointer;" onmouseenter="this.classList.add('bg-light')" onmouseleave="this.classList.remove('bg-light')">
             <div class="d-flex align-items-center gap-2">
-                <img src="elements/media/profile-pictures/${friend.username}.jpg" class="rounded-circle" onerror="this.onerror = null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" style="width: 44px; height: 44px; object-fit: cover;">
-                <div class="d-flex flex-column lh-1">
-                    <span class="fw-semibold">${friend.username}</span>
-                    <span class="text-muted text-12">${friend.fullName}</span>
-                </div>
+                <img src="${safeProfilePic}" class="rounded-circle" onerror="this.onerror = null; this.src='${DEFAULT_PROFILE_PIC}'" style="width: 44px; height: 44px; object-fit: cover;">
+                <span class="fw-semibold">${safeUsername}</span>
             </div>
-            <input class="form-check-input rounded-circle fs-5 m-0 js-share-checkbox" type="checkbox" value="${friend.id}" onchange="toggleShareFriend(this, '${friend.id}')" ${isChecked}>
+            <input class="form-check-input rounded-circle fs-5 m-0 js-share-checkbox" type="checkbox" value="${safeUserId}" onchange="toggleShareFriend(this, '${safeUserId}')" ${isChecked}>
         </label>`;
         friendsContainer.innerHTML += friendHTML;
     });
 }
 
-function openSharePopup(button) 
+async function openSharePopup(button)
 {
     let idDiv = button.closest('[data-post-id]');
     if (!idDiv) return;
     let postId = idDiv.dataset.postId;
-    
+
     let sharePopup = document.querySelector(".share-popup-background");
-    sharePopup.dataset.postId = postId ;
+    if (!sharePopup) return;
+    sharePopup.dataset.postId = postId;
 
-    selectedShareFriends = {}; 
+    selectedShareFriends = {};
     let searchInput = document.querySelector(".js-share-search-input");
-    if (searchInput) searchInput.value = ""; 
+    if (searchInput) searchInput.value = "";
 
-    createShareList();
-    
+    // Show the popup FIRST so a slow or failing fetch can never make the button feel dead
     sharePopup.classList.remove('d-none');
     sharePopup.classList.add('d-flex');
-    document.body.classList.add('overflow-hidden'); 
+    document.body.classList.add('overflow-hidden');
+
+    let friendsContainer = sharePopup.querySelector(".overflow-y-auto");
+    if (friendsContainer) {
+        friendsContainer.innerHTML = `<div class="text-center text-muted mt-3">Loading contacts...</div>`;
+    }
+
+    try {
+        // Reuse the EXACT same source the chat list uses (getSmartContactList lives in messages.js)
+        shareContactsCache = await getSmartContactList();
+        createShareList(shareContactsCache);
+    } catch (error) {
+        console.error("Error loading contacts for the Share popup:", error);
+        if (friendsContainer) {
+            friendsContainer.innerHTML = `<div class="text-center text-danger mt-3">Could not load contacts. Please try again.</div>`;
+        }
+    }
 }
 
 function closeSharePopup(event, forceClose = false) 
@@ -551,63 +630,152 @@ function closeSharePopup(event, forceClose = false)
     }
 }
 
-function sendSharedPost() 
+async function sendSharedPost()
 {
     let sharePopup = document.querySelector(".share-popup-background");
+    if (!sharePopup) return;
+
     let postId = sharePopup.dataset.postId;
     let selectedIds = Object.keys(selectedShareFriends);
-    
-    if (selectedIds.length === 0) return ;
 
-    selectedIds.forEach(friendId => {
-        if (!chatsDatabase[friendId]) {
-            chatsDatabase[friendId] = [];
+    if (!postId || selectedIds.length === 0) return;
+
+    // Confirm identity once before the loop
+    let currentUserId = await ensureCurrentUser();
+    if (!currentUserId) {
+        showShareResultModal("Share Post", "We couldn't verify your session. Please refresh the page and try again.", true);
+        return;
+    }
+
+    let sendBtn = sharePopup.querySelector(".js-send-share-btn");
+    if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.classList.add("opacity-50");
+    }
+
+    // Create a real shared_post message per recipient, through the existing chat API
+    let failures = 0;
+    for (let friendId of selectedIds) {
+        try {
+            let response = await fetch('/api/chats/createMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sender: currentUserId,
+                    receiver: friendId,
+                    type: "shared_post",
+                    postId: postId
+                })
+            });
+            let result = await response.json().catch(() => ({}));
+            if (!response.ok || !result.success) {
+                failures++;
+                console.error("Failed to share post with", friendId, result);
+            }
+        } catch (error) {
+            failures++;
+            console.error("Network error while sharing post with", friendId, error);
         }
-        
-        chatsDatabase[friendId].push({ // add to chat database
-            type: "shared_post",
-            postId: postId,
-            sender: "me",
-            time: "Just now"
-        });
-    });
+    }
+
+    if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.classList.remove("opacity-50");
+    }
 
     closeSharePopup(null, true);
-    renderMessagesList();
-    let chatWindow = document.querySelector(".chat-window-container");
-    
-    if (!chatWindow.classList.contains("d-none")) {
-        let currentOpenFriendId = chatWindow.dataset.friendId;
-        
-       
-        if (selectedIds.includes(currentOpenFriendId)) {
-            renderChatHistory(currentOpenFriendId);
-            let chatHistoryContainer = document.querySelector(".js-chat-history-container");
-            chatHistoryContainer.scrollTo({
-                top: chatHistoryContainer.scrollHeight,
-                behavior: 'smooth'
-            });
-        }
+
+    if (failures > 0) {
+        showShareResultModal(
+            "Share Post",
+            `This post couldn't be sent to ${failures} of ${selectedIds.length} contact(s).`,
+            true
+        );
     }
-    let feedPost = document.querySelector(`.js-all-post[data-post-id="${postId}"]`);
-    
-    if (feedPost) { // adding number of shares to the share count on html
-        let shareIcon = feedPost.querySelector('.bi-send');
-        if (shareIcon) {
-            let counterSpan = shareIcon.nextElementSibling;
-            if (counterSpan) {
-                let currentCount = parseInt(counterSpan.innerText) || 0;
-                counterSpan.innerText = currentCount + selectedIds.length;
-            }
+
+    // Refresh whichever chat surface is currently visible
+    let messagesPopup = document.querySelector(".messages-popup-container");
+    if (messagesPopup && !messagesPopup.classList.contains("d-none")) {
+        renderMessagesList();
+    }
+
+    let chatWindow = document.querySelector(".chat-window-container");
+    if (chatWindow && !chatWindow.classList.contains("d-none")) {
+        let openFriendId = chatWindow.dataset.friendId;
+        if (openFriendId && selectedIds.includes(openFriendId)) {
+            await openChatWindow(openFriendId);
         }
     }
 
-    let postInData = allPostsData.find(post => post._id === postId);
-        
-    if (postInData) {
-        let currentSharesCount = parseInt(postInData.stats.shares) || 0; // adding number of shares to share count on posts database
+    // Optimistic feed share-count bump (the Post backend has no share-count field)
+    let feedPost = document.querySelector(`.js-all-post[data-post-id="${postId}"]`);
+    if (feedPost) {
+        let shareIcon = feedPost.querySelector('.bi-send');
+        if (shareIcon && shareIcon.nextElementSibling) {
+            let counterSpan = shareIcon.nextElementSibling;
+            let currentCount = parseInt(counterSpan.innerText) || 0;
+            counterSpan.innerText = currentCount + selectedIds.length;
+        }
+    }
+
+    let postInData = (typeof allPostsData !== 'undefined' && Array.isArray(allPostsData))
+        ? allPostsData.find(post => post._id === postId)
+        : null;
+    if (postInData && postInData.stats) {
+        let currentSharesCount = parseInt(postInData.stats.shares) || 0;
         postInData.stats.shares = (currentSharesCount + selectedIds.length).toString();
     }
+
+    selectedShareFriends = {};
+}
+
+// Injects the "Share result" modal once — mirrors injectDeleteModal in messages.js
+function injectShareResultModal() {
+    if (document.getElementById('shareResultModal')) {
+        return;
+    }
+
+    const modalHTML = `
+    <div class="modal fade" id="shareResultModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold" id="shareResultModalTitle">Share Post</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-0">
+                    <p class="mb-0 text-dark" id="shareResultModalMessage"></p>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Blur focus on close to avoid the aria-hidden focus warning (same as the other modals)
+    const modalElement = document.getElementById('shareResultModal');
+    modalElement.addEventListener('hide.bs.modal', () => {
+        if (document.activeElement && modalElement.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
+    });
+}
+
+function showShareResultModal(title, message, isError = false) {
+    injectShareResultModal();
+
+    let titleEl = document.getElementById('shareResultModalTitle');
+    let messageEl = document.getElementById('shareResultModalMessage');
+
+    titleEl.textContent = title;
+    titleEl.classList.toggle('text-danger', isError === true);
+    messageEl.textContent = message;
+
+    let modal = new bootstrap.Modal(document.getElementById('shareResultModal'));
+    modal.show();
 }
 
 function prepareReply(username) {

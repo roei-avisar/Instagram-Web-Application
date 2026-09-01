@@ -14,10 +14,17 @@
     <link rel="stylesheet" href="css/messages.css" />
     <link rel="stylesheet" href="./css/instagram_left_sidebar.css">
     <link rel="stylesheet" href="./css/create-post.css">
-    <link rel="stylesheet" href="./css/notifications.css">
     <link rel="stylesheet" href="./css/dark-mode.css">
     <link rel="stylesheet" href="./css/userSettings.css">
     <link rel="stylesheet" href="./css/follow.css">
+    <link rel="stylesheet" href="./css/statistics.css">
+    <link rel="stylesheet" href="./css/advanced-search.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- External Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script> <!-- should be on top of the page -->
 </head>
 
 <body id="top">
@@ -71,7 +78,8 @@
                         <i class="bi bi-chevron-right"></i>
                     </span>
 
-                    <div class="story-progress-container js-story-progress-container d-flex gap-1 mb-2 w-100 px-2" style="position:absolute; top:10px; z-index:100; height:3px;"></div>
+                    <div class="story-progress-container js-story-progress-container d-flex gap-1 mb-2 w-100 px-2"
+                        style="position:absolute; top:10px; z-index:100; height:3px;"></div>
                     <div class="story-header">
 
                         <img src="" class="story-header-avatar">
@@ -82,9 +90,11 @@
                         </div>
 
                         <span class="story-actions">
-                            <i id="storyMuteBtn" class="bi bi-volume-mute-fill" style="cursor:pointer; display:none;"></i>
+                            <i id="storyMuteBtn" class="bi bi-volume-mute-fill"
+                                style="cursor:pointer; display:none;"></i>
                             <i id="pauseStory" class="bi bi-pause-fill ms-2" style="cursor:pointer;"></i>
-                            <i id="deleteStoryBtn" class="bi bi-trash-fill text-danger ms-2 d-none" style="cursor:pointer;" onclick="deleteCurrentStory(event)"></i>
+                            <i id="deleteStoryBtn" class="bi bi-trash-fill text-danger ms-2 d-none"
+                                style="cursor:pointer;" onclick="deleteCurrentStory(event)"></i>
                         </span>
 
 
@@ -122,157 +132,176 @@
 
         <main class="main-page d-flex">
 
-            <nav class="left-sidebar">
+            <header>
+                <nav class="left-sidebar">
 
-                <!-- Logo -->
-                <div class="logo">
-                    <a href="#top">
-                        <img src="elements/icons/instagram-black-white.png" alt="Instagram" class="logo-icon">
-                    </a>
-                </div>
-
-                <div class="menu">
-
-                    <!-- Home -->
-                    <button class="menu-item">
+                    <!-- Logo -->
+                    <div class="logo">
                         <a href="#top">
-                            <i class="bi bi-house-door"></i>
+                            <img src="elements/icons/instagram-black-white.png" alt="Instagram" class="logo-icon">
                         </a>
-                        <span>Home</span>
-                    </button>
+                    </div>
 
-                    <!-- groups -->
-                    <button class="menu-item" onclick="openGroupsPopup()">
-                        <i class="bi bi-people"></i>
-                        <span>Groups</span>
-                    </button>
+                    <div class="menu">
 
-                    <!-- Messages -->
-                    <button class="menu-item" onclick="openMessagesPopup()">
-                        <i class="bi bi-send"></i>
-                        <span>Messages</span>
-                    </button>
-
-                    <!-- Search -->
-                    <button class="menu-item js-search-btn">
-                        <i class="bi bi-search"></i>
-                        <span>Search</span>
-                    </button>
-
-                    <!-- Notifications -->
-                    <button class="menu-item js-notifications-btn">
-                        <i class="bi bi-heart"></i>
-                        <span>Notifications</span>
-                    </button>
-
-                    <!-- Create -->
-                    <button class="menu-item js-menu-create-btn">
-                        <i class="bi bi-plus-square"></i>
-                        <span>Create</span>
-                    </button>
-
-                    <!-- Filter -->
-                    <button class="menu-item js-filter-btn">
-                        <div class="bi bi-funnel small-icon"></div>
-                        <span>Filter Posts</span>
-                    </button>
-
-                    <!-- Profile -->
-                    <button class="menu-item" onclick="openSettings()">
-                        <img src="/elements/media/profile-pictures/Default_pfp.jpg"
-                            class="right-sidebar-avatar rounded-circle profile-avatar current-user-pic">
-                        <span>Profile</span>
-                    </button>
-
-                </div>
-                <div class="menu bottom">
-
-                    <button class="menu-item" id="theme-toggle">
-                        <img src="elements/icons/dark-mode.png" class="logo-icon" />
-                        <span> Dark Mode</span>
-                    </button>
-
-                    <div id="more-menu-container">
-                        <button class="menu-item" id="more-menu-btn" onclick="toggleMoreMenu()">
-                            <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.3"
-                                class="small-icon">
-                                <line x1="1" y1="4" x2="27" y2="4" />
-                                <line x1="1" y1="14" x2="27" y2="14" />
-                                <line x1="1" y1="24" x2="27" y2="24" />
-                            </svg>
-                            <span>More</span>
+                        <!-- Home -->
+                        <button class="menu-item">
+                            <a href="#top">
+                                <i class="bi bi-house-door"></i>
+                            </a>
+                            <span>Home</span>
                         </button>
 
-                        <!-- More dropdown menu -->
-                        <div class="more-dropdown-menu d-none" id="more-dropdown">
-                            <button class="more-dropdown-item" onclick="openSettings()">
-                                <i class="bi bi-gear"></i>
-                                <span>User Settings</span>
+                        <!-- groups -->
+                        <button class="menu-item" onclick="openGroupsPopup()">
+                            <i class="bi bi-people"></i>
+                            <span>Groups</span>
+                        </button>
+
+                        <!-- Messages -->
+                        <button class="menu-item" id="messages-toggle" onclick="openMessagesPopup()">
+                            <i class="bi bi-send"></i>
+                            <span>Messages</span>
+                        </button>
+
+                        <!-- Search and filter -->
+                        <button class="menu-item js-filter-btn">
+                            <div class="bi bi-funnel small-icon"></div>
+                            <span>Filter Posts</span>
+                        </button>
+
+                        <!-- Create -->
+                        <button class="menu-item js-menu-create-btn">
+                            <i class="bi bi-plus-square"></i>
+                            <span>Create</span>
+                        </button>
+
+                        <!-- Dashboard -->
+                        <button class="menu-item js-dashboard-btn" onclick="openDashboard()">
+                            <i class="bi bi-bar-chart"></i>
+                            <span>Dashboard</span>
+                        </button>
+
+                        <!-- Map -->
+                        <button class="menu-item js-global-map-btn" onclick="showAllPostsOnMap()">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>Map</span>
+                        </button>
+
+                        <!-- Profile -->
+                        <button class="menu-item" onclick="openSettings()">
+                            <img src="/elements/media/profile-pictures/Default_pfp.jpg"
+                                class="right-sidebar-avatar rounded-circle profile-avatar current-user-pic">
+                            <span>Profile</span>
+                        </button>
+
+                    </div>
+                    <div class="menu bottom">
+
+                        <button class="menu-item" id="theme-toggle">
+                            <img src="elements/icons/dark-mode.png" class="logo-icon" />
+                            <span> Dark Mode</span>
+                        </button>
+
+                        <div id="more-menu-container">
+                            <button class="menu-item" id="more-menu-btn" onclick="toggleMoreMenu()">
+                                <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.3"
+                                    class="small-icon">
+                                    <line x1="1" y1="4" x2="27" y2="4" />
+                                    <line x1="1" y1="14" x2="27" y2="14" />
+                                    <line x1="1" y1="24" x2="27" y2="24" />
+                                </svg>
+                                <span>More</span>
                             </button>
-                            <button class="more-dropdown-item" onclick="handleLogout()">
-                                <i class="bi bi-box-arrow-left"></i>
-                                <span>Log out</span>
-                            </button>
+
+                            <!-- More dropdown menu -->
+                            <div class="more-dropdown-menu d-none" id="more-dropdown">
+                                <button class="more-dropdown-item" onclick="openSettings()">
+                                    <i class="bi bi-gear"></i>
+                                    <span>User Settings</span>
+                                </button>
+                                <button class="more-dropdown-item" onclick="handleLogout()">
+                                    <i class="bi bi-box-arrow-left"></i>
+                                    <span>Log out</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button class="menu-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                                class="small-icon">
+                                <rect x="7" y="1" width="9" height="9" rx="1" />
+                                <rect x="1" y="14" width="9" height="9" rx="1" />
+                                <rect x="14" y="14" width="9" height="9" rx="1" />
+                            </svg>
+                            <span>Also from Meta</span>
+                        </button>
+
+                    </div>
+
+                </nav>
+            </header>
+
+            <!-- Feed Advanced Search Sidebar -->
+            <div class="feed-advanced-search-panel js-feed-advanced-search-panel hidden-panel">
+                <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+                    <h4 class="fw-bold mb-0 text-dark">Advanced Search</h4>
+                    <button
+                        class="bg-transparent border-0 bi bi-x fs-4 text-dark js-close-feed-adv-search hover-extend"></button>
+                </div>
+
+                <div class="p-4 overflow-y-auto flex-grow-1">
+                    <!-- Text Input -->
+                    <div class="mb-4">
+                        <label class="fw-bold mb-2 fs-7 text-secondary">Search Caption or Username</label>
+                        <input type="text" id="feedAdvSearchText"
+                            class="form-control rounded-pill bg-light shadow-none border px-3 py-2 text-dark"
+                            placeholder="Keywords..." dir="auto">
+                    </div>
+
+                    <!-- Media Types -->
+                    <div class="mb-4">
+                        <label class="fw-bold mb-2 fs-7 text-secondary">Media Type</label>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input js-feed-adv-filter-media border-secondary" type="checkbox"
+                                value="image" id="feedAdvFilterImage" checked>
+                            <label class="form-check-label cursor-pointer text-dark" for="feedAdvFilterImage"><i
+                                    class="bi bi-image me-2"></i>Images</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input js-feed-adv-filter-media border-secondary" type="checkbox"
+                                value="video" id="feedAdvFilterVideo" checked>
+                            <label class="form-check-label cursor-pointer text-dark" for="feedAdvFilterVideo"><i
+                                    class="bi bi-play-btn me-2"></i>Videos</label>
+                        </div>
+                        <div class="form-check mb-0">
+                            <input class="form-check-input js-feed-adv-filter-media border-secondary" type="checkbox"
+                                value="text" id="feedAdvFilterText" checked>
+                            <label class="form-check-label cursor-pointer text-dark" for="feedAdvFilterText"><i
+                                    class="bi bi-card-text me-2"></i>Text</label>
                         </div>
                     </div>
 
-                    <button class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                            class="small-icon">
-                            <rect x="7" y="1" width="9" height="9" rx="1" />
-                            <rect x="1" y="14" width="9" height="9" rx="1" />
-                            <rect x="14" y="14" width="9" height="9" rx="1" />
-                        </svg>
-                        <span>Also from Meta</span>
-                    </button>
+                    <!-- Time Range -->
+                    <div class="mb-4">
+                        <label class="fw-bold mb-2 fs-7 text-secondary">Upload Time</label>
+                        <select id="feedAdvSearchTime"
+                            class="form-select rounded-pill bg-light shadow-none border px-3 py-2 text-dark">
+                            <option value="all">Anytime</option>
+                            <option value="24h">Last 24 Hours</option>
+                            <option value="week">Past Week</option>
+                        </select>
+                    </div>
 
-                </div>
-
-            </nav>
-            <div class="notifications-panel js-notifications-panel shadow-lg d-none">
-                <div class="p-4 border-bottom">
-                    <h4 class="fw-bold mb-0">Notifications</h4>
-                </div>
-                <div class="notifications-list js-notifications-list p-4 overflow-y-auto">
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 mt-4">
+                        <button class="btn btn-light w-50 rounded-pill fw-bold py-2 border text-dark"
+                            onclick="clearFeedAdvancedSearch()">Clear</button>
+                        <button class="btn btn-primary w-50 rounded-pill fw-bold py-2"
+                            onclick="executeFeedAdvancedSearch()">Apply</button>
+                    </div>
                 </div>
             </div>
-
-            <div class="filter-menu-dropdown js-filter-menu d-none">
-                <h6 class="fw-bold mb-3 fs-6">Filter by Media</h6>
-
-                <div class="form-check mb-2">
-                    <input class="form-check-input js-filter-all" type="checkbox" value="all" id="filterAll" checked>
-                    <label class="form-check-label fs-7 cursor-pointer" for="filterAll">
-                        <i class="bi bi-grid me-2"></i>All
-                    </label>
-                </div>
-
-                <div class="form-check mb-2">
-                    <input class="form-check-input js-filter-single" type="checkbox" value="image" id="filterImage"
-                        checked>
-                    <label class="form-check-label fs-7 cursor-pointer" for="filterImage">
-                        <i class="bi bi-image me-2"></i>Images
-                    </label>
-                </div>
-
-                <div class="form-check mb-2">
-                    <input class="form-check-input js-filter-single" type="checkbox" value="video" id="filterVideo"
-                        checked>
-                    <label class="form-check-label fs-7 cursor-pointer" for="filterVideo">
-                        <i class="bi bi-play-btn me-2"></i>Videos
-                    </label>
-                </div>
-
-                <div class="form-check mb-0">
-                    <input class="form-check-input js-filter-single" type="checkbox" value="text" id="filterText"
-                        checked>
-                    <label class="form-check-label fs-7 cursor-pointer" for="filterText">
-                        <i class="bi bi-card-text me-2"></i>Text
-                    </label>
-                </div>
-
-            </div>
-
             <section class="main-feed-section"> <!-- Main feed section -->
 
                 <a id="backToTop" href="#top">
@@ -311,8 +340,63 @@
 
                 </div>
             </section>
+            <section id="dashboard-section" class="dashboard-section w-100 d-none mt-4 ms-4 text-center">
+                <div class="dashboard-header mb-4">
+                    <h3 class="dashboard-main-title fw-bold">System Analytics</h3>
+                </div>
 
-            <div class="right-sidebar mt-5 me-5">
+                <div class="row w-100">
+                    <div class="col-12 col-xl-6 mb-4">
+                        <div class="card dashboard-card shadow-sm border-0 rounded-4">
+                            <div class="card-body text-center">
+                                <h5 class="chart-title fw-semibold mb-4">Members per Group</h5>
+                                <div id="communitySizeChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-6 mb-4">
+                        <div class="card dashboard-card shadow-sm border-0 rounded-4">
+                            <div class="card-body text-center">
+                                <h5 class="chart-title fw-semibold mb-4">Most Active Creators</h5>
+                                <div id="topCreatorsChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-6 mb-4">
+                        <div class="card dashboard-card shadow-sm border-0 rounded-4">
+                            <div class="card-body text-center">
+                                <h5 class="chart-title fw-semibold mb-4">Group Engagement Rate</h5>
+                                <div id="engagementRateChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-6 mb-4">
+                        <div class="card dashboard-card shadow-sm border-0 rounded-4">
+                            <div class="card-body text-center">
+                                <h5 class="chart-title fw-semibold mb-4">Media Types</h5>
+                                <div id="mediaDistributionChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mb-4">
+                        <div class="card dashboard-card shadow-sm border-0 rounded-4">
+                            <div class="card-body text-center">
+                                <h5 class="chart-title fw-semibold mb-4">Daily Uploads</h5>
+                                <div id="postsTimelineChart" class="chart-container">
+                                    <canvas id="postsTimelineCanvas" class="canvas-chart"
+                                        aria-label="Daily post uploads chart" role="img"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="right-sidebar mt-5 me-5">
                 <div class="user-row d-flex justify-content-between align-items-center mb-4">
                     <div class="user-info d-flex align-items-center gap-3">
                         <img src="/elements/media/profile-pictures/Default_pfp.jpg"
@@ -375,7 +459,7 @@
                 <div class="mt-3">
                     <span class="text-muted fs-8">&copy; 2026 INSTAGRAM FROM BEST TEAM EVER :)</span>
                 </div>
-            </div>
+            </aside>
             <div class="weather-container position-absolute top-0 end-0 m-3 rounded-3 shadow-sm border p-2 d-flex align-items-center gap-2 user-select-none"
                 onclick="loadWeatherWidget()">
                 <div class="fs-5">☀️</div>
@@ -388,7 +472,7 @@
 
         <!-- Messages Box -->
         <div class="js-messages-capsule messages rounded-pill position-fixed z-5 shadow-lg px-3 py-3"
-            onclick="openMessagesPopup()">
+            onclick="restoreChatUI()">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
                     <button class="bi bi-send fs-5 fw-bold bg-transparent border-0 p-0"> </button>
@@ -423,33 +507,58 @@
             <div class="bg-white rounded-4 shadow-lg d-flex flex-column position-relative"
                 style="width: 450px; height: 80vh; max-width: 90vw;">
 
-                <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom flex-shrink-0">
                     <div class="fw-bold fs-5 mx-auto">Groups</div>
                     <button class="bg-transparent border-0 bi bi-x fs-3 position-absolute end-0 me-3 hover-extend"
-                        onmousedown="closeGroupsPopup(event, true)"></button>
+                        onclick="closeGroupsPopup(event, true)"></button>
                 </div>
 
-                <div class="p-4 border-bottom bg-light">
-                    <div class="d-flex gap-2 mb-3">
-                        <input type="text" id="newGroupName" class="form-control rounded-pill px-3 shadow-none border"
-                            placeholder="Name your new group..." maxlength="60">
-                        <button class="btn btn-primary rounded-pill px-4 fw-bold"
-                            onclick="createGroup()">Create</button>
+                <div class="overflow-y-auto flex-grow-1">
+
+                    <div class="p-3 border-bottom bg-light">
+                        <!-- Create Group Section -->
+                        <div class="d-flex gap-2 mb-3 pb-3 border-bottom">
+                            <input type="text" id="newGroupName"
+                                class="form-control rounded-pill px-3 shadow-none border"
+                                placeholder="Name your new group..." maxlength="60" dir="auto">
+                            <button class="btn btn-primary rounded-pill px-4 fw-bold"
+                                onclick="createGroup()">Create</button>
+                        </div>
+
+                        <!-- Advanced Search Section -->
+                        <div class="group-advanced-search-container">
+                            <h6 class="fw-bold mb-2 text-secondary">Advanced Search</h6>
+
+                            <input type="text" id="groupSearch"
+                                class="form-control rounded-pill px-3 shadow-none border bg-white shadow-sm mb-2"
+                                placeholder="Search groups..." dir="auto">
+
+                            <select id="groupTimeFilter"
+                                class="form-select rounded-pill px-3 shadow-none border bg-white shadow-sm mb-2 text-secondary">
+                                <option value="all">Anytime</option>
+                                <option value="24h">Created Last 24 Hours</option>
+                                <option value="week">Created Past Week</option>
+                            </select>
+
+                            <div class="form-check ms-2 mb-3">
+                                <input type="checkbox" id="myGroupsFilter" class="form-check-input border-secondary">
+                                <label class="form-check-label fs-7 fw-semibold text-secondary cursor-pointer"
+                                    for="myGroupsFilter">Show only my groups</label>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-light w-50 rounded-pill fw-bold py-2 border text-dark"
+                                    onclick="clearGroupSearch()">Clear</button>
+                                <button class="btn btn-primary w-50 rounded-pill fw-bold py-2"
+                                    onclick="filterGroups()">Apply</button>
+                            </div>
+                        </div>
                     </div>
 
-                    <input type="text" id="groupSearch"
-                        class="form-control rounded-pill px-3 shadow-none border-0 bg-white shadow-sm"
-                        placeholder="Search groups..." oninput="filterGroups()">
+                    <!-- Groups List Section -->
+                    <div id="groupsList" class="p-2"></div>
 
-                    <div class="form-check mt-3 ms-2">
-                        <input type="checkbox" id="myGroupsFilter" class="form-check-input border-secondary"
-                            onchange="filterGroups()">
-                        <label class="form-check-label fs-7 fw-semibold text-secondary cursor-pointer"
-                            for="myGroupsFilter">Show only my groups</label>
-                    </div>
                 </div>
-
-                <div id="groupsList" class="overflow-y-auto p-2 flex-grow-1"></div>
             </div>
         </div>
 
@@ -559,10 +668,11 @@
                         </div>
                         <div class="post-settings">
 
-                            <div class="location-container">
-                                <input type="text" class="form-control js-location-input location-input"
-                                    placeholder="Add location">
-                                <div class="bi bi-geo-alt text-muted ms-auto pe-2"></div>
+                            <div class="location-container" id="openMapBtn">
+                                <input type="text"
+                                    class="location-input js-location-input bg-transparent text-dark w-100 pe-none"
+                                    placeholder="Add location" readonly>
+                                <i class="bi bi-geo-alt location-icon"></i>
                             </div>
 
                             <div class="user-profile-container">
@@ -592,7 +702,8 @@
                     Followers</button>
                 <button class="btn btn-light rounded-0 py-3 border-bottom fs-6 js-postUpload-groups-btn">Upload to my
                     Groups</button>
-                <button class="btn btn-light rounded-0 py-3 rounded-bottom-4 fs-6 js-postUpload-story-btn">Share as Story</button>
+                <button class="btn btn-light rounded-0 py-3 rounded-bottom-4 fs-6 js-postUpload-story-btn">Share as
+                    Story</button>
             </div>
         </div>
 
@@ -616,6 +727,17 @@
             </div>
         </div>
 
+        <!-- Post Upload Loading Screen -->
+        <div id="postUploadLoadingScreen"
+            class="dark-overlay d-none align-items-center justify-content-center post-upload-loading">
+            <div class="d-flex flex-column align-items-center">
+                <div class="spinner-border text-white post-upload-spinner" role="status">
+                    <span class="visually-hidden">Uploading...</span>
+                </div>
+                <h5 class="mt-3 text-white fw-semibold">Uploading your post...</h5>
+            </div>
+        </div>
+
         <div class="dark-overlay discard-overlay js-discard-overlay d-none">
             <div class="discard-container">
                 <div class="p-4 text-center">
@@ -627,10 +749,6 @@
             </div>
         </div>
 
-        <div class="new-post-notification-bubble js-new-post-notification">
-            <span class="fw-semibold">New Post created !</span>
-        </div>
-
         <!-- Edit Post Modal -->
         <div id="editPostModal"
             class="dark-overlay upload-choice-overlay d-none align-items-center justify-content-center"
@@ -640,8 +758,14 @@
                 <h5 class="fw-bold mb-3 text-dark">Edit Post</h5>
                 <input type="hidden" id="editPostId">
                 <div class="mb-3">
-                    <label class="form-label fw-semibold text-dark fs-7">Location / Sub Header</label>
-                    <input type="text" id="editSubHeaderInput" class="form-control bg-light border-0 shadow-none">
+                    <label class="form-label fw-semibold text-dark fs-7">Location</label>
+                    <div class="d-flex gap-2">
+                        <input type="text" id="editSubHeaderInput" class="form-control bg-light border-0 shadow-none"
+                            placeholder="Tap to select location" readonly>
+                        <button class="btn btn-outline-secondary" id="editLocationBtn" style="width: 40px; padding: 0;">
+                            <i class="bi bi-geo-alt"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-semibold text-dark fs-7">Caption</label>
@@ -652,6 +776,17 @@
                     <button class="btn btn-light fw-bold text-dark border" onclick="closeEditModal()">Cancel</button>
                     <button class="btn btn-primary fw-bold" onclick="saveEditedPost()">Save</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Post Delete Loading Screen -->
+        <div id="postDeleteLoadingScreen"
+            class="dark-overlay d-none align-items-center justify-content-center post-delete-loading">
+            <div class="d-flex flex-column align-items-center">
+                <div class="spinner-border text-danger post-delete-spinner" role="status">
+                    <span class="visually-hidden">Deleting...</span>
+                </div>
+                <h5 class="mt-3 text-white fw-semibold">Deleting post...</h5>
             </div>
         </div>
 
@@ -834,22 +969,85 @@
 
         <!-- All Users Modal -->
         <div class="all-users-overlay" id="allUsersModal">
-            <div class="all-users-box">
-                <div class="all-users-header">
-                    <h2 class="all-users-title">All Users</h2>
-                    <button class="all-users-close" onclick="closeAllUsersPopup()">&times;</button>
+            <div class="all-users-box d-flex flex-column" style="max-height: 80vh;">
+
+                <div
+                    class="all-users-header p-3 border-bottom d-flex justify-content-between align-items-center flex-shrink-0">
+                    <h2 class="all-users-title m-0 fs-5 fw-bold">All Users</h2>
+                    <button class="all-users-close bg-transparent border-0 fs-3 hover-extend"
+                        onclick="closeAllUsersPopup()">&times;</button>
                 </div>
-                <div class="px-3 pb-3 border-bottom">
-                    <input type="text" id="allUsersSearchInput" class="form-control bg-light border-0 shadow-none"
-                        placeholder="Search by username...">
-                </div>
-                <div class="all-users-list" id="allUsersList">
-                    <!-- User rows will be inserted here dynamically -->
+
+                <div class="overflow-y-auto flex-grow-1">
+                    <!-- Advanced Search Section -->
+                    <div class="p-3 border-bottom bg-light">
+                        <input type="text" id="allUsersSearchInput"
+                            class="form-control rounded-pill px-3 shadow-none border bg-white shadow-sm mb-3"
+                            placeholder="Search by username..." dir="auto">
+
+                        <select id="filterIAmFollowing"
+                            class="form-select rounded-pill px-3 shadow-none border bg-white shadow-sm mb-2 text-secondary">
+                            <option value="all">Following: All</option>
+                            <option value="yes">Following</option>
+                            <option value="no">Not Following</option>
+                        </select>
+
+                        <select id="filterIsFollowingMe"
+                            class="form-select rounded-pill px-3 shadow-none border bg-white shadow-sm mb-3 text-secondary">
+                            <option value="all">Followers: All</option>
+                            <option value="yes">Followers</option>
+                            <option value="no">Non-Followers</option>
+                        </select>
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-light w-50 rounded-pill fw-bold py-2 border text-dark"
+                                onclick="clearUserSearch()">Clear</button>
+                            <button class="btn btn-primary w-50 rounded-pill fw-bold py-2"
+                                onclick="executeUserAdvancedSearch()">Apply</button>
+                        </div>
+                    </div>
+
+                    <!-- List Container -->
+                    <div class="all-users-list p-2" id="allUsersList">
+                        <!-- User rows will be inserted here dynamically -->
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- Map Modal for Post Creation -->
+        <div class="d-none position-fixed top-0 start-0 w-100 h-100" id="mapModal">
+            <div
+                class="position-absolute top-50 start-50 translate-middle bg-white rounded-3 p-3 w-100 map-modal-content">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="m-0 text-dark">Choose Location</h5>
+                    <button class="btn-close js-close-map-btn"></button>
+                </div>
+                <div class="input-group mb-2">
+                    <input type="text" id="mapSearchInput" class="form-control" placeholder="Search city or place...">
+                    <button class="btn btn-outline-secondary" id="mapSearchBtn">Search</button>
+                </div>
+                <div id="leafletMap" class="border rounded"></div>
+                <button class="btn btn-primary w-100 mt-3" id="confirmLocationBtn">Confirm Location</button>
+            </div>
+        </div>
+
+        <!-- Global Map Overlay -->
+        <div id="globalPostsMapOverlay" class="position-fixed top-0 start-0 w-100 h-100 d-none">
+            <div
+                class="position-absolute top-50 start-50 translate-middle bg-white rounded-3 p-3 w-75 h-75 d-flex flex-column js-global-map-content">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="m-0 text-dark">World Map of Posts</h4>
+                    <button class="btn-close"
+                        onclick="document.getElementById('globalPostsMapOverlay').classList.add('d-none')"></button>
+                </div>
+                <div id="globalLeafletMap" class="flex-grow-1 border rounded w-100"></div>
+            </div>
+        </div>
+
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="javascript/initApp.js"></script> <!-- important to be first, this is loading the userID -->
     <!-- user UI helper functions (must be after initApp.js globals) -->
     <script src="javascript/userViewUtils.js"></script>
@@ -857,12 +1055,13 @@
     <script src="javascript/posts.js"></script>
     <script src="javascript/post-buttons.js"></script>
     <script src="javascript/events.js"></script>
-    <script src="javascript/notifications.js"></script>
     <script src="javascript/messages.js"></script>
     <script src="javascript/groups.js"></script>
     <script src="javascript/sidebar.js"></script>
     <script src="javascript/userSettings.js"></script>
     <script src="javascript/follow.js"></script>
+    <script src="javascript/statistics.js"></script>
+    <script src="javascript/advanced-Search.js"></script>
 </body>
 
 </html>

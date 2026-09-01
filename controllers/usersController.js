@@ -130,17 +130,19 @@ class UserController {
   // POST /api/user/login
   async login(req, res) {
     try {
-      const identifier = req.body.identifier; // email or phone
+      const identifier = req.body.identifier; // email, phone or username
       const password = req.body.password;
 
       if (!identifier) {
-        return res.status(400).json({ error: 'Email or phone number is required.' });
+        return res.status(400).json({ error: 'Email, phone number, or username is required.' });
       }
-      // Validate identifier format (must be a valid email or phone number)
+      
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       const phoneRegex = /^(?:\+?972[- ]?(?:5[0-9]|[23489]|7[1-9])|0(?:5[0-9]|[23489]|7[1-9]))[- ]?\d{3}[- ]?\d{4}$|^\+?[1-9]\d{9,14}$/;
-      if (!emailRegex.test(identifier) && !phoneRegex.test(identifier)) {
-        return res.status(400).json({ error: 'Please enter a valid email address or phone number.' });
+      const usernameRegex = /^[a-zA-Z0-9_.]+$/;
+
+      if (!emailRegex.test(identifier) && !phoneRegex.test(identifier) && !usernameRegex.test(identifier)) {
+        return res.status(400).json({ error: 'Please enter a valid email, phone number, or username.' });
       }
       if (!password) {
         return res.status(400).json({ error: 'Password is required.' });
@@ -152,9 +154,7 @@ class UserController {
         return res.status(400).json({ error: 'Password cannot contain spaces.' });
       }
 
-
-      // Find user by email or phone
-      const user = await User.findOne({
+      let user = await User.findOne({
         $or: [
           { email: identifier.toLowerCase() },
           { phone: identifier }
@@ -162,16 +162,25 @@ class UserController {
       });
 
       if (!user) {
-        return res.status(401).json({ error: 'No account found with that email or phone number.' });
+        const allUsers = await User.find({});
+        user = allUsers.find(u => {
+          try {
+            return u.decryptUsername().toLowerCase() === identifier.toLowerCase();
+          } catch {
+            return false;
+          }
+        });
       }
 
-      // Compare password
+      if (!user) {
+        return res.status(401).json({ error: 'No account found with that information.' });
+      }
+
       const isMatch = await user.comparePassword(password);
       if (!isMatch) {
         return res.status(401).json({ error: 'Incorrect password. Please try again.' });
       }
 
-      // Create session (decrypt the username so the user sees the original plaintext)
       req.session.userId = user._id;
       req.session.username = user.decryptUsername();
 
@@ -181,7 +190,6 @@ class UserController {
       return res.status(500).json({ error: 'Server error. Please try again.' });
     }
   }
-
 
 
   // POST /api/user/uploadProfilePic
@@ -754,6 +762,185 @@ class UserController {
     } catch (err) {
       console.error("Error getting personal posts:", err);
       return res.status(500).json({ error: 'Server error' });
+    }
+  }
+  // get the username and photo bt given userID
+  async getBasicInfo(req, res) {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+
+      const User = require('../models/usersModel'); 
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      let username = 'Unknown';
+      try {
+        username = user.decryptUsername();
+      } catch { }
+
+      const profilePic = user.profilePic || '/images/profiles/Default_pfp.jpg';
+
+      return res.json({ username, profilePic });
+    } catch (err) {
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+
+  // POST /api/user/advancedSearch
+  async advancedUserSearch(req, res) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+      const { searchTerm, iAmFollowing, isFollowingMe } = req.body;
+      const currentUserId = req.session.userId;
+      
+      const currentUser = await User.findById(currentUserId);
+      if (!currentUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Build query
+      let andConditions = [{ _id: { $ne: currentUserId } }]; // $ne - not equal, give all the users exept me
+
+      // Filter by users I am following
+      if (iAmFollowing === 'yes') {
+        andConditions.push({ _id: { $in: currentUser.following } }); // only users in my following array
+      } else if (iAmFollowing === 'no') {
+        andConditions.push({ _id: { $nin: currentUser.following } }); // only users NOT in my following array
+      }
+
+      // Filter by users following me
+      if (isFollowingMe === 'yes') {
+        andConditions.push({ _id: { $in: currentUser.followers } }); // only users in my followers array
+      } else if (isFollowingMe === 'no') {
+        andConditions.push({ _id: { $nin: currentUser.followers } }); // only users NOT in my followers array
+      }
+
+      // Execute DB query
+      const dbQuery = { $and: andConditions }; // make and between all the conditions
+      const allUsers = await User.find(dbQuery);
+      const usersList = [];
+
+      for (const user of allUsers) {
+        let username = 'Unknown';
+        try {
+          username = user.decryptUsername();
+        } catch {
+          // keep Unknown
+        }
+
+        if (searchTerm && searchTerm.trim() !== '') {
+          if (!username.toLowerCase().includes(searchTerm.toLowerCase().trim())) {
+            continue; // filter search name
+          }
+        }
+
+        let profilePic = user.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg';
+        const isFollowing = currentUser.following.includes(user._id.toString());
+
+        usersList.push({
+          userId: user._id,
+          username: username,
+          bio: user.bio || '',
+          profilePic: profilePic,
+          isFollowing: isFollowing
+        });
+      }
+
+      return res.json({ users: usersList });
+    } catch (err) {
+      console.error('advancedUserSearch error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+  // POST /api/user/requestPasswordReset
+  async requestPasswordReset(req, res) {
+    try {
+      const { identifier } = req.body;
+      if (!identifier) return res.status(400).json({ error: 'Email or phone is required.' });
+
+      const user = await User.findOne({
+        $or: [{ email: identifier.toLowerCase() }, { phone: identifier }]
+      });
+
+      if (!user) return res.status(404).json({ error: 'Account not found.' });
+
+      // Generate a 6-digit random code
+      const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Assign the plain text code. The Model's pre('save') hook will hash it automatically!
+      user.resetCode = resetCode;
+      user.resetCodeExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
+      
+      await user.save();
+
+      // SIMULATION: Print the plain code to the server console
+      console.log(`\n=== PASSWORD RESET CODE FOR ${identifier}: ${resetCode} ===\n`);
+
+      return res.json({ message: 'Reset code sent successfully.' });
+    } catch (err) {
+      console.error('requestPasswordReset error:', err);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  }
+
+ // POST /api/user/resetPasswordWithCode
+  async resetPasswordWithCode(req, res) {
+    try {
+      const { identifier, code, newPassword } = req.body;
+
+      if (!identifier || !code || !newPassword) {
+        return res.status(400).json({ error: 'All fields are required.' });
+      }
+
+      // Original validation matching your registration logic
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+      }
+      if (newPassword.includes(' ')) {
+        return res.status(400).json({ error: 'Password cannot contain spaces.' });
+      }
+
+      const user = await User.findOne({
+        $or: [{ email: identifier.toLowerCase() }, { phone: identifier }]
+      });
+
+      if (!user) return res.status(404).json({ error: 'Account not found.' });
+
+      // Validate expiration
+      if (user.resetCodeExpires < Date.now()) {
+        return res.status(400).json({ error: 'Reset code has expired. Please request a new one.' });
+      }
+
+      // Use the Model method to compare the code
+      const isValidCode = await user.compareResetCode(code);
+      if (!isValidCode) {
+        return res.status(400).json({ error: 'Invalid reset code. Please check and try again.' });
+      }
+
+      // Update password and clear fields
+      user.password = newPassword; 
+      user.resetCode = null;
+      user.resetCodeExpires = null;
+      
+      await user.save();
+
+      return res.json({ message: 'Password reset successfully. You can now log in.' });
+    } catch (err) {
+      console.error('resetPasswordWithCode error:', err);
+      return res.status(500).json({ error: 'Server error.' });
     }
   }
 }

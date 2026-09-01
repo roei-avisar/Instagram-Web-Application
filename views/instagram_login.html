@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="icon" href="elements/icons/Instagram-logo.png" type="image/png">
   <link rel="stylesheet" href="./css/instagram_login.css">
+  <link rel="stylesheet" href="./css/dark-mode-login-page.css">
 </head>
 
 <body>
@@ -41,22 +42,50 @@
         <span> <a href="#!">Find your account and log in.</a></span>
       </div>
 
-      <input class="form-input" id="username" type="text" placeholder="Mobile number or email">
+      <input class="form-input" id="username" type="text" placeholder="Username, Mobile number or email">
       <input class="form-input" id="password" type="password" placeholder="Password">
 
       <button class="btn-login" onclick="handleLogin()">Log in</button>
 
-      <p class="forgot">Forgot password?</p>
+      <p class="forgot" onclick="openForgotModal()">Forgot password?</p>
+
+<!-- Forgot Password Modal -->
+      <div class="modal-overlay" id="forgotModal">
+        <div class="modal-box">
+          <button class="modal-close" onclick="closeForgotModal()">&times;</button>
+          <p class="modal-title">Reset your password</p>
+          
+          <!-- Error Box with Red Icon -->
+          <div id="forgot-msg-box" class="error-box" style="display:none;">
+            <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="#ed4956" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px; flex-shrink:0;">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span id="forgot-msg-text"></span>
+          </div>
+
+          <!-- Success Box for beautiful alerts -->
+          <div id="forgot-success-box" class="success-box" style="display:none;">
+            <span id="forgot-success-text"></span>
+          </div>
+
+          <!-- Request Code -->
+          <div id="forgot-step-1">
+            <input class="form-input" id="forgot-identifier" type="text" placeholder="Email or Mobile number">
+            <button class="btn-login" onclick="requestResetCode()">Send Verification Code</button>
+          </div>
+
+          <!-- Enter Code and New Password -->
+          <div id="forgot-step-2" style="display:none;">
+            <input class="form-input" id="forgot-code" type="text" placeholder="Enter 6-digit code">
+            <input class="form-input" id="forgot-new-password" type="password" placeholder="New Password">
+            <button class="btn-login" onclick="submitNewPassword()">Reset Password</button>
+          </div>
+        </div>
+      </div>
 
       <div class="divider"></div>
-
-      <button class="btn-facebook">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#1877f2">
-          <path
-            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-        </svg>
-        Log in with Facebook
-      </button>
 
       <button class="btn-create" onclick="openSignupModal()">Create new account</button>
 

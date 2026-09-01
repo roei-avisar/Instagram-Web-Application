@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router(); 
 const groupsController = require('../controllers/groupsController');
+const xssValidator = require('../middleware/xssValidator');
+
+// Apply XSS validation globally to all routes in this router
+router.use(xssValidator);
 
 router.post('/createGroup', groupsController.createGroup);
 router.get('/getGroups', groupsController.getAllGroups);
@@ -15,6 +19,7 @@ router.post('/addPost', groupsController.addPostToGroup);
 router.delete('/removePost/:groupId/:postId', groupsController.removePostFromGroup);
 router.get('/getMyGroupsPosts', groupsController.getMyGroupsPosts);
 router.delete('/removeUserFromAllGroups/:userId', groupsController.removeUserFromAllGroups);
+router.post('/advancedSearch', groupsController.advancedGroupSearch);
 
 
 module.exports = router; // export all the router functions to be used by server.js

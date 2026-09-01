@@ -1,41 +1,34 @@
-// Open the All Users modal and fetch users from the DB
-async function openAllUsersPopup() {
+// Open the All Users modal
+function openAllUsersPopup() {
   const modal = document.getElementById('allUsersModal');
   modal.classList.add('active');
-  document.body.classList.add('overflow-hidden'); // make the scrolling behind the popup to unavailable 
+  document.body.classList.add('overflow-hidden'); 
 
-  // add loading message to the empty modal while loading
-  const listContainer = document.getElementById('allUsersList');
-  listContainer.innerHTML = '<div class="text-center text-muted my-3">Loading users...</div>';
-
-  const searchInput = document.getElementById('allUsersSearchInput');
-  if (searchInput) searchInput.value = ''; // clear search input
-
-  try {
-    const res = await fetch('/api/user/allUsers'); // fetch all users from the DB
-    const data = await res.json();
-
-    if (res.ok) {
-      // save all the users in a global variable so we can use it for the search
-      window.allFetchedUsersList = data.users;
-      renderAllUsers(data.users);
-    } else {
-      listContainer.innerHTML = `<div class="text-center text-danger my-3">${data.error || 'Failed to load users'}</div>`;
-    }
-  } catch (err) {
-    console.error('Error fetching all users:', err);
-    listContainer.innerHTML = '<div class="text-center text-danger my-3">Connection error.</div>';
-  }
+  // Trigger search to load default un-filtered list
+  executeUserAdvancedSearch();
 }
 
 // Close the All Users modal
 function closeAllUsersPopup() {
   document.getElementById('allUsersModal').classList.remove('active');
   document.body.classList.remove('overflow-hidden'); // make scrolling available again
+  // Reset fields on close
+  const searchInput = document.getElementById('allUsersSearchInput');
+  if (searchInput) searchInput.value = '';
+  clearUserSearchError();
+
+  const filterIAmFollowing = document.getElementById('filterIAmFollowing');
+  if (filterIAmFollowing) filterIAmFollowing.value = 'all';
+
+  const filterIsFollowingMe = document.getElementById('filterIsFollowingMe');
+  if (filterIsFollowingMe) filterIsFollowingMe.value = 'all';
+
+  const listContainer = document.getElementById('allUsersList');
+  if (listContainer) listContainer.innerHTML = '';
 }
 
 // Close modal when clicking on the dark overlay (outside the box)
-document.getElementById('allUsersModal').addEventListener('click', function (e) {
+document.getElementById('allUsersModal').addEventListener('mousedown', function (e) {
   if (e.target === this) {
     closeAllUsersPopup();
   }
@@ -160,21 +153,6 @@ async function handleFollowToggle(targetUserId, btnElement) {
   }
 }
 
-// Handle search input filtering
-const allUsersSearchInput = document.getElementById('allUsersSearchInput');
-if (allUsersSearchInput) {
-  allUsersSearchInput.addEventListener('input', (e) => {
-    const searchTerm = e.target.value.toLowerCase().trim();
-    if (!window.allFetchedUsersList) return;
-
-    const filteredUsers = window.allFetchedUsersList.filter(user =>
-      user.username.toLowerCase().includes(searchTerm)
-    );
-
-    renderAllUsers(filteredUsers);
-  });
-}
-
 // Dynamically load suggested users for the right sidebar
 async function loadSidebarSuggestedUsers() {
   const listContainer = document.getElementById('suggestedUsersSidebarList');
@@ -208,7 +186,7 @@ async function loadSidebarSuggestedUsers() {
 
         row.innerHTML = `
           <div class="user-info d-flex align-items-center gap-2">
-            <img src="${user.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg'}" class="right-sidebar-avatar rounded-circle" />
+            <img src="${user.profilePic || '/elements/media/profile-pictures/Default_pfp.jpg'}" onerror="this.onerror=null; this.src='/elements/media/profile-pictures/Default_pfp.jpg'" class="right-sidebar-avatar rounded-circle" />
             <div class="lh-1">
               <span class="username">${displayUsername}</span>
               <div class="d-flex mt-1">
@@ -234,3 +212,63 @@ async function loadSidebarSuggestedUsers() {
 
 // Call it when the page loads
 document.addEventListener('DOMContentLoaded', loadSidebarSuggestedUsers);
+
+function showUserSearchError(msg) {
+    const input = document.getElementById('allUsersSearchInput');
+    let errorDiv = input.parentElement.querySelector('.user-search-error');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'user-search-error text-danger small mt-2 fw-bold w-100';
+        input.parentElement.insertBefore(errorDiv, input.nextSibling);
+    }
+    errorDiv.innerHTML = `<i class="bi bi-exclamation-circle-fill me-1"></i>${msg}`;
+}
+
+function clearUserSearchError() {
+    const input = document.getElementById('allUsersSearchInput');
+    if (input) {
+        let errorDiv = input.parentElement.querySelector('.user-search-error');
+        if (errorDiv) errorDiv.remove();
+    }
+}
+
+function clearUserSearch() {
+    document.getElementById('allUsersSearchInput').value = '';
+    document.getElementById('filterIAmFollowing').value = 'all';
+    document.getElementById('filterIsFollowingMe').value = 'all';
+    
+    clearUserSearchError();
+    executeUserAdvancedSearch();
+}
+
+async function executeUserAdvancedSearch() {
+  const listContainer = document.getElementById('allUsersList');
+  listContainer.innerHTML = '<div class="text-center text-muted my-3">Loading users...</div>';
+
+  const searchTerm = document.getElementById('allUsersSearchInput').value.trim();
+  const iAmFollowing = document.getElementById('filterIAmFollowing').value;
+  const isFollowingMe = document.getElementById('filterIsFollowingMe').value;
+
+  clearUserSearchError();
+
+  try {
+    const res = await fetch('/api/user/advancedSearch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ searchTerm, iAmFollowing, isFollowingMe })
+    });
+    
+    const data = await res.json();
+
+    if (res.ok) {
+      renderAllUsers(data.users);
+    } else {
+      listContainer.innerHTML = '';
+      showUserSearchError(data.error || 'Failed to load users');
+    }
+  } catch (err) {
+    console.error('Error executing user search:', err);
+    listContainer.innerHTML = '';
+    showUserSearchError('Connection error.');
+  }
+}

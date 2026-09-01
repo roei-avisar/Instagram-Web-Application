@@ -4,20 +4,12 @@ const menusConfig = [
         dontRemoveOn: '.options-btn, .post-options-dropdown'
     },
     {
-        menuClass: '.js-search-container',
-        dontRemoveOn: '.js-search-container, .js-filter-menu, button'
-    },
-    {
-        menuClass: '.js-filter-menu',
-        dontRemoveOn: '.js-filter-menu, .js-search-container, button'
-    },
-    {
         menuClass: '.create-form-overlay',
-        dontRemoveOn: '.js-menu-create-btn, .create-form-overlay, .js-discard-overlay, #postUploadChoiceModal, #groupsSelectionModal, .story-add-btn, .your-story-item'
+        dontRemoveOn: '.js-menu-create-btn, .create-form-overlay, .js-discard-overlay, #postUploadChoiceModal, #groupsSelectionModal, .story-add-btn, .your-story-item, #mapModal, .leaflet-marker-icon, .leaflet-popup'
     },
     {
-        menuClass: '.js-notifications-panel',
-        dontRemoveOn: '.js-notifications-btn, .js-notifications-panel'
+        menuClass: '#globalPostsMapOverlay',
+        dontRemoveOn: '.js-global-map-btn, .js-global-map-content,.leaflet-marker-icon, .leaflet-popup'
     }
 ];
 
@@ -25,18 +17,14 @@ const menusConfig = [
 let currentMediaType = '';
 let currentMediaSource = '';
 let isMuted = false;
+// Map-related globals for location selection during post creation
+let mapInstance = null;           // Leaflet map instance
+let currentMarker = null;         // Current marker on the map
+let selectedLocation = { name: "", lat: null, lng: null }; // Selected location data
+let editingPostId = null;         // Track if we're editing a post (used for map modal)
 
 // Theme element
 const themeToggle = document.getElementById('theme-toggle');
-
-// filter and search posts elements
-const searchMenuBtn = document.querySelector('.js-search-btn');
-const searchContainerWrapper = document.querySelector('.js-search-container');
-const searchInput = document.querySelector('.js-posts-search-input');
-const filterBtn = document.querySelector('.js-filter-btn');
-const filterMenu = document.querySelector('.js-filter-menu');
-const filterAllCheckboxes = document.querySelector('.js-filter-all');
-const filterSingleCheckbox = document.querySelectorAll('.js-filter-single');
 
 // Create new post form elemments
 const menuCreateBtn = document.querySelector('.js-menu-create-btn');
@@ -78,6 +66,18 @@ window.addEventListener('scroll', () => {
 // Toggle dark mode
 themeToggle.addEventListener('click', () => {
     document.body.classList.toggle('dark-mode');
+    // storage the user choise on browser
+    if (document.body.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark');
+    } else {
+        localStorage.setItem('theme', 'light');
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
 });
 
 function closePostCreationForm() {
@@ -93,6 +93,9 @@ function closePostCreationForm() {
     document.body.style.overflow = '';
     document.getElementById('postUploadChoiceModal')?.classList.replace('d-flex', 'd-none');
     document.getElementById('groupsSelectionModal')?.classList.replace('d-flex', 'd-none');
+    // Close map and reset selected location on full discard
+    document.getElementById('mapModal')?.classList.replace('d-flex', 'd-none');
+    selectedLocation = { name: "", lat: null, lng: null };
 }
 
 function switchCreatePostFormState() {
@@ -118,7 +121,7 @@ function discardPost() {
 }
 
 // Global listener usef for closing all open menu's when clicking on elements not in their 'safe zone'
-document.addEventListener('click', function(event) {
+document.addEventListener('click', function (event) {
 
     menusConfig.forEach(config => {
 
@@ -128,10 +131,6 @@ document.addEventListener('click', function(event) {
             const openElements = document.querySelectorAll(`${config.menuClass}:not(.d-none)`);
             openElements.forEach(element => {
                 element.classList.add('d-none');
-                if (element.classList.contains('js-search-container')) {
-                    updateSearchFilter('');
-                    searchInput.value = '';
-                }
             });
         }
     });
@@ -139,7 +138,7 @@ document.addEventListener('click', function(event) {
 
 // Generate event listener on all suggested Follow/Followign buttons that changes their state between Follow and Following
 followButtons.forEach(button => {
-    button.addEventListener('click', function(event) {
+    button.addEventListener('click', function (event) {
         if (this.textContent.trim() === 'Follow') {
             this.textContent = 'Following';
             this.classList.remove('instagram-blue');
@@ -154,7 +153,7 @@ followButtons.forEach(button => {
 });
 
 // Open the 'delete post' or 'edit post' menu when clicking on the post options button, and deleting the post when the delete button is clicked
-document.addEventListener('click', function(event) {
+document.addEventListener('click', function (event) {
 
     if (event.target.classList.contains('options-btn')) {
         const parentContainer = event.target.closest('.position-relative');
@@ -176,7 +175,7 @@ document.addEventListener('click', function(event) {
 });
 
 // Open the create post form
-menuCreateBtn.addEventListener('click', function(event) {
+menuCreateBtn.addEventListener('click', function (event) {
     window.isUploadingStory = false;
     createFormOverlay.classList.toggle('d-none');
     if (createFormOverlay.classList.contains('d-none')) {
@@ -185,7 +184,7 @@ menuCreateBtn.addEventListener('click', function(event) {
         document.body.style.overflow = 'hidden';
     }
 });
-createTextPostBtn.addEventListener('click', function(event) {
+createTextPostBtn.addEventListener('click', function (event) {
     currentMediaType = 'text';
     isMuted = false;
     previewImg.classList.add('d-none');
@@ -197,12 +196,12 @@ createTextPostBtn.addEventListener('click', function(event) {
 });
 
 // Get file input when clicking 'Select from computer'
-uploadFileCreateFormBtn.addEventListener('click', function(event) {
+uploadFileCreateFormBtn.addEventListener('click', function (event) {
     fileInput.click();
 });
 
 // Use the selected media as image/video source for the creation form details stage
-fileInput.addEventListener('change', function(event) {
+fileInput.addEventListener('change', function (event) {
     const selectedFile = event.target.files[0];
 
     if (selectedFile) {
@@ -211,7 +210,7 @@ fileInput.addEventListener('change', function(event) {
 
         // Read the actual file to send to the server
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             currentMediaSource = e.target.result; // This holds the actual Base64 data
         };
         reader.readAsDataURL(selectedFile);
@@ -237,7 +236,7 @@ fileInput.addEventListener('change', function(event) {
 });
 
 // Unique event listener to close the create post form correctly
-createFormOverlay.addEventListener('click', function(event) {
+createFormOverlay.addEventListener('click', function (event) {
     const clickFormConainer = event.target.closest('.create-form-container');
 
     if (!clickFormConainer) {
@@ -251,26 +250,26 @@ createFormOverlay.addEventListener('click', function(event) {
 });
 
 // Remove discard message when cancelled
-cancelDiscardBtn.addEventListener('click', function(event) {
+cancelDiscardBtn.addEventListener('click', function (event) {
     discardOverlay.classList.add('d-none');
     event.stopPropagation();
 });
 
 // Activate the discard function when discard is chosen
-discardBtn.addEventListener('click', function(event) {
+discardBtn.addEventListener('click', function (event) {
     discardOverlay.classList.add('d-none');
     discardPost();
 });
 
 // Activate discard screen and mark it as 'back'
-postFormBackBtn.addEventListener('click', function(event) {
+postFormBackBtn.addEventListener('click', function (event) {
     discardBtn.setAttribute('discard-action', 'back');
     discardOverlay.classList.remove('d-none');
 });
 
 // --- Post Upload Logic and Modals ---
 
-postShareBtn.addEventListener('click', function(event) {
+postShareBtn.addEventListener('click', function (event) {
     let captionText = document.querySelector('.js-caption-input').value;
     if (currentMediaType === 'text') {
         currentMediaSource = previewText.value.trim();
@@ -279,7 +278,7 @@ postShareBtn.addEventListener('click', function(event) {
         alert("Cannot upload an empty post!");
         return;
     }
-    
+
     if (window.isUploadingStory) {
         document.querySelector('.js-postUpload-story-btn').click();
     } else {
@@ -287,36 +286,36 @@ postShareBtn.addEventListener('click', function(event) {
     }
 });
 
-document.querySelector('.js-postUpload-followers-btn').addEventListener('click', function() {
+document.querySelector('.js-postUpload-followers-btn').addEventListener('click', function () {
     // Submit the post data to the server
-    submitPostDataToServer(null); 
+    submitPostDataToServer(null);
 });
 
-document.querySelector('.js-postUpload-groups-btn').addEventListener('click', async function() {
+document.querySelector('.js-postUpload-groups-btn').addEventListener('click', async function () {
     document.getElementById('postUploadChoiceModal').classList.replace('d-flex', 'd-none');
-    
+
     try {
         const response = await fetch('/api/groups/myGroups');
         const result = await response.json();
-        
+
         if (result.success) {
             const userGroups = result.data;
             const container = document.getElementById('groupsListContainer');
             container.innerHTML = '';
-            
-            if(userGroups.length === 0) {
+
+            if (userGroups.length === 0) {
                 container.innerHTML = '<div class="text-center text-muted mt-3">You are not in any groups yet.</div>';
             } else {
                 userGroups.forEach(group => {
                     container.innerHTML += `
                         <label class="d-flex align-items-center justify-content-between p-2 rounded hover-light bg-light" style="cursor: pointer;">
                             <span class="fw-semibold">${group.name}</span>
-                            <input type="radio" name="groupSelection" class="form-check-input js-group-upload-radio" value="${group._id}">
+                            <input type="radio" name="groupSelection" class="form-check-input js-group-upload-radio" value="${group._id}" data-admin-id="${group.admin || ''}">
                         </label>
                     `;
                 });
             }
-            
+
             document.getElementById('groupsSelectionModal').classList.replace('d-none', 'd-flex');
         }
     } catch (error) {
@@ -325,25 +324,27 @@ document.querySelector('.js-postUpload-groups-btn').addEventListener('click', as
 });
 
 // go back to the post upload choice modal from the groups selection modal
-document.querySelector('.js-back-to-choice-btn').addEventListener('click', function() {
+document.querySelector('.js-back-to-choice-btn').addEventListener('click', function () {
     document.getElementById('groupsSelectionModal').classList.replace('d-flex', 'd-none');
     document.getElementById('postUploadChoiceModal').classList.replace('d-none', 'd-flex');
 });
 
-document.querySelector('.js-final-postUpload-groups-btn').addEventListener('click', function() {
+document.querySelector('.js-final-postUpload-groups-btn').addEventListener('click', function () {
     const selectedRadio = document.querySelector('.js-group-upload-radio:checked');
     if (!selectedRadio) {
         alert("Please select a group");
         return;
     }
-    
+
+    const selectedGroupAdminId = selectedRadio.dataset.adminId || null;
+
     // Submit the post data to the server
-    submitPostDataToServer(selectedRadio.value);
+    submitPostDataToServer(selectedRadio.value, selectedGroupAdminId);
 });
 
-document.querySelector('.js-postUpload-story-btn').addEventListener('click', async function() {
+document.querySelector('.js-postUpload-story-btn').addEventListener('click', async function () {
     document.getElementById('postUploadChoiceModal').classList.replace('d-flex', 'd-none');
-    
+
     if (currentMediaType === 'text') {
         alert("Text stories are not supported!");
         return;
@@ -384,87 +385,93 @@ document.querySelector('.js-postUpload-story-btn').addEventListener('click', asy
 });
 
 async function submitPostDataToServer(groupId) {
-    let captionText = document.querySelector('.js-caption-input').value;
-    let locationText = document.querySelector('.js-location-input').value;
-    
-    const newPost = {
-        "authors": [CURRENT_USER_ID],
-        "isVerified": false,
-        "timeAgo": "1s",
-        "subHeader": locationText,
-        "mediaType": currentMediaType,
-        "mediaSource": currentMediaSource,
-        "hasMuteButton": isMuted,
-        "stats": { "likes": 0, "comments": 0, "shares": 0 },
-        "likedByUsers": [],
-        "caption": captionText,
-        "isSuggested": false
-    };
+    function showPostUploadError(container, msg) {
+        let errorDiv = container.querySelector('.post-action-error');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'post-action-error text-danger small mt-2 p-1 fw-bold d-flex align-items-start text-start w-100';
+            container.appendChild(errorDiv);
+        }
 
-    if (groupId) {
-        newPost.groupId = groupId;
+        errorDiv.innerHTML = `
+        <svg class="me-2 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="#ed4956" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px; margin-top:2px;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span style="word-break: break-word;">${msg}</span>
+    `;
     }
 
-    // Create the post
-    await addNewPost(newPost);
+    async function submitPostDataToServer(groupId, groupAdminId = null) {
+        let captionText = document.querySelector('.js-caption-input').value;
+        let locationText = document.querySelector('.js-location-input').value;
 
-    // Close the post creation form and reset its state
-    closePostCreationForm();
-    uploadNewPostNotification(currentMediaSource, currentMediaType);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Select and disable submission buttons to prevent multiple clicks
+        const followersBtn = document.querySelector('.js-postUpload-followers-btn');
+        const groupsFinalBtn = document.querySelector('.js-final-postUpload-groups-btn');
+        if (followersBtn) followersBtn.disabled = true;
+        if (groupsFinalBtn) groupsFinalBtn.disabled = true;
+
+        const newPost = {
+            "authors": [CURRENT_USER_ID],
+            "isVerified": false,
+            "location": selectedLocation,
+            "mediaType": currentMediaType,
+            "mediaSource": currentMediaSource,
+            "hasMuteButton": isMuted,
+            "stats": { "likes": 0, "comments": 0, "shares": 0 },
+            "likedByUsers": [],
+            "caption": captionText,
+            "isSuggested": false
+        };
+
+        if (groupId) {
+            newPost.groupId = groupId;
+            if (groupAdminId) {
+                newPost.groupAdminId = groupAdminId;
+            }
+        }
+
+        const loadingScreen = document.getElementById('postUploadLoadingScreen');
+        if (loadingScreen) loadingScreen.classList.remove('d-none');
+
+        try {
+            // Here we target the caption container so it sits nicely without breaking the flexbox!
+            const errorContainer = document.querySelector('.caption-container');
+            const oldError = errorContainer.querySelector('.post-action-error');
+            if (oldError) oldError.remove();
+
+            const result = await addNewPost(newPost);
+
+            if (result && result.success) {
+                // Close the post creation form and reset its state
+                closePostCreationForm();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                selectedLocation = { name: "", lat: null, lng: null };
+
+                if (typeof uploadNewPostNotification === 'function') {
+                    uploadNewPostNotification(currentMediaSource, currentMediaType);
+                }
+            } else {
+                document.getElementById('postUploadChoiceModal').classList.replace('d-flex', 'd-none');
+                document.getElementById('groupsSelectionModal').classList.replace('d-flex', 'd-none');
+                showPostUploadError(errorContainer, result ? result.error : "Failed to upload post.");
+            }
+        } catch (error) {
+            console.error('Error uploading post:', error);
+            document.getElementById('postUploadChoiceModal').classList.replace('d-flex', 'd-none');
+            document.getElementById('groupsSelectionModal').classList.replace('d-flex', 'd-none');
+            const errorContainer = document.querySelector('.caption-container');
+            showPostUploadError(errorContainer, "Connection error. Please try again.");
+        } finally {
+            // Re-enable submission buttons and hide loading screen
+            if (followersBtn) followersBtn.disabled = false;
+            if (groupsFinalBtn) groupsFinalBtn.disabled = false;
+            if (loadingScreen) loadingScreen.classList.add('d-none');
+        }
+    }
 }
-
-// Open the search container when clicking on the search logo
-searchMenuBtn.addEventListener('click', function(event) {
-    updateSearchFilter('');
-    searchInput.value = '';
-    searchContainerWrapper.classList.toggle('d-none');
-    searchInput.focus();
-});
-
-// Use the search input to filter posts
-searchInput.addEventListener('input', function(event) {
-
-    const searchString = event.target.value;
-    updateSearchFilter(searchString);
-});
-
-// Open the posts filter menu when clicking on the logo
-filterBtn.addEventListener('click', function() {
-    filterMenu.classList.toggle('d-none');
-});
-
-// Used for updating the mediaType filter with the current checkboxes values
-function triggerFilterUpdate() {
-    const checkedTypes = Array.from(filterSingleCheckbox)
-        .filter(cb => cb.checked)
-        .map(cb => cb.value);
-
-    updateMediaFilter(checkedTypes);
-}
-
-// Mark or un-mark every checkbox in accordance to the 'all' checkbox mark
-filterAllCheckboxes.addEventListener('change', function(event) {
-    const isChecked = event.target.checked;
-
-    filterSingleCheckbox.forEach(cb => {
-        cb.checked = isChecked;
-    });
-
-    triggerFilterUpdate();
-});
-
-// Upon 'change' event in the regular checkboxes (all checkboxes other then 'all'), change the 'all' checkbox accordingly, and trigger the mediaFilterUpdate
-filterSingleCheckbox.forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-
-        const areAllChecked = Array.from(filterSingleCheckbox).every(cb => cb.checked);
-
-        filterAllCheckboxes.checked = areAllChecked;
-
-        triggerFilterUpdate();
-    });
-});
 
 function togglePostAudio(button, postId) {
     let postContainer = button.closest('.js-post-media');
@@ -524,7 +531,7 @@ function openEditModal(postId) {
     if (!post) return;
 
     document.getElementById('editPostId').value = postId;
-    document.getElementById('editSubHeaderInput').value = post.subHeader || '';
+    document.getElementById('editSubHeaderInput').value = post.location?.name || '';
     document.getElementById('editCaptionInput').value = post.caption || '';
 
     const modal = document.getElementById('editPostModal');
@@ -538,11 +545,192 @@ function closeEditModal() {
     document.body.style.overflow = '';
 }
 
-function saveEditedPost() {
+async function saveEditedPost() {
+    const saveBtn = document.querySelector('#editPostModal .btn-primary');
+    if (saveBtn) saveBtn.disabled = true; // Disable save button immediately on click
+
     const postId = document.getElementById('editPostId').value;
-    const newSubHeader = document.getElementById('editSubHeaderInput').value;
     const newCaption = document.getElementById('editCaptionInput').value;
-    
-    // Call the function to update the post data on the server
-    editPostData(postId, newCaption, newSubHeader);
+
+    const updatedLocation = {
+        name: selectedLocation.name || "",
+        lat: selectedLocation.lat || null,
+        lng: selectedLocation.lng || null
+    };
+
+    const modalBody = document.querySelector('#editPostModal .bg-white');
+    const oldError = modalBody.querySelector('.post-action-error');
+    if (oldError) oldError.remove();
+
+    // editPostData handles the async request and will re-enable the button in its finally block
+    const result = await editPostData(postId, newCaption, updatedLocation);
+
+    if (result && !result.success) {
+        showPostUploadError(modalBody, result.error);
+        if (saveBtn) saveBtn.disabled = false;
+    } else {
+        selectedLocation = { name: "", lat: null, lng: null };
+        if (saveBtn) saveBtn.disabled = false;
+    }
 }
+
+
+// ===== Map Logic for Location Selection =====
+// Initializes and manages Leaflet map for post location selection
+function initMap() {
+    // Avoid re-initializing if map already exists
+    if (mapInstance !== null) return;
+
+    mapInstance = L.map('leafletMap').setView([32.0853, 34.7818], 13); // Default center
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(mapInstance);
+
+    mapInstance.on('click', function (e) {
+        setMapMarker(e.latlng.lat, e.latlng.lng);
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${e.latlng.lat}&lon=${e.latlng.lng}`)
+            .then(response => response.json())
+            .then(data => {
+                const placeName = data.address.city || data.address.town || data.address.village || data.name || "Selected Location";
+                selectedLocation = { name: placeName, lat: e.latlng.lat, lng: e.latlng.lng };
+                document.getElementById('mapSearchInput').value = placeName;
+            })
+            .catch(() => {
+                selectedLocation = { name: "Selected Pin", lat: e.latlng.lat, lng: e.latlng.lng };
+                document.getElementById('mapSearchInput').value = "Selected Pin";
+            });
+    });
+}
+
+function setMapMarker(lat, lng) {
+    if (currentMarker) {
+        mapInstance.removeLayer(currentMarker);
+    }
+    currentMarker = L.marker([lat, lng]).addTo(mapInstance);
+}
+
+document.getElementById('openMapBtn')?.addEventListener('click', function () {
+    document.getElementById('mapModal').classList.replace('d-none', 'd-flex');
+    setTimeout(() => {
+        initMap();
+
+        // Reset the map view to a default location and remove any existing marker when the modal is opened
+        if (mapInstance) {
+            mapInstance.setView([32.0853, 34.7818], 13);
+            if (currentMarker) {
+                mapInstance.removeLayer(currentMarker);
+                currentMarker = null;
+            }
+        }
+
+        // Reset the search input when the map modal is opened
+        const searchInput = document.getElementById('mapSearchInput');
+        if (searchInput) searchInput.value = '';
+
+        mapInstance.invalidateSize();
+    }, 100);
+});
+
+document.querySelector('.js-close-map-btn')?.addEventListener('click', function () {
+    // Trigger the main discard overlay to close the entire post creation flow
+    discardBtn.setAttribute('discard-action', 'close');
+    discardOverlay.classList.remove('d-none');
+});
+
+document.getElementById('confirmLocationBtn')?.addEventListener('click', function () {
+    if (selectedLocation.name) {
+        if (editingPostId) {
+            // Edit mode: update the edit form input
+            document.getElementById('editSubHeaderInput').value = selectedLocation.name;
+        } else {
+            // Post creation mode: update the location input
+            document.querySelector('.js-location-input').value = selectedLocation.name;
+        }
+    }
+    document.getElementById('mapModal').classList.replace('d-flex', 'd-none');
+    editingPostId = null; // Clear the edit mode flag
+});
+
+document.getElementById('mapSearchBtn')?.addEventListener('click', function () {
+    const query = document.getElementById('mapSearchInput').value;
+    if (!query) return;
+
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                const lat = parseFloat(data[0].lat);
+                const lng = parseFloat(data[0].lon);
+                mapInstance.setView([lat, lng], 13);
+                setMapMarker(lat, lng);
+                selectedLocation = { name: data[0].name, lat: lat, lng: lng };
+            }
+        });
+});
+
+// Listener to close the map modal when clicking outside
+document.getElementById('mapModal')?.addEventListener('click', function (event) {
+    // Check if the actual element clicked is the dark background overlay itself, 
+    // not the white content box (.map-modal-content) inside it
+    if (event.target === this) {
+        // If editing, just close the map modal; otherwise trigger discard for post creation
+        if (editingPostId) {
+            document.getElementById('mapModal').classList.replace('d-flex', 'd-none');
+            editingPostId = null;
+        } else {
+            discardBtn.setAttribute('discard-action', 'close');
+            discardOverlay.classList.remove('d-none');
+        }
+    }
+});
+
+// Open map for editing post location
+document.getElementById('editLocationBtn')?.addEventListener('click', function () {
+    const postId = document.getElementById('editPostId').value;
+    const post = allPostsData.find(p => p._id === postId);
+
+    // Always reset selectedLocation with the post's current location data (handles undefined/null cases)
+    selectedLocation = {
+        name: (post && post.location && post.location.name) ? post.location.name : "",
+        lat: (post && post.location && post.location.lat) ? post.location.lat : null,
+        lng: (post && post.location && post.location.lng) ? post.location.lng : null
+    };
+
+    editingPostId = postId; // Set flag to indicate we're in edit mode
+
+    // Destroy the old map instance to ensure fresh initialization for each edit
+    if (mapInstance !== null) {
+        mapInstance.remove();
+        mapInstance = null;
+    }
+    if (currentMarker !== null) {
+        currentMarker = null;
+    }
+
+    document.getElementById('mapModal').classList.replace('d-none', 'd-flex');
+    setTimeout(() => {
+        initMap();
+
+        // Ensure map container is properly sized before setting view
+        mapInstance.invalidateSize();
+
+        // If the post has location coordinates, show them on the map
+        if (selectedLocation.lat !== null && selectedLocation.lng !== null) {
+            mapInstance.setView([selectedLocation.lat, selectedLocation.lng], 13);
+            setMapMarker(selectedLocation.lat, selectedLocation.lng);
+        } else {
+            // Reset the map view to default
+            mapInstance.setView([32.0853, 34.7818], 13);
+            if (currentMarker) {
+                mapInstance.removeLayer(currentMarker);
+                currentMarker = null;
+            }
+        }
+
+        // Reset the search input
+        const searchInput = document.getElementById('mapSearchInput');
+        if (searchInput) searchInput.value = selectedLocation.name;
+    }, 100);
+});
