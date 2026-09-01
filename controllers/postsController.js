@@ -51,6 +51,9 @@ function canManagePost(post, userId) {
 class PostController {
     // Controller method to handle fetching all posts
     async getAllPosts(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
         try {
             // Fetch all posts and deeply populate all user references
             const posts = await Post.find().sort({ _id: -1 })
@@ -101,6 +104,10 @@ class PostController {
 
     // Controller method to handle creating a new post in the database
     async createPost(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const newPostData = req.body;
             newPostData.authors = [req.session.userId];
@@ -155,6 +162,10 @@ class PostController {
 
     // Controller method to handle deleting a post
     async deletePost(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const postId = req.params.id;
             const userId = req.session.userId;
@@ -212,6 +223,10 @@ class PostController {
 
     // Method to delete multiple posts based on an array of IDs
     async deleteMultiplePosts(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const { postIds } = req.body;
 
@@ -245,6 +260,10 @@ class PostController {
     }
 
     async addComment(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const userId = req.session.userId;
             const { text } = req.body;
@@ -266,6 +285,10 @@ class PostController {
 
     // Handle liking/unliking a specific comment in a specific post
     async manageCommentLike(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const userId = req.session.userId || req.body.userId; // Use userId
             const commentId = req.params.id;
@@ -297,6 +320,10 @@ class PostController {
 
     // Handle liking/unliking a post
     async managelikesPost(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const userId = req.session.userId || req.body.userId; // Use userId
             const postId = req.params.id;
@@ -322,6 +349,10 @@ class PostController {
 
     // Handle saving/unsaving a post
     async manageSavePost(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+        
         try {
             const userId = req.session.userId || req.body.userId; // Use userId
             const postId = req.params.id;
@@ -344,6 +375,9 @@ class PostController {
 
     // Controller method to get feed posts by calling users and groups routes
     async getFeedPosts(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
         try {
             const userId = req.session.userId;
             if (!userId) return res.status(401).json({ message: "User not logged in" });
@@ -438,6 +472,10 @@ class PostController {
 
     // Controller method to handle updating an existing post
     async updatePost(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const postId = req.params.id;
             const userId = req.session.userId;
@@ -479,6 +517,10 @@ class PostController {
     }
     // Controller method to handle advanced post search with 3 parameters
     async advancedFeedSearch(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const userId = req.session.userId;
             if (!userId) return res.status(401).json({ message: "User not logged in" });

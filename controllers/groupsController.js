@@ -22,6 +22,10 @@ async function deleteGroupPostsHelper(postIds, req) {
 
 class GroupsController {
     async createGroup(req, res) { // creating a new group on DB and making the user admin
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const { name, adminId } = req.body;
 
@@ -52,6 +56,10 @@ class GroupsController {
     }
 
     async getAllGroups (req, res) { // get all groups in DB
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const groups = await Group.find();
 
@@ -62,6 +70,10 @@ class GroupsController {
     }
 
     async deleteGroup(req, res) { // delete the group if the user is the admin
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const groupId = req.params.groupId;
             const userId = req.body.userId;
@@ -88,6 +100,10 @@ class GroupsController {
     }
 
     async joinGroup(req, res) { // adding a user to a group
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const groupId = req.params.groupId;
             const userId = req.body.userId;
@@ -109,6 +125,10 @@ class GroupsController {
     }
 
     async leaveGroup(req, res) { // deleting user from group by user request
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const groupId = req.params.groupId;
             const userId = req.body.userId;
@@ -130,6 +150,10 @@ class GroupsController {
     }
 
     async removeUser(req, res) { // remove user from group by admin
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const groupId = req.params.groupId;
             const adminId = req.body.adminId;
@@ -158,6 +182,10 @@ class GroupsController {
     }
 
     async getGroupMembers(req, res) { // get all the group members
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const groupId = req.params.groupId;
 
@@ -173,6 +201,10 @@ class GroupsController {
         }
     }
     async renameGroup(req, res) { // rename the group by admin user
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const { newName } = req.body;
             const groupId = req.params.groupId;
@@ -200,6 +232,10 @@ class GroupsController {
         }
     }
     async getUserGroups(req, res) { // get all the groups that the user is a member of
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const userId = req.session.userId;
             if (!userId) {
@@ -214,6 +250,10 @@ class GroupsController {
         }
     }
     async addPostToGroup(req, res) { // add a post to a specific group
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const { postId, groupId } = req.body;
             const userId = req.session.userId;
@@ -232,6 +272,10 @@ class GroupsController {
         }
     }
     async removePostFromGroup(req, res) { // remove a post from a specific group
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const { groupId, postId } = req.params;
             const userId = req.session.userId;
@@ -255,11 +299,12 @@ class GroupsController {
 
     // GET /api/groups/getMyGroupsPosts
     async getMyGroupsPosts(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const userId = req.session.userId;
-            if (!userId) {
-                return res.status(401).json({ success: false, message: "User not logged in" });
-            }
 
             // Find all groups where the user is a member
             const userGroups = await Group.find({ users: userId });
@@ -281,12 +326,12 @@ class GroupsController {
         }
     }
     async removeUserFromAllGroups(req, res) { // while deleting a user this function removes this user from all the groups he was a member and deleting the groups he created
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const userId = req.params.userId;
-
-            if (!userId) {
-                return res.status(400).json({ success: false, message: 'User ID is required' });
-            }
 
             // Find all groups where the user is the admin and delete their posts and the groups themselves
             const groupsToDelete = await Group.find({ admin: userId }); 
@@ -315,7 +360,11 @@ class GroupsController {
             return res.status(500).json({ success: false, error: error.message });
         }
     }
-    async advancedGroupSearch(req, res) { 
+    async advancedGroupSearch(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         try {
             const { searchTerm, showOnlyMine, timeFilter } = req.body;
             const userId = req.session.userId;
