@@ -441,7 +441,8 @@ class PostController {
         try {
             const postId = req.params.id;
             const userId = req.session.userId;
-            const { caption, subHeader } = req.body;
+    // Update post with new caption and/or location data (replaces old subHeader string field)
+            const { caption, location } = req.body;
 
             if (!userId) {
                 return res.status(401).json({ message: "User not logged in" });
@@ -462,7 +463,7 @@ class PostController {
             // Create an object with the fields that need to be updated
             const updateFields = {};
             if (caption !== undefined) updateFields.caption = caption;
-            if (subHeader !== undefined) updateFields.subHeader = subHeader;
+            if (location !== undefined) updateFields.location = location;
 
             // Perform the update in the database
             const updatedPost = await Post.findByIdAndUpdate(

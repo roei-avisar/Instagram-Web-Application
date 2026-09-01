@@ -133,14 +133,16 @@ async function deletePostById(deleteId) {
     }
 }
 
-async function editPostData(postId, newCaption, newSubHeader) {
+// Updates post data on server - now sends location object instead of subHeader string
+async function editPostData(postId, newCaption, newLocation) {
     try {
         const response = await fetch(`/api/posts/updatePost/${postId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ caption: newCaption, subHeader: newSubHeader })
+            // location object contains { name, lat, lng } - replaces old string-based subHeader
+            body: JSON.stringify({ caption: newCaption, location: newLocation })
         });
 
         if (response.ok) {
@@ -148,7 +150,7 @@ async function editPostData(postId, newCaption, newSubHeader) {
             const postIndex = allPostsData.findIndex(p => p._id === postId);
             if (postIndex !== -1) {
                 allPostsData[postIndex].caption = newCaption;
-                allPostsData[postIndex].subHeader = newSubHeader;
+                allPostsData[postIndex].location = newLocation;
             }
             applyFilters(); // Re-render the posts with the updated data
             closeEditModal();
@@ -291,18 +293,19 @@ function createPostContentHTML(post, profilePicsHTML, authorsNamesHTML) {
         </div>`;
     }
 
+    // Extract location name from new location object (was previously string-based subHeader)
     let combinedSubHeaderText = '';
+    let postLocationName = post.location && post.location.name ? post.location.name : '';
     
+    // Combine group name with location if both exist
     if (post.group && post.group.name) {
-        // Combine the group name and subHeader if both exist, otherwise just use the group name
-        if (post.subHeader && post.subHeader.trim() !== "") {
-            combinedSubHeaderText = `<span class="fw-bold">${post.group.name}</span> &bull; ${post.subHeader}`;
+        if (postLocationName.trim() !== "") {
+            combinedSubHeaderText = `<span class="fw-bold">${post.group.name}</span> &bull; <span class="text-decoration-none text-muted">${postLocationName}</span>`;
         } else {
             combinedSubHeaderText = `<span class="fw-bold">${post.group.name}</span>`;
         }
     } else {
-        // If there's no group, just use the subHeader as is (or empty if it's not set)
-        combinedSubHeaderText = post.subHeader ? post.subHeader : '';
+        combinedSubHeaderText = postLocationName;
     }
 
     let postContentHTML = '';
@@ -517,6 +520,53 @@ function renderPosts(postsData) {
     document.getElementById('loadingScreen').classList.remove('d-flex');
     document.getElementById('loadingScreen').classList.add('d-none');
     document.getElementById('mainApp').classList.remove('d-none');
+}
+
+let globalPostsMap = null;
+
+// ===== Global Map Feature =====
+// Renders an interactive map showing all posts with location data
+// Allows users to see geographic distribution of posts and view post info via markers
+function showAllPostsOnMap() {
+    const mapOverlay = document.getElementById('globalPostsMapOverlay');
+    mapOverlay.classList.remove('d-none');
+
+    setTimeout(() => {
+        if (!globalPostsMap) {
+            globalPostsMap = L.map('globalLeafletMap').setView([32.0853, 34.7818], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(globalPostsMap);
+        } else {
+            // Reset the map view to default center and zoom when reopened
+            globalPostsMap.setView([32.0853, 34.7818], 5);
+            
+            // Close any active popups from previous views
+            globalPostsMap.closePopup();
+        }
+
+        // Remove existing markers before rendering new ones
+        globalPostsMap.eachLayer((layer) => {
+            if (layer instanceof L.Marker) {
+                globalPostsMap.removeLayer(layer);
+            }
+        });
+
+        // Render all posts with location markers on map
+        // Each marker shows location name and author info on click
+        allPostsData.forEach(post => {
+            // Only show posts that have valid location coordinates
+            if (post.location && post.location.lat !== null && post.location.lng !== null) {
+                const marker = L.marker([post.location.lat, post.location.lng]).addTo(globalPostsMap);
+                const authorName = post.authors && post.authors[0] ? post.authors[0].username : "Unknown";
+                marker.bindPopup(`<b>${post.location.name}</b><br>Posted by: ${authorName}`);
+            }
+        });
+
+        // Ensure the map resizes correctly inside the modal
+        globalPostsMap.invalidateSize();
+    }, 100);
 }
 
 fetchPostsFromServer(); // Call the fetchPostsFromServer function to fetch posts from the server and then render them

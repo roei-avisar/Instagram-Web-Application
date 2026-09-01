@@ -7,12 +7,20 @@ const statsSchema = new mongoose.Schema({
     shares: { type: Number, default: 0 }
 }, { _id: false });
 
+// Location schema definition - stores geographic information for posts
+// Includes place name and coordinates (lat/lng) for map rendering
+const locationSchema = new mongoose.Schema({
+    name: { type: String, default: "" },      // The location string/name (e.g., "Tel Aviv")
+    lat: { type: Number, default: null },     // Latitude coordinate
+    lng: { type: Number, default: null }      // Longitude coordinate
+}, { _id: false });
+
 // Post schema definition
 const postSchema = new mongoose.Schema({
     authors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
     groupAdminId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     isVerified: { type: Boolean, default: false },
-    subHeader: { type: String, default: "" },
+    location: { type: locationSchema, default: () => ({ name: "", lat: null, lng: null }) },
     mediaType: { type: String, enum: ['image', 'video', 'text'], required: true },
     mediaSource: { type: String, required: true },
     audioSource: { type: String, default: null },
