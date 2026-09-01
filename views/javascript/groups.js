@@ -1,4 +1,3 @@
-
 let globalGroups = [];
 let currentOpenGroupId = null;
 let pendingHighlightGroupId = null;
@@ -9,14 +8,7 @@ function openGroupsPopup() {
     overlay.classList.add('d-flex'); // groups popup become visiable
     document.body.style.overflow = 'hidden';
     
-    fetch('/api/groups/getGroups') // get all the existing groups
-        .then(res => res.json()) // make the response as an object
-        .then(data => {
-            if(data && data.success) { // success and data were given parameter by the controller response
-                globalGroups = data.data; // save all the groups on the global parameter
-                filterGroups();  // filter and then render the groups on the screen
-            }
-        });
+    filterGroups(); // filter and then render the groups on the screen
 }
 
 function closeGroupsPopup(event, forceClose = false) {
@@ -29,12 +21,18 @@ function closeGroupsPopup(event, forceClose = false) {
         // remove the popup
         
         document.getElementById('newGroupName').value = '';
-        document.getElementById('groupSearch').value = '';
-        document.getElementById('myGroupsFilter').checked = false;
-        // reset all the boxes
-        
-        filterGroups(); // filter and then render the groups on the screen
+        clearGroupSearch(); // reset all the boxes and fetch default groups
     }
+}
+
+function clearGroupSearch() { // clear advanced search inputs
+    document.getElementById('groupSearch').value = '';
+    document.getElementById('myGroupsFilter').checked = false;
+    
+    const timeFilter = document.getElementById('groupTimeFilter');
+    if (timeFilter) timeFilter.value = 'all';
+    
+    filterGroups(); // filter and then render the groups on the screen
 }
 
 function createGroup() {
@@ -69,18 +67,35 @@ function createGroup() {
     .catch(err => console.error(err));
 }
 
-function filterGroups() {
-    const searchTerm = document.getElementById('groupSearch').value.toLowerCase();
+async function filterGroups() { // executes the advanced search via server
+    const searchTerm = document.getElementById('groupSearch').value.trim();
     const showOnlyMine = document.getElementById('myGroupsFilter').checked; // if the user want to see only his group he is a member
+    
+    let timeFilter = 'all';
+    const timeFilterElement = document.getElementById('groupTimeFilter');
+    if (timeFilterElement) {
+        timeFilter = timeFilterElement.value; // filter the shown groups by time created
+    }
 
-    const filtered = globalGroups.filter(group => {
-        const matchesSearch = group.name.toLowerCase().includes(searchTerm); // filter the shown group by their names
-        const matchesMine = showOnlyMine ? group.users.includes(CURRENT_USER_ID) : true; // filter the shown groups by "is mine" checkbox
-        
-        return matchesSearch && matchesMine; // return the groups who go throgh this both conditions
-    });
+    try {
+        const response = await fetch('/api/groups/advancedSearch', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ searchTerm, showOnlyMine, timeFilter })
+        });
 
-    renderGroups(filtered);
+        if (response.ok) {
+            const data = await response.json(); // make the response as an object
+            if (data && data.success) { // success and data were given parameter by the controller response
+                globalGroups = data.data; // save all the groups on the global parameter
+                renderGroups(globalGroups);
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching filtered groups:', error);
+    }
 }
 
 function renderGroups(groupsArray) {
