@@ -61,7 +61,116 @@
 }
 
 .message-profile:hover .text-bubble {
-    opacity: 1; 
+    opacity: 1;
     visibility: visible;
     bottom: 130%;
+}
+
+/* ============================================================
+   Chat feature — contact list, message bubbles, action menu
+   (light mode here; dark-mode overrides live in dark-mode.css)
+   ============================================================ */
+
+/* ---- Contact list rows ---- */
+.chat-row-name {
+    color: #1a1a1a;
+    font-size: 14px;
+}
+.chat-row-preview {
+    color: #8e8e8e;
+    max-width: 240px;
+}
+
+/* ---- Chat input pill ---- */
+.chat-window-container .border.rounded-pill {
+    border-color: #dbdbdb !important;
+}
+
+/* ---- Message row + bubbles ---- */
+.chat-msg-row {
+    /* leaves room for the hover action menu without shifting the bubble */
+    gap: 2px;
+}
+.chat-bubble {
+    max-width: 75%;
+    padding: 8px 14px;
+    border-radius: 18px;
+    font-size: 15px;
+    line-height: 1.35;
+    word-break: break-word;
+}
+.chat-bubble--out {
+    background-color: #0d6efd;
+    color: #ffffff;
+    border-bottom-right-radius: 5px;
+}
+.chat-bubble--in {
+    background-color: #ffffff;
+    color: #1a1a1a;
+    border: 1px solid #e9ecef;
+    border-bottom-left-radius: 5px;
+}
+.chat-shared-card {
+    background-color: #f1f3f5;
+    border: 1px solid #e9ecef;
+    color: #1a1a1a;
+}
+/* The "Text Post" placeholder always sits on a light gradient */
+.chat-textpost-label {
+    color: #1a1a1a;
+}
+
+/* ---- Professional 3-dots action menu ---- */
+.chat-msg-menu {
+    position: relative;
+    align-self: center;
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+}
+.chat-msg-row:hover .chat-msg-menu,
+.chat-msg-menu:focus-within {
+    opacity: 1;
+}
+.chat-msg-menu-toggle {
+    background: none;
+    border: 0;
+    padding: 2px 5px;
+    line-height: 1;
+    color: #8e8e8e;
+    border-radius: 50%;
+}
+.chat-msg-menu-toggle:hover {
+    color: #1a1a1a;
+    background-color: rgba(0, 0, 0, 0.06);
+}
+.chat-msg-actions {
+    position: fixed;
+    display: none;
+    z-index: 1080;
+    min-width: 130px;
+    padding: 4px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+.chat-msg-actions.show {
+    display: block;
+}
+.chat-msg-actions button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    background: none;
+    border: 0;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #1a1a1a;
+}
+.chat-msg-actions button:hover {
+    background-color: #f2f2f2;
+}
+.chat-msg-actions .js-msg-delete {
+    color: #d9342b;
 }
