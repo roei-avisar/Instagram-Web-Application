@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router(); 
 const groupsController = require('../controllers/groupsController');
+const xssValidator = require('../middleware/xssValidator');
+
+// Apply XSS validation globally to all routes in this router
+router.use(xssValidator);
 
 router.post('/createGroup', groupsController.createGroup);
 router.get('/getGroups', groupsController.getAllGroups);

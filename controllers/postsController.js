@@ -275,7 +275,7 @@ class PostController {
             const updatedPost = await Post.findByIdAndUpdate(postId, {
                 $push: { comments: newComment._id },
                 $inc: { 'stats.comments': 1 }
-            }, { new: true });
+            }, { returnDocument: 'after' });
 
             res.status(201).json({ comment: newComment, commentsCount: updatedPost.comments.length });
         } catch (error) {
@@ -506,7 +506,7 @@ class PostController {
             const updatedPost = await Post.findByIdAndUpdate(
                 postId,
                 { $set: updateFields },
-                { new: true } // Return the updated document
+                { returnDocument: 'after' } // Return the updated document
             );
 
             res.status(200).json({ message: "Post updated successfully", post: updatedPost });
@@ -625,6 +625,41 @@ class PostController {
         } catch (error) {
             console.error("Error executing advanced search:", error);
             res.status(500).json({ message: "Error searching posts", error });
+        }
+    }
+    async deleteComment(req, res) {
+        if (!req.session || !req.session.userId) {
+         return res.status(401).json({ error: 'Not authenticated' });}
+        try {
+            const userId = req.session.userId;
+            const { postId, commentId } = req.params;
+
+            if (!userId) return res.status(401).json({ message: "User not logged in" });
+
+            const comment = await Comment.findById(commentId);
+            if (!comment) return res.status(404).json({ message: "Comment not found" });
+
+            const post = await Post.findById(postId);
+            if (!post) return res.status(404).json({ message: "Post not found" });
+
+            const isCommentAuthor = comment.userId.toString() === userId;
+            const isPostAuthor = post.authors.some(author => author.toString() === userId);
+            const isGroupAdmin = post.groupAdminId && post.groupAdminId.toString() === userId;
+
+            if (!isCommentAuthor && !isPostAuthor && !isGroupAdmin) {
+                return res.status(403).json({ message: "Unauthorized to delete this comment" });
+            }
+
+            await Comment.findByIdAndDelete(commentId);
+            
+            await Post.findByIdAndUpdate(postId, {
+                $pull: { comments: commentId },
+                $inc: { 'stats.comments': -1 }
+            });
+
+            res.status(200).json({ success: true, message: "Comment deleted successfully" });
+        } catch (error) {
+            res.status(500).json({ message: "Error deleting comment", error });
         }
     }
 }

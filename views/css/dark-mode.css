@@ -11,8 +11,7 @@ body.dark-mode .card-body,
 body.dark-mode .comment-popup-container,
 body.dark-mode .messages-popup-container,
 body.dark-mode .chat-window-container,
-body.dark-mode .share-popup-container,
-body.dark-mode .notifications-panel {
+body.dark-mode .share-popup-container {
     background-color: #0C1014 !important;
     color: white !important;
 }

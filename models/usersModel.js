@@ -51,6 +51,14 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  resetCode: {
+    type: String,
+    default: null
+  },
+  resetCodeExpires: {
+    type: Date,
+    default: null
   }
 });
 
@@ -60,11 +68,18 @@ userSchema.pre('save', async function () {
   if (this.isModified('username')) {
     this.username = encrypt(this.username);
   }
-  // Importent to check if the password is modified because this function works for update
-  // operations too and we don't want to hash the password again, do we :)
-  if (!this.isModified('password')) return;
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  
+  // Hash password if modified
+  if (this.isModified('password')) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
+  
+  // Hash resetCode if modified and not null
+  if (this.isModified('resetCode') && this.resetCode !== null) {
+    const salt = await bcrypt.genSalt(10);
+    this.resetCode = await bcrypt.hash(this.resetCode, salt);
+  }
 });
 
 // Compare password method
@@ -72,7 +87,11 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   // compare function from bcrypt compares the candidate password with the stored one (hashed)
   return bcrypt.compare(candidatePassword, this.password);
 };
-
+// Compare reset code method
+userSchema.methods.compareResetCode = async function (candidateCode) {
+  if (!this.resetCode) return false;
+  return bcrypt.compare(candidateCode, this.resetCode);
+};
 // Decrypt username method — returns the original plaintext username
 userSchema.methods.decryptUsername = function () {
   return decrypt(this.username);
