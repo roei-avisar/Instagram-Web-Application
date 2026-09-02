@@ -19,9 +19,11 @@
     <link rel="stylesheet" href="./css/follow.css">
     <link rel="stylesheet" href="./css/statistics.css">
     <link rel="stylesheet" href="./css/advanced-search.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <!-- External Scripts -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://d3js.org/d3.v7.min.js"></script> <!-- should be on top of the page -->
 </head>
 
@@ -48,6 +50,7 @@
                 <!-- Previous Story 2 -->
                 <div class="side-story side-story-far">
                     <img id="prev2StoryImage" src="">
+                    <video id="prev2StoryVideo" src="" style="display:none;" muted playsinline></video>
                     <div class="side-story-user">
                         <img id="prev2ProfileImage" src="">
                         <div id="prev2ProfileName"></div>
@@ -57,6 +60,7 @@
                 <!-- Previous Story -->
                 <div class="side-story">
                     <img id="prevStoryImage" src="">
+                    <video id="prevStoryVideo" src="" style="display:none;" muted playsinline></video>
 
                     <div class="side-story-user">
                         <img id="prevProfileImage" src="">
@@ -74,8 +78,8 @@
                         <i class="bi bi-chevron-right"></i>
                     </span>
 
-                    <div class="story-progress-bg"></div>
-                    <div class="story-progress"></div>
+                    <div class="story-progress-container js-story-progress-container d-flex gap-1 mb-2 w-100 px-2"
+                        style="position:absolute; top:10px; z-index:100; height:3px;"></div>
                     <div class="story-header">
 
                         <img src="" class="story-header-avatar">
@@ -86,9 +90,11 @@
                         </div>
 
                         <span class="story-actions">
-                            <i class="bi bi-volume-up-fill"></i>
-                            <i id="pauseStory" class="bi bi-pause-fill"></i>
-                            <i class="bi bi-three-dots"></i>
+                            <i id="storyMuteBtn" class="bi bi-volume-mute-fill"
+                                style="cursor:pointer; display:none;"></i>
+                            <i id="pauseStory" class="bi bi-pause-fill ms-2" style="cursor:pointer;"></i>
+                            <i id="deleteStoryBtn" class="bi bi-trash-fill text-danger ms-2 d-none"
+                                style="cursor:pointer;" onclick="deleteCurrentStory(event)"></i>
                         </span>
 
 
@@ -97,29 +103,13 @@
                     <img id="storyImage" src="" alt="Story">
                     <video id="storyVideo" autoplay muted loop playsinline style="display:none;"></video>
 
-                    <div class="story-footer">
-
-                        <div class="reply-wrapper">
-
-                            <input type="text" id="storyReplyInput" placeholder="Reply to" class="story-reply">
-
-                            <span id="storySendBtn" class="send-btn">
-                                Send
-                            </span>
-
-                        </div>
-
-                        <i class="bi bi-heart story-icon"></i>
-                        <i class="bi bi-send story-icon"></i>
-
-                    </div>
-
                 </div>
 
                 <!-- Next Story -->
                 <div class="side-story">
 
                     <img id="nextStoryImage" src="">
+                    <video id="nextStoryVideo" src="" style="display:none;" muted playsinline></video>
 
                     <div class="side-story-user">
                         <img id="nextProfileImage" src="">
@@ -130,6 +120,7 @@
                 <!-- Next Story 2 -->
                 <div class="side-story side-story-far">
                     <img id="next2StoryImage" src="">
+                    <video id="next2StoryVideo" src="" style="display:none;" muted playsinline></video>
                     <div class="side-story-user">
                         <img id="next2ProfileImage" src="">
                         <div id="next2ProfileName"></div>
@@ -144,109 +135,109 @@
             <header>
                 <nav class="left-sidebar">
 
-                <!-- Logo -->
-                <div class="logo">
-                    <a href="#top">
-                        <img src="elements/icons/instagram-black-white.png" alt="Instagram" class="logo-icon">
-                    </a>
-                </div>
-
-                <div class="menu">
-
-                    <!-- Home -->
-                    <button class="menu-item">
+                    <!-- Logo -->
+                    <div class="logo">
                         <a href="#top">
-                            <i class="bi bi-house-door"></i>
+                            <img src="elements/icons/instagram-black-white.png" alt="Instagram" class="logo-icon">
                         </a>
-                        <span>Home</span>
-                    </button>
-
-                    <!-- groups -->
-                    <button class="menu-item" onclick="openGroupsPopup()">
-                        <i class="bi bi-people"></i>
-                        <span>Groups</span>
-                    </button>
-
-                    <!-- Messages -->
-                    <button class="menu-item" id="messages-toggle" onclick="openMessagesPopup()">
-                        <i class="bi bi-send"></i>
-                        <span>Messages</span>
-                    </button>
-
-                    <!-- Search and filter -->
-                    <button class="menu-item js-filter-btn">
-                        <div class="bi bi-funnel small-icon"></div>
-                        <span>Filter Posts</span>
-                    </button>
-
-                    <!-- Create -->
-                    <button class="menu-item js-menu-create-btn">
-                        <i class="bi bi-plus-square"></i>
-                        <span>Create</span>
-                    </button>
-
-                    <!-- Dashboard -->
-                    <button class="menu-item js-dashboard-btn" onclick="openDashboard()">
-                        <i class="bi bi-bar-chart"></i>
-                        <span>Dashboard</span>
-                    </button>
-
-                    <!-- Map -->
-                    <button class="menu-item js-global-map-btn" onclick="showAllPostsOnMap()">
-                        <i class="bi bi-geo-alt"></i>
-                        <span>Map</span>
-                    </button>
-
-                    <!-- Profile -->
-                    <button class="menu-item" onclick="openSettings()">
-                        <img src="/elements/media/profile-pictures/Default_pfp.jpg"
-                            class="right-sidebar-avatar rounded-circle profile-avatar current-user-pic">
-                        <span>Profile</span>
-                    </button>
-
-                </div>
-                <div class="menu bottom">
-
-                    <button class="menu-item" id="theme-toggle">
-                        <img src="elements/icons/dark-mode.png" class="logo-icon" />
-                        <span> Dark Mode</span>
-                    </button>
-
-                    <div id="more-menu-container">
-                        <button class="menu-item" id="more-menu-btn" onclick="toggleMoreMenu()">
-                            <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.3"
-                                class="small-icon">
-                                <line x1="1" y1="4" x2="27" y2="4" />
-                                <line x1="1" y1="14" x2="27" y2="14" />
-                                <line x1="1" y1="24" x2="27" y2="24" />
-                            </svg>
-                            <span>More</span>
-                        </button>
-
-                        <!-- More dropdown menu -->
-                        <div class="more-dropdown-menu d-none" id="more-dropdown">
-                            <button class="more-dropdown-item" onclick="openSettings()">
-                                <i class="bi bi-gear"></i>
-                                <span>User Settings</span>
-                            </button>
-                            <button class="more-dropdown-item" onclick="handleLogout()">
-                                <i class="bi bi-box-arrow-left"></i>
-                                <span>Log out</span>
-                            </button>
-                        </div>
                     </div>
 
-                    <button class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                            class="small-icon">
-                            <rect x="7" y="1" width="9" height="9" rx="1" />
-                            <rect x="1" y="14" width="9" height="9" rx="1" />
-                            <rect x="14" y="14" width="9" height="9" rx="1" />
-                        </svg>
-                        <span>Also from Meta</span>
-                    </button>
+                    <div class="menu">
 
-                </div>
+                        <!-- Home -->
+                        <button class="menu-item">
+                            <a href="#top">
+                                <i class="bi bi-house-door"></i>
+                            </a>
+                            <span>Home</span>
+                        </button>
+
+                        <!-- groups -->
+                        <button class="menu-item" onclick="openGroupsPopup()">
+                            <i class="bi bi-people"></i>
+                            <span>Groups</span>
+                        </button>
+
+                        <!-- Messages -->
+                        <button class="menu-item" id="messages-toggle" onclick="openMessagesPopup()">
+                            <i class="bi bi-send"></i>
+                            <span>Messages</span>
+                        </button>
+
+                        <!-- Search and filter -->
+                        <button class="menu-item js-filter-btn">
+                            <div class="bi bi-funnel small-icon"></div>
+                            <span>Filter Posts</span>
+                        </button>
+
+                        <!-- Create -->
+                        <button class="menu-item js-menu-create-btn">
+                            <i class="bi bi-plus-square"></i>
+                            <span>Create</span>
+                        </button>
+
+                        <!-- Dashboard -->
+                        <button class="menu-item js-dashboard-btn" onclick="openDashboard()">
+                            <i class="bi bi-bar-chart"></i>
+                            <span>Dashboard</span>
+                        </button>
+
+                        <!-- Map -->
+                        <button class="menu-item js-global-map-btn" onclick="showAllPostsOnMap()">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>Map</span>
+                        </button>
+
+                        <!-- Profile -->
+                        <button class="menu-item" onclick="openSettings()">
+                            <img src="/elements/media/profile-pictures/Default_pfp.jpg"
+                                class="right-sidebar-avatar rounded-circle profile-avatar current-user-pic">
+                            <span>Profile</span>
+                        </button>
+
+                    </div>
+                    <div class="menu bottom">
+
+                        <button class="menu-item" id="theme-toggle">
+                            <img src="elements/icons/dark-mode.png" class="logo-icon" />
+                            <span> Dark Mode</span>
+                        </button>
+
+                        <div id="more-menu-container">
+                            <button class="menu-item" id="more-menu-btn" onclick="toggleMoreMenu()">
+                                <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.3"
+                                    class="small-icon">
+                                    <line x1="1" y1="4" x2="27" y2="4" />
+                                    <line x1="1" y1="14" x2="27" y2="14" />
+                                    <line x1="1" y1="24" x2="27" y2="24" />
+                                </svg>
+                                <span>More</span>
+                            </button>
+
+                            <!-- More dropdown menu -->
+                            <div class="more-dropdown-menu d-none" id="more-dropdown">
+                                <button class="more-dropdown-item" onclick="openSettings()">
+                                    <i class="bi bi-gear"></i>
+                                    <span>User Settings</span>
+                                </button>
+                                <button class="more-dropdown-item" onclick="handleLogout()">
+                                    <i class="bi bi-box-arrow-left"></i>
+                                    <span>Log out</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button class="menu-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                                class="small-icon">
+                                <rect x="7" y="1" width="9" height="9" rx="1" />
+                                <rect x="1" y="14" width="9" height="9" rx="1" />
+                                <rect x="14" y="14" width="9" height="9" rx="1" />
+                            </svg>
+                            <span>Also from Meta</span>
+                        </button>
+
+                    </div>
 
                 </nav>
             </header>
@@ -255,37 +246,47 @@
             <div class="feed-advanced-search-panel js-feed-advanced-search-panel hidden-panel">
                 <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
                     <h4 class="fw-bold mb-0 text-dark">Advanced Search</h4>
-                    <button class="bg-transparent border-0 bi bi-x fs-4 text-dark js-close-feed-adv-search hover-extend"></button>
+                    <button
+                        class="bg-transparent border-0 bi bi-x fs-4 text-dark js-close-feed-adv-search hover-extend"></button>
                 </div>
-                
+
                 <div class="p-4 overflow-y-auto flex-grow-1">
                     <!-- Text Input -->
                     <div class="mb-4">
                         <label class="fw-bold mb-2 fs-7 text-secondary">Search Caption or Username</label>
-                        <input type="text" id="feedAdvSearchText" class="form-control rounded-pill bg-light shadow-none border px-3 py-2 text-dark" placeholder="Keywords..." dir="auto">
+                        <input type="text" id="feedAdvSearchText"
+                            class="form-control rounded-pill bg-light shadow-none border px-3 py-2 text-dark"
+                            placeholder="Keywords..." dir="auto">
                     </div>
 
                     <!-- Media Types -->
                     <div class="mb-4">
                         <label class="fw-bold mb-2 fs-7 text-secondary">Media Type</label>
                         <div class="form-check mb-2">
-                            <input class="form-check-input js-feed-adv-filter-media border-secondary" type="checkbox" value="image" id="feedAdvFilterImage" checked>
-                            <label class="form-check-label cursor-pointer text-dark" for="feedAdvFilterImage"><i class="bi bi-image me-2"></i>Images</label>
+                            <input class="form-check-input js-feed-adv-filter-media border-secondary" type="checkbox"
+                                value="image" id="feedAdvFilterImage" checked>
+                            <label class="form-check-label cursor-pointer text-dark" for="feedAdvFilterImage"><i
+                                    class="bi bi-image me-2"></i>Images</label>
                         </div>
                         <div class="form-check mb-2">
-                            <input class="form-check-input js-feed-adv-filter-media border-secondary" type="checkbox" value="video" id="feedAdvFilterVideo" checked>
-                            <label class="form-check-label cursor-pointer text-dark" for="feedAdvFilterVideo"><i class="bi bi-play-btn me-2"></i>Videos</label>
+                            <input class="form-check-input js-feed-adv-filter-media border-secondary" type="checkbox"
+                                value="video" id="feedAdvFilterVideo" checked>
+                            <label class="form-check-label cursor-pointer text-dark" for="feedAdvFilterVideo"><i
+                                    class="bi bi-play-btn me-2"></i>Videos</label>
                         </div>
                         <div class="form-check mb-0">
-                            <input class="form-check-input js-feed-adv-filter-media border-secondary" type="checkbox" value="text" id="feedAdvFilterText" checked>
-                            <label class="form-check-label cursor-pointer text-dark" for="feedAdvFilterText"><i class="bi bi-card-text me-2"></i>Text</label>
+                            <input class="form-check-input js-feed-adv-filter-media border-secondary" type="checkbox"
+                                value="text" id="feedAdvFilterText" checked>
+                            <label class="form-check-label cursor-pointer text-dark" for="feedAdvFilterText"><i
+                                    class="bi bi-card-text me-2"></i>Text</label>
                         </div>
                     </div>
 
                     <!-- Time Range -->
                     <div class="mb-4">
                         <label class="fw-bold mb-2 fs-7 text-secondary">Upload Time</label>
-                        <select id="feedAdvSearchTime" class="form-select rounded-pill bg-light shadow-none border px-3 py-2 text-dark">
+                        <select id="feedAdvSearchTime"
+                            class="form-select rounded-pill bg-light shadow-none border px-3 py-2 text-dark">
                             <option value="all">Anytime</option>
                             <option value="24h">Last 24 Hours</option>
                             <option value="week">Past Week</option>
@@ -294,8 +295,10 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex gap-2 mt-4">
-                        <button class="btn btn-light w-50 rounded-pill fw-bold py-2 border text-dark" onclick="clearFeedAdvancedSearch()">Clear</button>
-                        <button class="btn btn-primary w-50 rounded-pill fw-bold py-2" onclick="executeFeedAdvancedSearch()">Apply</button>
+                        <button class="btn btn-light w-50 rounded-pill fw-bold py-2 border text-dark"
+                            onclick="clearFeedAdvancedSearch()">Clear</button>
+                        <button class="btn btn-primary w-50 rounded-pill fw-bold py-2"
+                            onclick="executeFeedAdvancedSearch()">Apply</button>
                     </div>
                 </div>
             </div>
@@ -315,133 +318,7 @@
                     </button>
                     <div class="stories-scroll d-flex gap-3 px-2 py-1">
 
-                        <div class="story-item" data-story="elements/media/stories-section/story1.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d01d53850f0e0dbcdd8.jpg" data-name="maya_99"
-                            data-video="elements/media/stories-section/videoStory.mp4">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d01d53850f0e0dbcdd8.jpg" alt="maya's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">maya_99</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story2.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d02d53850f0e0dbcdd9.jpg" data-name="tomer19">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d02d53850f0e0dbcdd9.jpg" alt="tomer's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">tomer19</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story3.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d03d53850f0e0dbcdda.jpg" data-name="sara22">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d03d53850f0e0dbcdda.jpg" alt="sara's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">sara22</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story4.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d03d53850f0e0dbcddb.jpg"
-                            data-name="jamil.abukhaima">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d03d53850f0e0dbcddb.jpg" alt="jamil's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">jamil.abukhaima</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story5.jpg"
-                            data-profile="elements/media/profile-pictures/6a908eef7b56e93a2c1078b5.jpg" data-name="nalin12">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a908eef7b56e93a2c1078b5.jpg" alt="nalin's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">nalin12</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story6.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d03d53850f0e0dbcddc.jpg"
-                            data-name="jacob_ashkenazi2">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d03d53850f0e0dbcddc.jpg" alt="jacob's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">jacob_ashkenazi2</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story7.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d04d53850f0e0dbcddd.jpg" data-name="noa.nesh1">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d04d53850f0e0dbcddd.jpg" alt="noa's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-                            <p class="story-username">noa.nesh1</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story8.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d04d53850f0e0dbcdde.jpg" data-name="omer_44">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d04d53850f0e0dbcdde.jpg" alt="omer's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-
-                            <p class="story-username">omer_44</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story9.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d04d53850f0e0dbcddf.jpg" data-name="alex_56">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d04d53850f0e0dbcddf.jpg" alt="alex's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-
-                            <p class="story-username">alex_56</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story10.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d05d53850f0e0dbcde0.jpg" data-name="lili_18">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d05d53850f0e0dbcde0.jpg" alt="lili's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-
-                            <p class="story-username">lili_18</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story11.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d05d53850f0e0dbcde1.jpg" data-name="guy_13">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d05d53850f0e0dbcde1.jpg" alt="guy's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-
-                            <p class="story-username">guy_13</p>
-                        </div>
-
-                        <div class="story-item" data-story="elements/media/stories-section/story12.jpg"
-                            data-profile="elements/media/profile-pictures/6a917d05d53850f0e0dbcde2.jpg" data-name="dan_11">
-
-                            <div class="profile-circle p-1 rounded-circle">
-                                <img src="elements/media/profile-pictures/6a917d05d53850f0e0dbcde2.jpg" alt="dan's profile"
-                                    class="story-avatar rounded-circle border border-white border-4" />
-                            </div>
-
-                            <p class="story-username">dan_11</p>
-                        </div>
+                        <!-- Dynamic stories will be injected here by stories.js -->
 
                     </div>
 
@@ -467,7 +344,7 @@
                 <div class="dashboard-header mb-4">
                     <h3 class="dashboard-main-title fw-bold">System Analytics</h3>
                 </div>
-                
+
                 <div class="row w-100">
                     <div class="col-12 col-xl-6 mb-4">
                         <div class="card dashboard-card shadow-sm border-0 rounded-4">
@@ -625,30 +502,39 @@
 
 
         <!-- groups popup -->
-        <div id="groupsOverlay" class="dark-overlay d-none align-items-center justify-content-center" onmousedown="closeGroupsPopup(event)">
-            <div class="bg-white rounded-4 shadow-lg d-flex flex-column position-relative" style="width: 450px; height: 80vh; max-width: 90vw;">
+        <div id="groupsOverlay" class="dark-overlay d-none align-items-center justify-content-center"
+            onmousedown="closeGroupsPopup(event)">
+            <div class="bg-white rounded-4 shadow-lg d-flex flex-column position-relative"
+                style="width: 450px; height: 80vh; max-width: 90vw;">
 
                 <div class="d-flex justify-content-between align-items-center p-3 border-bottom flex-shrink-0">
                     <div class="fw-bold fs-5 mx-auto">Groups</div>
-                    <button class="bg-transparent border-0 bi bi-x fs-3 position-absolute end-0 me-3 hover-extend" onclick="closeGroupsPopup(event, true)"></button>
+                    <button class="bg-transparent border-0 bi bi-x fs-3 position-absolute end-0 me-3 hover-extend"
+                        onclick="closeGroupsPopup(event, true)"></button>
                 </div>
 
                 <div class="overflow-y-auto flex-grow-1">
-                    
+
                     <div class="p-3 border-bottom bg-light">
                         <!-- Create Group Section -->
                         <div class="d-flex gap-2 mb-3 pb-3 border-bottom">
-                            <input type="text" id="newGroupName" class="form-control rounded-pill px-3 shadow-none border" placeholder="Name your new group..." maxlength="60" dir="auto">
-                            <button class="btn btn-primary rounded-pill px-4 fw-bold" onclick="createGroup()">Create</button>
+                            <input type="text" id="newGroupName"
+                                class="form-control rounded-pill px-3 shadow-none border"
+                                placeholder="Name your new group..." maxlength="60" dir="auto">
+                            <button class="btn btn-primary rounded-pill px-4 fw-bold"
+                                onclick="createGroup()">Create</button>
                         </div>
 
                         <!-- Advanced Search Section -->
                         <div class="group-advanced-search-container">
                             <h6 class="fw-bold mb-2 text-secondary">Advanced Search</h6>
-                            
-                            <input type="text" id="groupSearch" class="form-control rounded-pill px-3 shadow-none border bg-white shadow-sm mb-2" placeholder="Search groups..." dir="auto">
 
-                            <select id="groupTimeFilter" class="form-select rounded-pill px-3 shadow-none border bg-white shadow-sm mb-2 text-secondary">
+                            <input type="text" id="groupSearch"
+                                class="form-control rounded-pill px-3 shadow-none border bg-white shadow-sm mb-2"
+                                placeholder="Search groups..." dir="auto">
+
+                            <select id="groupTimeFilter"
+                                class="form-select rounded-pill px-3 shadow-none border bg-white shadow-sm mb-2 text-secondary">
                                 <option value="all">Anytime</option>
                                 <option value="24h">Created Last 24 Hours</option>
                                 <option value="week">Created Past Week</option>
@@ -656,19 +542,22 @@
 
                             <div class="form-check ms-2 mb-3">
                                 <input type="checkbox" id="myGroupsFilter" class="form-check-input border-secondary">
-                                <label class="form-check-label fs-7 fw-semibold text-secondary cursor-pointer" for="myGroupsFilter">Show only my groups</label>
+                                <label class="form-check-label fs-7 fw-semibold text-secondary cursor-pointer"
+                                    for="myGroupsFilter">Show only my groups</label>
                             </div>
 
                             <div class="d-flex gap-2">
-                                <button class="btn btn-light w-50 rounded-pill fw-bold py-2 border text-dark" onclick="clearGroupSearch()">Clear</button>
-                                <button class="btn btn-primary w-50 rounded-pill fw-bold py-2" onclick="filterGroups()">Apply</button>
+                                <button class="btn btn-light w-50 rounded-pill fw-bold py-2 border text-dark"
+                                    onclick="clearGroupSearch()">Clear</button>
+                                <button class="btn btn-primary w-50 rounded-pill fw-bold py-2"
+                                    onclick="filterGroups()">Apply</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Groups List Section -->
                     <div id="groupsList" class="p-2"></div>
-                    
+
                 </div>
             </div>
         </div>
@@ -780,7 +669,9 @@
                         <div class="post-settings">
 
                             <div class="location-container" id="openMapBtn">
-                                <input type="text" class="location-input js-location-input bg-transparent text-dark w-100 pe-none" placeholder="Add location" readonly>
+                                <input type="text"
+                                    class="location-input js-location-input bg-transparent text-dark w-100 pe-none"
+                                    placeholder="Add location" readonly>
                                 <i class="bi bi-geo-alt location-icon"></i>
                             </div>
 
@@ -809,8 +700,10 @@
                 <div class="p-3 text-center border-bottom fw-bold fs-5">Upload to</div>
                 <button class="btn btn-light rounded-0 py-3 border-bottom fs-6 js-postUpload-followers-btn">Upload to
                     Followers</button>
-                <button class="btn btn-light rounded-0 py-3 rounded-bottom-4 fs-6 js-postUpload-groups-btn">Upload to my
+                <button class="btn btn-light rounded-0 py-3 border-bottom fs-6 js-postUpload-groups-btn">Upload to my
                     Groups</button>
+                <button class="btn btn-light rounded-0 py-3 rounded-bottom-4 fs-6 js-postUpload-story-btn">Share as
+                    Story</button>
             </div>
         </div>
 
@@ -835,7 +728,8 @@
         </div>
 
         <!-- Post Upload Loading Screen -->
-        <div id="postUploadLoadingScreen" class="dark-overlay d-none align-items-center justify-content-center post-upload-loading">
+        <div id="postUploadLoadingScreen"
+            class="dark-overlay d-none align-items-center justify-content-center post-upload-loading">
             <div class="d-flex flex-column align-items-center">
                 <div class="spinner-border text-white post-upload-spinner" role="status">
                     <span class="visually-hidden">Uploading...</span>
@@ -866,7 +760,8 @@
                 <div class="mb-3">
                     <label class="form-label fw-semibold text-dark fs-7">Location</label>
                     <div class="d-flex gap-2">
-                        <input type="text" id="editSubHeaderInput" class="form-control bg-light border-0 shadow-none" placeholder="Tap to select location" readonly>
+                        <input type="text" id="editSubHeaderInput" class="form-control bg-light border-0 shadow-none"
+                            placeholder="Tap to select location" readonly>
                         <button class="btn btn-outline-secondary" id="editLocationBtn" style="width: 40px; padding: 0;">
                             <i class="bi bi-geo-alt"></i>
                         </button>
@@ -885,7 +780,8 @@
         </div>
 
         <!-- Post Delete Loading Screen -->
-        <div id="postDeleteLoadingScreen" class="dark-overlay d-none align-items-center justify-content-center post-delete-loading">
+        <div id="postDeleteLoadingScreen"
+            class="dark-overlay d-none align-items-center justify-content-center post-delete-loading">
             <div class="d-flex flex-column align-items-center">
                 <div class="spinner-border text-danger post-delete-spinner" role="status">
                     <span class="visually-hidden">Deleting...</span>
@@ -1074,32 +970,40 @@
         <!-- All Users Modal -->
         <div class="all-users-overlay" id="allUsersModal">
             <div class="all-users-box d-flex flex-column" style="max-height: 80vh;">
-                
-                <div class="all-users-header p-3 border-bottom d-flex justify-content-between align-items-center flex-shrink-0">
+
+                <div
+                    class="all-users-header p-3 border-bottom d-flex justify-content-between align-items-center flex-shrink-0">
                     <h2 class="all-users-title m-0 fs-5 fw-bold">All Users</h2>
-                    <button class="all-users-close bg-transparent border-0 fs-3 hover-extend" onclick="closeAllUsersPopup()">&times;</button>
+                    <button class="all-users-close bg-transparent border-0 fs-3"
+                        onclick="closeAllUsersPopup()">&times;</button>
                 </div>
 
                 <div class="overflow-y-auto flex-grow-1">
                     <!-- Advanced Search Section -->
                     <div class="p-3 border-bottom bg-light">
-                        <input type="text" id="allUsersSearchInput" class="form-control rounded-pill px-3 shadow-none border bg-white shadow-sm mb-3" placeholder="Search by username..." dir="auto">
-                        
-                        <select id="filterIAmFollowing" class="form-select rounded-pill px-3 shadow-none border bg-white shadow-sm mb-2 text-secondary">
+                        <input type="text" id="allUsersSearchInput"
+                            class="form-control rounded-pill px-3 shadow-none border bg-white shadow-sm mb-3"
+                            placeholder="Search by username..." dir="auto">
+
+                        <select id="filterIAmFollowing"
+                            class="form-select rounded-pill px-3 shadow-none border bg-white shadow-sm mb-2 text-secondary">
                             <option value="all">Following: All</option>
                             <option value="yes">Following</option>
                             <option value="no">Not Following</option>
                         </select>
-                        
-                        <select id="filterIsFollowingMe" class="form-select rounded-pill px-3 shadow-none border bg-white shadow-sm mb-3 text-secondary">
+
+                        <select id="filterIsFollowingMe"
+                            class="form-select rounded-pill px-3 shadow-none border bg-white shadow-sm mb-3 text-secondary">
                             <option value="all">Followers: All</option>
                             <option value="yes">Followers</option>
                             <option value="no">Non-Followers</option>
                         </select>
-                        
+
                         <div class="d-flex gap-2">
-                            <button class="btn btn-light w-50 rounded-pill fw-bold py-2 border text-dark" onclick="clearUserSearch()">Clear</button>
-                            <button class="btn btn-primary w-50 rounded-pill fw-bold py-2" onclick="executeUserAdvancedSearch()">Apply</button>
+                            <button class="btn btn-light w-50 rounded-pill fw-bold py-2 border text-dark"
+                                onclick="clearUserSearch()">Clear</button>
+                            <button class="btn btn-primary w-50 rounded-pill fw-bold py-2"
+                                onclick="executeUserAdvancedSearch()">Apply</button>
                         </div>
                     </div>
 
@@ -1113,7 +1017,8 @@
 
         <!-- Map Modal for Post Creation -->
         <div class="d-none position-fixed top-0 start-0 w-100 h-100" id="mapModal">
-            <div class="position-absolute top-50 start-50 translate-middle bg-white rounded-3 p-3 w-100 map-modal-content">
+            <div
+                class="position-absolute top-50 start-50 translate-middle bg-white rounded-3 p-3 w-100 map-modal-content">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="m-0 text-dark">Choose Location</h5>
                     <button class="btn-close js-close-map-btn"></button>
@@ -1129,10 +1034,12 @@
 
         <!-- Global Map Overlay -->
         <div id="globalPostsMapOverlay" class="position-fixed top-0 start-0 w-100 h-100 d-none">
-            <div class="position-absolute top-50 start-50 translate-middle bg-white rounded-3 p-3 w-75 h-75 d-flex flex-column js-global-map-content">
+            <div
+                class="position-absolute top-50 start-50 translate-middle bg-white rounded-3 p-3 w-75 h-75 d-flex flex-column js-global-map-content">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="m-0 text-dark">World Map of Posts</h4>
-                    <button class="btn-close" onclick="document.getElementById('globalPostsMapOverlay').classList.add('d-none')"></button>
+                    <button class="btn-close"
+                        onclick="document.getElementById('globalPostsMapOverlay').classList.add('d-none')"></button>
                 </div>
                 <div id="globalLeafletMap" class="flex-grow-1 border rounded w-100"></div>
             </div>

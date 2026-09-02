@@ -425,7 +425,9 @@ body.dark-mode .right-sidebar .text-muted {
 
 
 .side-story-far img,
-.side-story img {
+.side-story-far video,
+.side-story img,
+.side-story video {
     width: 180px;
     height: 320px;
     object-fit: cover;
