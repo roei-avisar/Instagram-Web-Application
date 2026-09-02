@@ -63,6 +63,7 @@ class StoriesController {
               username: authorUsername,
               profilePic: story.author.profilePic
             },
+            isCurrentUser: authorId === currentUserId.toString(),
             stories: []
           });
         }

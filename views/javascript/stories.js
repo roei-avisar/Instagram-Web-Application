@@ -74,8 +74,7 @@ function renderStoriesBar() {
     storiesContainer.innerHTML = ''; // Clear container
 
     // Always render "Your Story" circle first
-    const currentId = typeof CURRENT_USER_ID !== 'undefined' ? CURRENT_USER_ID : null;
-    const hasOwnStory = feedGroups.length > 0 && currentId && feedGroups[0].author._id === currentId;
+    const hasOwnStory = feedGroups.length > 0 && feedGroups[0].isCurrentUser;
 
     // Check if user has an active story
     let yourStoryHTML = '';
@@ -108,7 +107,7 @@ function renderStoriesBar() {
     // Render other users' stories
     feedGroups.forEach((group, index) => {
         // Skip current user because we handled it above
-        if (currentId && group.author._id === currentId) return;
+        if (group.isCurrentUser) return;
 
         const html = `
             <div class="story-item" onclick="openStoryViewer(${index}, 0)">
@@ -153,8 +152,7 @@ function openStoryViewer(groupIndex, storyIndex) {
     storyProfile.src = group.author.profilePic;
     storyName.textContent = group.author.username;
 
-    const currentId = typeof CURRENT_USER_ID !== 'undefined' ? CURRENT_USER_ID : null;
-    if (currentId && group.author._id === currentId) {
+    if (group.isCurrentUser) {
         deleteStoryBtn.classList.remove('d-none');
     } else {
         deleteStoryBtn.classList.add('d-none');
