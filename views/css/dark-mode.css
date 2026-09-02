@@ -508,6 +508,32 @@ body.dark-mode mark.chat-search-hit--active {
     color: #fff;
 }
 
+/* Generic chat notice / XSS-warning modal — plain .modal-content has no dark
+   theme, so it rendered white-on-white (same fix as the other chat modals) */
+body.dark-mode #chatNoticeModal .modal-content {
+    background-color: #1e2530 !important;
+    border: 1px solid #3a3f47 !important;
+}
+body.dark-mode #chatNoticeModal .modal-title,
+body.dark-mode #chatNoticeModal .modal-body,
+body.dark-mode #chatNoticeModal .modal-body p {
+    color: #ffffff !important;
+}
+body.dark-mode #chatNoticeModal .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Capsule / messages-preview avatar tooltip — the global `span {color:#fff}`
+   rule made this white-on-white and unreadable in dark mode */
+body.dark-mode .text-bubble {
+    background-color: #262B33 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+}
+body.dark-mode .text-bubble::after {
+    border-color: #262B33 transparent transparent transparent !important;
+}
+
 /* Emoji quick-picker */
 body.dark-mode .chat-emoji-picker {
     background-color: #1e2530 !important;

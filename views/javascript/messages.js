@@ -1313,6 +1313,16 @@ function openChatSearch() {
         input.focus();
         input.select();
     }
+
+    // Wire the leading magnifier icon so a click runs the search (same as Enter).
+    // Transient: attached only while the bar is open, removed in closeChatSearch.
+    let searchIcon = document.querySelector(".js-chat-search-bar .bi-search");
+    if (searchIcon) {
+        searchIcon.style.cursor = "pointer";
+        searchIcon.removeEventListener("click", handleChatSearchIconClick);
+        searchIcon.addEventListener("click", handleChatSearchIconClick);
+    }
+
     updateChatSearchCount();
 }
 
@@ -1334,6 +1344,10 @@ function closeChatSearch() {
     if (toggle) {
         toggle.classList.remove("text-primary");
     }
+    let searchIcon = document.querySelector(".js-chat-search-bar .bi-search");
+    if (searchIcon) {
+        searchIcon.removeEventListener("click", handleChatSearchIconClick);
+    }
 
     clearChatSearchHighlights();
     isChatSearchOpen = false;
@@ -1349,15 +1363,31 @@ function handleChatSearchKey(event) {
         return;
     }
     event.preventDefault();
+    // Shift+Enter walks backwards through existing hits, plain Enter forwards
+    triggerChatSearchFromInput(event.shiftKey ? -1 : 1);
+}
 
-    let query = event.target.value.trim();
+// Runs the search for whatever is currently in the search box. Shared by the
+// Enter key and the magnifier button so both behave identically. When the query
+// is unchanged and already has hits, it just steps to the next/prev match.
+function triggerChatSearchFromInput(direction) {
+    let input = document.querySelector(".js-chat-search-input");
+    if (!input) {
+        return;
+    }
+    let query = input.value.trim();
 
     // Same query already searched -> just step through the existing hits
     if (query !== "" && query === chatSearchQuery && chatSearchMatches.length > 0) {
-        gotoChatSearchMatch(event.shiftKey ? -1 : 1);
+        gotoChatSearchMatch(direction < 0 ? -1 : 1);
         return;
     }
     runChatSearch(query);
+}
+
+// Click handler for the magnifier icon inside the open search bar.
+function handleChatSearchIconClick() {
+    triggerChatSearchFromInput(1);
 }
 
 // Mirrors middleware/xssValidator.js so we can reject early with a clear message
