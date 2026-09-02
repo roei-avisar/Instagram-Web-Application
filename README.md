@@ -2,7 +2,8 @@
 
 A full-stack social media / Instagram-like platform built with Node.js, Express.js, MongoDB (Mongoose ODM), vanilla HTML/CSS/JavaScript and Bootstrap 5. It implements user management and authentication, post sharing with image/video/text media, story sharing, interactive maps for location tagging, follower-based feeds, group communities, direct messaging with post sharing, a multi-parameter advanced search, and a D3.js analytics dashboard.
 This project was developed as part of a Web Applications course.
-Authors: Roei Avisar, Ron Hefetz, Guy Keller, Adi Moshcovitz
+
+**Authors:** Roei Avisar, Ron Hefetz, Guy Keller, Adi Moshcovitz
 
 # Features
 
