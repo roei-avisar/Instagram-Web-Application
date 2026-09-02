@@ -461,8 +461,34 @@ body.dark-mode .chat-msg-actions .js-msg-delete {
 }
 
 /* Chat input pill */
-body.dark-mode .chat-window-container .border.rounded-pill {
+body.dark-mode .js-chat-input-pill {
     border-color: #3a3f47 !important;
+}
+
+/* Chat search bar */
+body.dark-mode .chat-search-bar {
+    background-color: #23262b;
+    border-color: #3a3f47 !important;
+}
+body.dark-mode .chat-search-input {
+    color: #e9ecef;
+}
+body.dark-mode mark.chat-search-hit {
+    background-color: #6b5900;
+    color: #fff;
+}
+body.dark-mode mark.chat-search-hit--active {
+    background-color: #c07a00;
+    color: #fff;
+}
+
+/* Emoji quick-picker */
+body.dark-mode .chat-emoji-picker {
+    background-color: #1e2530 !important;
+    border-color: #3a3f47 !important;
+}
+body.dark-mode .chat-emoji-choice:hover {
+    background-color: #262B33 !important;
 }
 
 /* Chat-related Bootstrap modals (edit / delete message, share result) —

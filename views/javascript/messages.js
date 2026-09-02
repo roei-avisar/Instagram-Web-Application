@@ -1,12 +1,16 @@
 function openMessagesPopup() {
     let messagesPopup = document.querySelector(".messages-popup-container");
     let messagesCapsule = document.querySelector(".js-messages-capsule");
-    
+
     if (messagesCapsule) {
         messagesCapsule.classList.add("d-none");
     }
-    
+
+    let wasHidden = messagesPopup.classList.contains("d-none");
     messagesPopup.classList.remove("d-none");
+    if (wasHidden) {
+        playChatAnim(messagesPopup, "chat-anim-pop");
+    }
     renderMessagesList();
 }
 
@@ -19,6 +23,7 @@ function closeMessagesPopup() {
 
     if (messagesCapsule) {
         messagesCapsule.classList.remove("d-none");
+        playChatAnim(messagesCapsule, "chat-anim-capsule");
     }
 }
 
@@ -32,6 +37,17 @@ let chatWasInConversation = false;
 // Live refresh of the currently-open conversation (simple poll — no websockets in the stack).
 const CHAT_POLL_MS = 4000;
 let chatPollTimer = null;
+
+// ===== Chat search (WhatsApp-style) state =====
+// Search execution goes through the backend (POST /api/chats/searchForAMessage);
+// the server returns the matching TEXT messages, and the frontend highlights the
+// query substring inside those bubbles (by data-message-id) in the loaded history.
+let isChatSearchOpen = false;
+let chatSearchQuery = "";        // the applied query (trimmed) — also the highlight term
+let chatSearchResultIds = [];    // message _id strings returned by the backend
+let chatSearchMatches = [];      // <mark> elements currently in the DOM, document order
+let chatSearchIndex = -1;        // index of the "active" match
+let chatSearchSeq = 0;           // guards against out-of-order / stale fetch responses
 
 // Makes sure CURRENT_USER_ID is populated before we call any chat endpoint.
 // The first chat action after a page refresh can run before initApp.js has
@@ -247,8 +263,11 @@ async function renderMessagesList() {
     } catch (error) {
         console.error("Error building chat contacts list:", error);
         container.innerHTML = `<div class="text-center text-danger mt-3">Failed to load your chats.</div>`;
+        renderCapsuleAvatars([]);
         return;
     }
+
+    renderCapsuleAvatars(contacts);   // keep the floating capsule in sync
 
     container.innerHTML = "";
 
@@ -295,6 +314,54 @@ async function renderMessagesList() {
         container.appendChild(row);
     });
 }
+
+// Fills the floating capsule with up to 3 profile pictures of the people the
+// user has actually been chatting with (most recent first). Reuses the contact
+// list the messages popup already builds — no extra requests when called from
+// renderMessagesList(). Clears to nothing when there are no conversations.
+function renderCapsuleAvatars(contacts) {
+    let holder = document.querySelector(".js-capsule-avatars");
+    if (!holder) {
+        return;
+    }
+
+    let recent = (Array.isArray(contacts) ? contacts : [])
+        .filter(c => c && c.lastMessageAt && !c.unavailable)
+        .slice(0, 3);
+
+    holder.innerHTML = "";
+
+    recent.forEach(contact => {
+        let safePic = escapeHTML(contact.profilePic || DEFAULT_PROFILE_PIC);
+        let safeName = escapeHTML(contact.username || "Unknown");
+
+        let wrap = document.createElement("div");
+        wrap.className = "message-profile";
+        wrap.innerHTML = `
+            <img src="${safePic}" class="message-alert-profile-pic rounded-circle" alt="${safeName}"
+                onerror="this.onerror=null; this.src='${DEFAULT_PROFILE_PIC}'">
+            <span class="text-bubble">${safeName}</span>
+        `;
+        holder.appendChild(wrap);
+    });
+}
+
+// Standalone refresh (used once on load) — does its own fetch.
+async function refreshCapsuleAvatars() {
+    try {
+        let contacts = await getSmartContactList();
+        renderCapsuleAvatars(contacts);
+    } catch (error) {
+        console.error("Could not load capsule avatars:", error);
+        renderCapsuleAvatars([]);   // fall back to the clean, image-free capsule
+    }
+}
+
+// Populate the capsule shortly after load (deferred so it doesn't compete with
+// the critical page bootstrap in initApp.js).
+document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(refreshCapsuleAvatars, 1000);
+});
 
 // One delegated listener handles clicks on every chat row (present and future).
 // Rows for unavailable users don't get the "js-chat-row" class, so they're ignored.
@@ -355,7 +422,24 @@ document.addEventListener("scroll", closeAllMsgMenus, true);
 
 
 // ===== Minimize / restore the whole chat UI =====
+
+// One-shot entrance animation for a chat surface that was just un-hidden.
+// The class is stripped on animationend so it can replay on the next open.
+function playChatAnim(el, className) {
+    if (!el) {
+        return;
+    }
+    el.classList.remove("chat-anim-pop", "chat-anim-capsule");
+    void el.offsetWidth;                     // force reflow so the same class restarts
+    el.classList.add(className);
+    el.addEventListener("animationend", function done() {
+        el.classList.remove(className);
+        el.removeEventListener("animationend", done);
+    });
+}
+
 function minimizeChatUI() {
+    closeChatSearch();
     let chatWindow = document.querySelector(".chat-window-container");
     let messagesPopup = document.querySelector(".messages-popup-container");
     let capsule = document.querySelector(".js-messages-capsule");
@@ -369,7 +453,10 @@ function minimizeChatUI() {
 
     if (chatWindow) chatWindow.classList.add("d-none");
     if (messagesPopup) messagesPopup.classList.add("d-none");
-    if (capsule) capsule.classList.remove("d-none");
+    if (capsule) {
+        capsule.classList.remove("d-none");
+        playChatAnim(capsule, "chat-anim-capsule");
+    }
 
     closeAllMsgMenus();
     stopChatPolling();
@@ -436,18 +523,23 @@ async function openChatWindow(friendId, friendUsername = null, friendProfilePic 
     // Select the chat window and history container
     let chatWindow = document.querySelector(".chat-window-container");
     let chatHistoryContainer = document.querySelector(".js-chat-history-container");
+    let chatWindowWasHidden = chatWindow.classList.contains("d-none");
 
 
     // Only clear the screen if the user clicked on a different friend
     if (chatWindow.dataset.friendId !== friendId) {
+        closeChatSearch();                       // don't carry search into another chat
         if (chatHistoryContainer) {
-            chatHistoryContainer.innerHTML = ""; 
+            chatHistoryContainer.innerHTML = "";
         }
     }
 
     // Select and show the relevant chat (and attache the relevant friendId to this chat)
     chatWindow.dataset.friendId = friendId;
     chatWindow.classList.remove("d-none");
+    if (chatWindowWasHidden) {
+        playChatAnim(chatWindow, "chat-anim-pop");
+    }
 
     // Only update the header if we passed in a username and picture
     // This is necessary because the function is called both when the chat needs to load for the first time and whenever a message in the chat changes
@@ -517,6 +609,7 @@ async function openChatWindow(friendId, friendUsername = null, friendProfilePic 
     let chatInput = chatWindow.querySelector(".js-chat-message-input");
     if (chatInput) {
         chatInput.value = "";
+        autoGrowTextarea(chatInput);   // shrink back to a single row
         setTimeout(() => chatInput.focus(), 100);
     }
 
@@ -601,7 +694,9 @@ async function refreshOpenChat(options = {}) {
     renderChatHistory(result.data);
 
     // renderChatHistory rebuilds innerHTML (scrollTop resets to 0) — put the user back
-    if (wasNearBottom || options.scrollToBottom) {
+    if (isChatSearchOpen) {
+        // search re-applies its own highlight + scroll in renderChatHistory
+    } else if (wasNearBottom || options.scrollToBottom) {
         historyContainer.scrollTop = historyContainer.scrollHeight;
     } else {
         historyContainer.scrollTop = prevScrollTop;
@@ -756,6 +851,65 @@ function renderChatHistory(messagesArray){
             chatHistoryContainer.innerHTML += bubbleHTML;
         }
     });
+
+    // Keep search highlights alive across live-poll re-renders
+    if (isChatSearchOpen && chatSearchQuery) {
+        reapplyChatSearch();
+    }
+}
+
+// Shared auto-grow for chat-style textareas: grows to fit content up to the
+// element's CSS max-height, then lets it scroll, keeping the caret in view
+// while the user types at the end.
+function autoGrowTextarea(el) {
+    if (!el) {
+        return;
+    }
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+    if (el.selectionStart === el.value.length) {
+        el.scrollTop = el.scrollHeight;
+    }
+}
+
+// ===== Generic chat notice modal (replaces native alert) =====
+function injectChatNoticeModal() {
+    if (document.getElementById('chatNoticeModal')) {
+        return;
+    }
+    const modalHTML = `
+    <div class="modal fade" id="chatNoticeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold" id="chatNoticeModalTitle">Notice</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-0">
+                    <p class="mb-0 text-dark" id="chatNoticeModalBody"></p>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    const el = document.getElementById('chatNoticeModal');
+    el.addEventListener('hide.bs.modal', () => {
+        if (document.activeElement && el.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
+    });
+}
+
+function showChatMessageModal(title, message) {
+    injectChatNoticeModal();
+    document.getElementById('chatNoticeModalTitle').textContent = title || "Notice";
+    document.getElementById('chatNoticeModalBody').textContent = message || "";
+    let modal = new bootstrap.Modal(document.getElementById('chatNoticeModal'));
+    modal.show();
 }
 
 function injectEditModal() {
@@ -775,12 +929,14 @@ function injectEditModal() {
                 </div>
                 <div class="modal-body py-0">
                     <input type="hidden" id="hiddenEditMessageId">
-                    <textarea id="editMessageInput" class="form-control rounded-3" rows="3"></textarea>
+                    <textarea id="editMessageInput" class="form-control rounded-3" rows="3"
+                        style="max-height: 180px; overflow-y: auto;"
+                        oninput="autoGrowTextarea(this)"></textarea>
                     <div id="editMessageError" class="text-danger mt-2 d-none" style="font-size: 14px;"></div>
                 </div>
                 <div class="modal-footer border-top-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary px-4" onclick="submitEditMessage()">Save Changes</button>
+                    <button type="button" class="btn btn-primary px-4" onclick="submitEditMessage(this)">Save Changes</button>
                 </div>
             </div>
         </div>
@@ -810,15 +966,28 @@ function handleEditMessage(messageId) {
 
     // Storing inportant values in hidden elements for future use- in submit function
     document.getElementById('hiddenEditMessageId').value = messageId;
-    document.getElementById('editMessageInput').value = oldContent;
+    let editInput = document.getElementById('editMessageInput');
+    editInput.value = oldContent;
     document.getElementById('editMessageError').classList.add('d-none');
 
     // Creating a Bootstrap modal instance and displaying it on the screen
-    let editModal = new bootstrap.Modal(document.getElementById('editMessageModal'));
+    let editModalEl = document.getElementById('editMessageModal');
+
+    // Once visible: size the textarea to the content and drop the caret at the
+    // end so long messages open scrolled to where the user will type.
+    editModalEl.addEventListener('shown.bs.modal', function onShown() {
+        editModalEl.removeEventListener('shown.bs.modal', onShown);
+        autoGrowTextarea(editInput);
+        editInput.focus();
+        editInput.selectionStart = editInput.selectionEnd = editInput.value.length;
+        editInput.scrollTop = editInput.scrollHeight;
+    });
+
+    let editModal = new bootstrap.Modal(editModalEl);
     editModal.show();
 }
 
-async function submitEditMessage() {
+async function submitEditMessage(button) {
     // Getting the new relevant values from the screen
     let messageId = document.getElementById('hiddenEditMessageId').value;
     let newContent = document.getElementById('editMessageInput').value.trim();
@@ -841,6 +1010,11 @@ async function submitEditMessage() {
         errorBox.innerText = "Could not verify your session. Please refresh the page.";
         errorBox.classList.remove('d-none');
         return;
+    }
+
+    // Block a second click while this request is in flight
+    if (button) {
+        button.disabled = true;
     }
 
     try {
@@ -881,6 +1055,11 @@ async function submitEditMessage() {
         console.error("Server error:", error);
         errorBox.innerText = "Network error. Please try again.";
         errorBox.classList.remove('d-none');
+    } finally {
+        // Re-enable for a retry after errors (on success the modal is hidden)
+        if (button) {
+            button.disabled = false;
+        }
     }
 }
 
@@ -906,7 +1085,7 @@ function injectDeleteModal() {
                 </div>
                 <div class="modal-footer border-top-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger px-4" onclick="submitDeleteMessage()">Delete</button>
+                    <button type="button" class="btn btn-danger px-4" onclick="submitDeleteMessage(this)">Delete</button>
                 </div>
             </div>
         </div>
@@ -940,11 +1119,11 @@ function handleDeleteMessage(messageId) {
     deleteModal.show();
 }
 
-async function submitDeleteMessage() {
+async function submitDeleteMessage(button) {
     // Getting the new relevant values from the screen
     let messageId = document.getElementById('hiddenDeleteMessageId').value;
     let errorBox = document.getElementById('deleteMessageError');
-    
+
     // Getting the current open friend chat from the chat element
     let chatWindow = document.querySelector(".chat-window-container");
     let friendId = chatWindow.dataset.friendId;
@@ -955,6 +1134,11 @@ async function submitDeleteMessage() {
         errorBox.innerText = "Could not verify your session. Please refresh the page.";
         errorBox.classList.remove('d-none');
         return;
+    }
+
+    // Block a second click while this request is in flight
+    if (button) {
+        button.disabled = true;
     }
 
     try {
@@ -994,6 +1178,11 @@ async function submitDeleteMessage() {
         console.error("Server error:", error);
         errorBox.innerText = "Network error. Please try again.";
         errorBox.classList.remove('d-none');
+    } finally {
+        // Re-enable for a retry after errors (on success the modal is hidden)
+        if (button) {
+            button.disabled = false;
+        }
     }
 }
 
@@ -1059,83 +1248,531 @@ function openSharedPostComments(postId) {
 }
 
 function backToMessages() {
+    closeChatSearch();
     stopChatPolling();
     document.querySelector(".chat-window-container").classList.add("d-none");
-    document.querySelector(".messages-popup-container").classList.remove("d-none");
+    let messagesPopup = document.querySelector(".messages-popup-container");
+    messagesPopup.classList.remove("d-none");
+    playChatAnim(messagesPopup, "chat-anim-pop");
     renderMessagesList();
 }
 
 function closeChatWindow() {
+    closeChatSearch();
     stopChatPolling();
     document.querySelector(".chat-window-container").classList.add("d-none");
     chatWasInConversation = false;   // explicit close = clean reset
     let messagesCapsule = document.querySelector(".js-messages-capsule");
     if (messagesCapsule) {
         messagesCapsule.classList.remove("d-none");
+        playChatAnim(messagesCapsule, "chat-anim-capsule");
     }
 }
 
-async function handleChatInput(event) {
-    if (event.key === "Enter") { // Handle enter inside the input box- a meaning to send a message!
+// ============================================================
+//  Chat search (WhatsApp-style)
+//  Execution -> backend (POST /api/chats/searchForAMessage).
+//  Highlighting/navigation -> frontend, within the loaded chat only.
+// ============================================================
 
-        // Stop the default action of the key enter and allow us to handle what pressing this key will do
+// Attached to the document ONLY while the search bar is open (see openChatSearch /
+// closeChatSearch) so ESC never interferes with modals/popups elsewhere on the site.
+function handleGlobalChatSearchEsc(event) {
+    if (event.key === "Escape") {
         event.preventDefault();
+        closeChatSearch();
+    }
+}
 
-        // Get the message text
-        let chatInput = event.target;
-        let content = chatInput.value.trim();
+function toggleChatSearch() {
+    if (isChatSearchOpen) {
+        closeChatSearch();
+    } else {
+        openChatSearch();
+    }
+}
 
-        // Ensure the message isn't empty- if it is the runction will not continue!
-        if (content === ""){
-            return;
+function openChatSearch() {
+    let bar = document.querySelector(".js-chat-search-bar");
+    if (!bar) {
+        return;
+    }
+    bar.classList.remove("d-none");
+    bar.classList.add("d-flex");
+    isChatSearchOpen = true;
+
+    document.addEventListener("keydown", handleGlobalChatSearchEsc);
+
+    let toggle = document.querySelector(".js-chat-search-toggle");
+    if (toggle) {
+        toggle.classList.add("text-primary");
+    }
+
+    let input = document.querySelector(".js-chat-search-input");
+    if (input) {
+        input.focus();
+        input.select();
+    }
+    updateChatSearchCount();
+}
+
+function closeChatSearch() {
+    chatSearchSeq++;   // invalidate any in-flight search response
+
+    document.removeEventListener("keydown", handleGlobalChatSearchEsc);
+
+    let bar = document.querySelector(".js-chat-search-bar");
+    if (bar) {
+        bar.classList.add("d-none");
+        bar.classList.remove("d-flex");
+    }
+    let input = document.querySelector(".js-chat-search-input");
+    if (input) {
+        input.value = "";
+    }
+    let toggle = document.querySelector(".js-chat-search-toggle");
+    if (toggle) {
+        toggle.classList.remove("text-primary");
+    }
+
+    clearChatSearchHighlights();
+    isChatSearchOpen = false;
+    chatSearchQuery = "";
+    chatSearchResultIds = [];
+    chatSearchMatches = [];
+    chatSearchIndex = -1;
+    updateChatSearchCount();
+}
+
+function handleChatSearchKey(event) {
+    if (event.key !== "Enter") {
+        return;
+    }
+    event.preventDefault();
+
+    let query = event.target.value.trim();
+
+    // Same query already searched -> just step through the existing hits
+    if (query !== "" && query === chatSearchQuery && chatSearchMatches.length > 0) {
+        gotoChatSearchMatch(event.shiftKey ? -1 : 1);
+        return;
+    }
+    runChatSearch(query);
+}
+
+// Mirrors middleware/xssValidator.js so we can reject early with a clear message
+const CHAT_SEARCH_FORBIDDEN = /[<>"'`${};|\\]/;
+
+async function runChatSearch(rawQuery) {
+    let query = (rawQuery || "").trim();
+
+    // Reset highlight state before every new search
+    clearChatSearchHighlights();
+    chatSearchMatches = [];
+    chatSearchIndex = -1;
+    chatSearchResultIds = [];
+    chatSearchQuery = "";
+
+    if (query === "") {
+        updateChatSearchCount();
+        return;
+    }
+
+    if (CHAT_SEARCH_FORBIDDEN.test(query)) {
+        showChatMessageModal("Invalid search",
+            "Search text can't contain special characters like < > \" ' ` ; | \\ or { }.");
+        updateChatSearchCount();
+        return;
+    }
+
+    let chatWindow = document.querySelector(".chat-window-container");
+    let friendId = chatWindow ? chatWindow.dataset.friendId : null;
+    if (!friendId) {
+        updateChatSearchCount();
+        return;
+    }
+
+    let currentUserId = await ensureCurrentUser();
+    if (!currentUserId) {
+        showChatMessageModal("Session expired",
+            "Could not verify your session. Please refresh the page and try again.");
+        updateChatSearchCount();
+        return;
+    }
+
+    let seq = ++chatSearchSeq;
+
+    let countEl = document.querySelector(".js-chat-search-count");
+    if (countEl) {
+        countEl.textContent = "…";
+    }
+
+    let status;
+    let result;
+    try {
+        let response = await fetch('/api/chats/searchForAMessage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                messageSearch: query,
+                senderId: currentUserId,
+                receiverId: friendId
+            })
+        });
+        status = response.status;
+        result = await response.json();
+    } catch (error) {
+        if (seq === chatSearchSeq) {
+            console.error("Chat search network error:", error);
+            showChatMessageModal("Network error",
+                "The search could not be completed. Please check your connection and try again.");
+            updateChatSearchCount();
         }
+        return;
+    }
 
-        // Doing only if the message isn't empty
-        // Attach friendID to the opened chat div- the main chat div
-        let chatWindow = document.querySelector(".chat-window-container");
-        let friendId = chatWindow.dataset.friendId;
+    // A newer search started, or search/chat was closed while we waited
+    if (seq !== chatSearchSeq) {
+        return;
+    }
 
-        // Make sure the current user is known before sending
-        let currentUserId = await ensureCurrentUser();
-        if (!currentUserId) {
-            alert("Could not verify your session. Please refresh the page.");
-            return;
-        }
+    // "Chat not found" => brand-new conversation, just treat as no results
+    if (status === 404) {
+        chatSearchQuery = query;
+        chatSearchResultIds = [];
+        paintChatSearchResults(false);
+        return;
+    }
 
-        try {
-            let response = await fetch('/api/chats/createMessage', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    sender: currentUserId,
-                    receiver: friendId,
-                    type: "text",
-                    content: content
-                })
-            });
+    if (!result || !result.success) {
+        let msg = (result && (result.error || result.message))
+            ? (result.error || result.message)
+            : "Could not search this conversation. Please try again.";
+        showChatMessageModal("Search failed", msg);
+        updateChatSearchCount();
+        return;
+    }
 
-            let result = await response.json();
+    let data = Array.isArray(result.data) ? result.data : [];
+    chatSearchQuery = query;
+    chatSearchResultIds = data
+        .filter(m => m && m._id != null)
+        .map(m => String(m._id));
 
-            // Checks for potential validation errors (like xss) or other error from the server
-            if (!response.ok && result.error) {
-                alert(result.error);
-                return;
+    paintChatSearchResults(false);
+}
+
+// Highlight the cached result ids in the current DOM history.
+// preserveIndex=true keeps the user on ~the same match after a poll rebuild.
+function paintChatSearchResults(preserveIndex) {
+    let prevIndex = chatSearchIndex;
+
+    clearChatSearchHighlights();
+    chatSearchMatches = [];
+
+    let container = document.querySelector(".js-chat-history-container");
+    if (container && chatSearchQuery && chatSearchResultIds.length > 0) {
+        chatSearchResultIds.forEach(id => {
+            let textEl = container.querySelector(`.js-msg-text[data-message-id="${id}"]`);
+            if (textEl) {
+                highlightTermInElement(textEl, chatSearchQuery);
             }
+        });
+        chatSearchMatches = Array.from(container.querySelectorAll("mark.chat-search-hit"));
+    }
 
-            if (result.success) {
-                // Clear the typing input box
-                chatInput.value = ""; 
+    if (chatSearchMatches.length === 0) {
+        chatSearchIndex = -1;
+    } else if (preserveIndex && prevIndex >= 0) {
+        chatSearchIndex = Math.min(prevIndex, chatSearchMatches.length - 1);
+        setActiveChatSearchMatch();
+    } else {
+        chatSearchIndex = chatSearchMatches.length - 1;   // newest match first
+        setActiveChatSearchMatch();
+    }
+    updateChatSearchCount();
+}
 
-                // Refresh the chat history (all the messages) to pull the new message from the DB
-                await openChatWindow(friendId); 
-            } else {
-                console.error("Failed to save message:", result.message);
-            }
+// Called by renderChatHistory after the poll rebuilds the history DOM
+function reapplyChatSearch() {
+    if (!isChatSearchOpen || !chatSearchQuery || chatSearchResultIds.length === 0) {
+        return;
+    }
+    paintChatSearchResults(true);
+}
 
-        } catch (error) {
-            console.error("Network or server error:", error);
+function gotoChatSearchMatch(direction) {
+    if (chatSearchMatches.length === 0) {
+        return;
+    }
+    let count = chatSearchMatches.length;
+    chatSearchIndex = (chatSearchIndex + direction + count) % count;
+    setActiveChatSearchMatch();
+    updateChatSearchCount();
+}
+
+function setActiveChatSearchMatch() {
+    chatSearchMatches.forEach((mark, i) => {
+        mark.classList.toggle("chat-search-hit--active", i === chatSearchIndex);
+    });
+    let active = chatSearchMatches[chatSearchIndex];
+    if (active) {
+        scrollChatMatchIntoView(active);
+    }
+}
+
+// Scroll ONLY the history container (never the page) so the match sits centered.
+function scrollChatMatchIntoView(mark) {
+    let container = document.querySelector(".js-chat-history-container");
+    if (!container || !mark) {
+        return;
+    }
+    let cRect = container.getBoundingClientRect();
+    let mRect = mark.getBoundingClientRect();
+    let delta = (mRect.top - cRect.top) - (container.clientHeight / 2) + (mRect.height / 2);
+    container.scrollTop += delta;
+}
+
+function updateChatSearchCount() {
+    let countEl = document.querySelector(".js-chat-search-count");
+    if (countEl) {
+        if (chatSearchMatches.length > 0) {
+            countEl.textContent = `${chatSearchIndex + 1}/${chatSearchMatches.length}`;
+        } else {
+            countEl.textContent = chatSearchQuery ? "0/0" : "";
         }
     }
+    let hasMatches = chatSearchMatches.length > 0;
+    document.querySelectorAll(".js-chat-search-nav").forEach(btn => {
+        btn.disabled = !hasMatches;
+    });
+}
+
+// Wrap every case-insensitive occurrence of `term` inside `el` with
+// <mark class="chat-search-hit">. Text-node only + textContent => XSS-safe.
+function highlightTermInElement(el, term) {
+    let needle = (term || "").toLowerCase();
+    if (!el || needle === "") {
+        return;
+    }
+
+    let walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+    let textNodes = [];
+    let node;
+    while ((node = walker.nextNode())) {
+        textNodes.push(node);
+    }
+
+    textNodes.forEach(textNode => {
+        let text = textNode.nodeValue;
+        let lower = text.toLowerCase();
+        let idx = lower.indexOf(needle);
+        if (idx === -1) {
+            return;
+        }
+
+        let frag = document.createDocumentFragment();
+        let pos = 0;
+        while (idx !== -1) {
+            if (idx > pos) {
+                frag.appendChild(document.createTextNode(text.slice(pos, idx)));
+            }
+            let mark = document.createElement("mark");
+            mark.className = "chat-search-hit";
+            mark.textContent = text.slice(idx, idx + needle.length);
+            frag.appendChild(mark);
+            pos = idx + needle.length;
+            idx = lower.indexOf(needle, pos);
+        }
+        if (pos < text.length) {
+            frag.appendChild(document.createTextNode(text.slice(pos)));
+        }
+        textNode.parentNode.replaceChild(frag, textNode);
+    });
+}
+
+function clearChatSearchHighlights() {
+    let container = document.querySelector(".js-chat-history-container");
+    if (!container) {
+        return;
+    }
+    container.querySelectorAll("mark.chat-search-hit").forEach(mark => {
+        let parent = mark.parentNode;
+        if (!parent) {
+            return;
+        }
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        parent.normalize();   // merge the split text nodes back together
+    });
+}
+
+// ===== Lightweight emoji quick-picker =====
+function openEmojiPicker() {
+    let picker = document.querySelector(".js-emoji-picker");
+    if (!picker || !picker.classList.contains("d-none")) {
+        return;
+    }
+    picker.classList.remove("d-none");
+    // Listen for outside-clicks / ESC ONLY while the picker is actually open
+    document.addEventListener("click", handleEmojiPickerOutsideClick);
+    document.addEventListener("keydown", handleEmojiPickerEsc);
+}
+
+function closeEmojiPicker() {
+    let picker = document.querySelector(".js-emoji-picker");
+    if (!picker || picker.classList.contains("d-none")) {
+        return;
+    }
+    picker.classList.add("d-none");
+    document.removeEventListener("click", handleEmojiPickerOutsideClick);
+    document.removeEventListener("keydown", handleEmojiPickerEsc);
+}
+
+function toggleEmojiPicker() {
+    let picker = document.querySelector(".js-emoji-picker");
+    if (!picker) {
+        return;
+    }
+    if (picker.classList.contains("d-none")) {
+        openEmojiPicker();
+    } else {
+        closeEmojiPicker();
+    }
+}
+
+// Attached to the document ONLY while the picker is open (see openEmojiPicker).
+function handleEmojiPickerOutsideClick(event) {
+    if (!event.target.closest(".js-emoji-picker") &&
+        !event.target.closest(".js-emoji-toggle")) {
+        closeEmojiPicker();
+    }
+}
+
+function handleEmojiPickerEsc(event) {
+    if (event.key === "Escape") {
+        closeEmojiPicker();
+    }
+}
+
+// Insert the emoji at the caret position and keep the picker open for more picks.
+function addEmojiToChatInput(emoji) {
+    let input = document.querySelector(".js-chat-message-input");
+    if (!input) {
+        return;
+    }
+    let start = (typeof input.selectionStart === "number") ? input.selectionStart : input.value.length;
+    let end = (typeof input.selectionEnd === "number") ? input.selectionEnd : input.value.length;
+
+    input.value = input.value.slice(0, start) + emoji + input.value.slice(end);
+
+    let caret = start + emoji.length;
+    input.focus();
+    input.setSelectionRange(caret, caret);
+    autoGrowTextarea(input);
+}
+
+// Guard so a burst of Enter presses can't fire multiple sends.
+let isSendingChatMessage = false;
+
+// Shared send routine — called by both the Enter key and the Send button.
+async function submitChatMessage() {
+    // Already sending — ignore repeated triggers
+    if (isSendingChatMessage) {
+        return;
+    }
+
+    let chatWindow = document.querySelector(".chat-window-container");
+    let chatInput = chatWindow ? chatWindow.querySelector(".js-chat-message-input") : null;
+    if (!chatInput) {
+        return;
+    }
+
+    // Get the message text — bail out if it's empty
+    let content = chatInput.value.trim();
+    if (content === "") {
+        return;
+    }
+
+    // The friend whose chat is currently open
+    let friendId = chatWindow.dataset.friendId;
+
+    // Make sure the current user is known before sending
+    let currentUserId = await ensureCurrentUser();
+    if (!currentUserId) {
+        showChatMessageModal("Session expired",
+            "Could not verify your session. Please refresh the page and try again.");
+        return;
+    }
+
+    // Lock the input + Send button for the duration of the request
+    isSendingChatMessage = true;
+    chatInput.disabled = true;
+    setChatSendButtonSending(true);
+
+    try {
+        let response = await fetch('/api/chats/createMessage', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: currentUserId,
+                receiver: friendId,
+                type: "text",
+                content: content
+            })
+        });
+
+        let result = await response.json();
+
+        // Checks for potential validation errors (like xss) or other error from the server
+        if (!response.ok && result.error) {
+            showChatMessageModal("Message not sent", result.error);
+            return;
+        }
+
+        if (result.success) {
+            // Clear the typing input box and shrink it back to one row
+            chatInput.value = "";
+            autoGrowTextarea(chatInput);
+
+            // Refresh the chat history (all the messages) to pull the new message from the DB
+            await openChatWindow(friendId);
+        } else {
+            console.error("Failed to save message:", result.message);
+            showChatMessageModal("Message not sent",
+                "Something went wrong while sending your message. Please try again.");
+        }
+
+    } catch (error) {
+        console.error("Network or server error:", error);
+        showChatMessageModal("Network error",
+            "Your message could not be sent. Please check your connection and try again.");
+    } finally {
+        // Re-enable only after the request settled and the box was handled
+        isSendingChatMessage = false;
+        chatInput.disabled = false;
+        setChatSendButtonSending(false);
+        chatInput.focus();
+    }
+}
+
+// Flip the Send button between its normal blue state and a disabled "sending" state.
+function setChatSendButtonSending(sending) {
+    let btn = document.querySelector(".js-chat-send-btn");
+    if (!btn) {
+        return;
+    }
+    btn.disabled = sending;
+    btn.classList.toggle("is-sending", sending);
+}
+
+async function handleChatInput(event) {
+    // Only plain Enter sends. Shift+Enter falls through to insert a newline
+    // (the textarea's oninput handler re-grows the box).
+    if (event.key !== "Enter" || event.shiftKey) {
+        return;
+    }
+    event.preventDefault();
+    submitChatMessage();
 }
