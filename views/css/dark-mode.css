@@ -643,6 +643,13 @@ body.dark-mode #globalPostsMapOverlay .bg-white {
     border: 1px solid #262B33 !important;
 }
 
+body.dark-mode #editMessageModal .btn-close,
+body.dark-mode #deleteMessageModal .btn-close,
+body.dark-mode #shareResultModal .btn-close,
+body.dark-mode #globalPostsMapOverlay .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
 body.dark-mode #mapModal h5,
 body.dark-mode #globalPostsMapOverlay h4 {
     color: white !important;
