@@ -16,20 +16,20 @@ class StoriesController {
       const currentUser = await User.findById(currentUserId);
       if (!currentUser) return res.status(404).json({ error: 'User not found' });
 
-      // Calculate the time 24 hours ago
-      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      // Calculate the time 72 hours ago
+      const seventyTwoHoursAgo = new Date(Date.now() - 72 * 60 * 60 * 1000);
 
       // Find stories from users the current user follows + their own stories
       const usersToFetch = [...currentUser.following, currentUserId];
 
       const activeStories = await Story.find({
         author: { $in: usersToFetch },
-        createdAt: { $gt: twentyFourHoursAgo }
+        createdAt: { $gt: seventyTwoHoursAgo }
       }).populate('author', 'username profilePic').sort({ createdAt: -1 });
 
       // Clean up expired stories directly in DB
       const expiredStories = await Story.find({
-        createdAt: { $lt: twentyFourHoursAgo }
+        createdAt: { $lt: seventyTwoHoursAgo }
       });
 
       for (const story of expiredStories) {
