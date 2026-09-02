@@ -479,23 +479,8 @@
                     <span class="ms-2 fw-semibold messages-text">Messages</span>
                 </div>
                 <div>
-                    <div class="d-flex align-items-center ms-5">
-                        <div class="message-profile">
-                            <img src="elements/media/profile-pictures/6a917d03d53850f0e0dbcddb.jpg"
-                                class="message-alert-profile-pic rounded-circle" alt="Image">
-                            <span class="text-bubble">Jamil</span>
-                        </div>
-                        <div class="message-profile">
-                            <img src="elements/media/profile-pictures/6a917d03d53850f0e0dbcdda.jpg"
-                                class="message-alert-profile-pic rounded-circle" alt="Image">
-                            <span class="text-bubble">Sara Haya</span>
-                        </div>
-                        <div class="message-profile">
-                            <img src="elements/media/profile-pictures/6a917d02d53850f0e0dbcdd9.jpg"
-                                class="message-alert-profile-pic rounded-circle" alt="Image">
-                            <span class="text-bubble">TOMER ;)</span>
-                        </div>
-                    </div>
+                    <!-- Filled by renderCapsuleAvatars() with the people you're actually chatting with -->
+                    <div class="d-flex align-items-center ms-5 js-capsule-avatars"></div>
                 </div>
             </div>
         </div>
@@ -840,16 +825,49 @@
                 <button class="bg-transparent border-0 bi bi-x fs-4" onclick="closeChatWindow()"></button>
             </div>
 
+            <!-- Chat search bar (WhatsApp-style) — hidden until the footer search icon is clicked -->
+            <div class="js-chat-search-bar chat-search-bar d-none align-items-center gap-2 px-3 py-2 border-bottom">
+                <span class="bi bi-search text-muted flex-shrink-0"></span>
+                <input type="text"
+                    class="js-chat-search-input chat-search-input flex-grow-1 border-0 bg-transparent"
+                    placeholder="Search in this chat..." autocomplete="off"
+                    onkeydown="handleChatSearchKey(event)">
+                <span class="js-chat-search-count chat-search-count text-12 text-muted flex-shrink-0"></span>
+                <button type="button"
+                    class="js-chat-search-nav chat-search-nav bg-transparent border-0 p-1 bi bi-chevron-up"
+                    onclick="gotoChatSearchMatch(-1)" aria-label="Previous match"></button>
+                <button type="button"
+                    class="js-chat-search-nav chat-search-nav bg-transparent border-0 p-1 bi bi-chevron-down"
+                    onclick="gotoChatSearchMatch(1)" aria-label="Next match"></button>
+                <button type="button"
+                    class="chat-search-nav bg-transparent border-0 p-1 bi bi-x-lg"
+                    onclick="closeChatSearch()" aria-label="Close search"></button>
+            </div>
+
             <div class="overflow-y-auto p-3 flex-grow-1 js-chat-history-container contain-scroll white-back">
             </div>
 
-            <div class="p-3 border-top bg-white rounded-bottom-4">
-                <div class="border rounded-pill px-3 py-2 d-flex align-items-center gap-2">
-                    <span class="bi bi-emoji-smile fs-5 text-muted"></span>
-                    <input type="text" class="js-chat-message-input border-0 shadow-none flex-grow-1 bg-transparent"
-                        placeholder="Message..." onkeydown="handleChatInput(event)">
-                    <span class="bi bi-mic fs-5 text-muted"></span>
-                    <span class="bi bi-image fs-5 text-muted"></span>
+            <div class="p-3 border-top bg-white rounded-bottom-4 position-relative">
+                <div class="js-emoji-picker chat-emoji-picker d-none">
+                    <button type="button" class="chat-emoji-choice" onclick="addEmojiToChatInput('😂')">😂</button>
+                    <button type="button" class="chat-emoji-choice" onclick="addEmojiToChatInput('❤️')">❤️</button>
+                    <button type="button" class="chat-emoji-choice" onclick="addEmojiToChatInput('👍')">👍</button>
+                    <button type="button" class="chat-emoji-choice" onclick="addEmojiToChatInput('🔥')">🔥</button>
+                    <button type="button" class="chat-emoji-choice" onclick="addEmojiToChatInput('🙏')">🙏</button>
+                </div>
+                <div class="border rounded-4 px-3 py-2 d-flex align-items-center gap-2 js-chat-input-pill">
+                    <button type="button"
+                        class="js-emoji-toggle js-chat-pill-icon-btn bi bi-emoji-smile fs-5 text-muted flex-shrink-0 bg-transparent border-0 d-flex align-items-center justify-content-center"
+                        onclick="toggleEmojiPicker()" aria-label="Insert emoji"></button>
+                    <textarea class="js-chat-message-input border-0 shadow-none flex-grow-1 bg-transparent"
+                        placeholder="Message..." rows="1"
+                        onkeydown="handleChatInput(event)" oninput="autoGrowTextarea(this)"></textarea>
+                    <button type="button"
+                        class="js-chat-search-toggle js-chat-pill-icon-btn bi bi-search fs-5 text-muted flex-shrink-0 bg-transparent border-0 d-flex align-items-center justify-content-center"
+                        onclick="toggleChatSearch()" aria-label="Search messages"></button>
+                    <button type="button"
+                        class="js-chat-send-btn btn btn-primary rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center p-0 bi bi-send"
+                        onclick="submitChatMessage()" aria-label="Send message"></button>
                 </div>
             </div>
 

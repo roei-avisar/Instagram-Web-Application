@@ -707,7 +707,7 @@ async function sendSharedPost()
         }
     }
 
-    // Optimistic feed share-count bump (the Post backend has no share-count field)
+    // Optimistic feed share-count bump
     let feedPost = document.querySelector(`.js-all-post[data-post-id="${postId}"]`);
     if (feedPost) {
         let shareIcon = feedPost.querySelector('.bi-send');
@@ -716,6 +716,17 @@ async function sendSharedPost()
             let currentCount = parseInt(counterSpan.innerText) || 0;
             counterSpan.innerText = currentCount + selectedIds.length;
         }
+    }
+
+    // Call the backend to update the DB schema
+    try {
+        await fetch(`/api/posts/share/${postId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: selectedIds.length })
+        });
+    } catch (error) {
+        console.error("Failed to update share count in DB:", error);
     }
 
     let postInData = (typeof allPostsData !== 'undefined' && Array.isArray(allPostsData))
