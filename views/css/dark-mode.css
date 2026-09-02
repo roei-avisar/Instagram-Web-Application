@@ -56,6 +56,7 @@ body.dark-mode .border-right,
 body.dark-mode .border-left {
     border-color: #262B33 !important;
 }
+
 /* Inputs */
 body.dark-mode input,
 body.dark-mode textarea {
@@ -83,6 +84,7 @@ body.dark-mode .messages {
     background-color: rgb(56, 57, 62);
     color: white;
 }
+
 body.dark-mode .messages:hover {
     background-color: rgb(72, 73, 80);
 }
@@ -132,6 +134,7 @@ body.dark-mode .discard-container h5 {
 body.dark-mode .upload-post-btn {
     color: #4150F7 !important;
 }
+
 body.dark-mode .discard-btn {
     color: #ed4956 !important;
 }
@@ -149,17 +152,21 @@ body.dark-mode .js-preview-text {
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
     color: white !important;
 }
+
 body.dark-mode .js-preview-text::placeholder {
     color: rgba(255, 255, 255, 0.7) !important;
 }
 
-body.dark-mode span.text-primary{ /* for the verfied icon still be blue */
+body.dark-mode span.text-primary {
+    /* for the verfied icon still be blue */
     color: #0d6efd !important;
 }
 
-body.dark-mode .bi-heart-fill.text-danger { /* for the like icon still be red */
+body.dark-mode .bi-heart-fill.text-danger {
+    /* for the like icon still be red */
     color: #ed4956 !important;
 }
+
 body.dark-mode .js-posts-search-input {
     background-color: #262B33 !important;
     color: white !important;
@@ -173,11 +180,11 @@ body.dark-mode .js-posts-search-input::placeholder {
 body.dark-mode #storyModal input.story-reply {
     background-color: transparent !important;
     color: white !important;
-    border: 1px solid rgba(255,255,255,0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
 }
 
 body.dark-mode #storyModal input.story-reply::placeholder {
-    color: rgba(255,255,255,0.8) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
 body.dark-mode .white-arrow {
@@ -197,8 +204,18 @@ body.dark-mode #storyModal .story-nav {
 body.dark-mode #storyModal .story-nav i {
     color: #ffffff !important;
 }
+
 body.dark-mode #storyModal .bi-heart-fill.text-danger {
     color: #ed4956 !important;
+}
+
+/* Story '+' button dark mode */
+body.dark-mode .story-add-btn {
+    border-color: #0C1014;
+}
+
+body.dark-mode .story-avatar {
+    border-color: #0C1014 !important;
 }
 
 /* Settings Modal */
@@ -319,7 +336,7 @@ body.dark-mode .weather-container strong {
 body.dark-mode .following-btn {
     background-color: #262B33 !important;
     color: white !important;
-    border: 1px solid #555 !important; 
+    border: 1px solid #555 !important;
     opacity: 1 !important;
 }
 
@@ -351,6 +368,7 @@ body.dark-mode #editPostModal .bg-white {
     border-color: #262B33 !important;
 }
 
+body.dark-mode #editPostModal input,
 body.dark-mode #editPostModal .btn-light {
     background-color: #262B33 !important;
     color: white !important;
@@ -362,7 +380,7 @@ body.dark-mode #editPostModal .btn-light:hover {
     color: white !important;
 }
 
-body.dark-mode #editPostModal input, 
+body.dark-mode #editPostModal input,
 body.dark-mode #editPostModal textarea {
     background-color: #262B33 !important;
     color: white !important;
@@ -407,6 +425,7 @@ body.dark-mode .js-chat-history-container.white-back {
 body.dark-mode .chat-row-name {
     color: #ffffff !important;
 }
+
 body.dark-mode .chat-row-preview {
     color: #a8a8a8 !important;
 }
@@ -417,6 +436,7 @@ body.dark-mode .chat-bubble--in {
     color: #ffffff !important;
     border-color: #3a3f47 !important;
 }
+
 /* Outgoing bubble — keep it a readable blue with white text */
 body.dark-mode .chat-bubble--out {
     background-color: #2b5cff !important;
@@ -429,6 +449,7 @@ body.dark-mode .chat-shared-card {
     border-color: #3a3f47 !important;
     color: #ffffff !important;
 }
+
 body.dark-mode .chat-shared-card .text-primary {
     color: #6ea8fe !important;
 }
@@ -442,20 +463,25 @@ body.dark-mode .chat-textpost-label {
 body.dark-mode .chat-msg-menu-toggle {
     color: #a8a8a8 !important;
 }
+
 body.dark-mode .chat-msg-menu-toggle:hover {
     color: #ffffff !important;
     background-color: rgba(255, 255, 255, 0.1) !important;
 }
+
 body.dark-mode .chat-msg-actions {
     background-color: #1e2530 !important;
     border-color: #3a3f47 !important;
 }
+
 body.dark-mode .chat-msg-actions button {
     color: #ffffff !important;
 }
+
 body.dark-mode .chat-msg-actions button:hover {
     background-color: #262B33 !important;
 }
+
 body.dark-mode .chat-msg-actions .js-msg-delete {
     color: #ff6b6b !important;
 }
@@ -473,6 +499,7 @@ body.dark-mode #shareResultModal .modal-content {
     background-color: #1e2530 !important;
     border: 1px solid #3a3f47 !important;
 }
+
 body.dark-mode #editMessageModal .modal-title,
 body.dark-mode #deleteMessageModal .modal-title,
 body.dark-mode #shareResultModal .modal-title,
@@ -484,26 +511,31 @@ body.dark-mode #deleteMessageModal .modal-body p,
 body.dark-mode #shareResultModal .modal-body p {
     color: #ffffff !important;
 }
+
 /* Keep the destructive / error titles red */
 body.dark-mode #deleteMessageModal .modal-title,
 body.dark-mode #shareResultModal .modal-title.text-danger {
     color: #ff6b6b !important;
 }
+
 body.dark-mode #editMessageModal .btn-light,
 body.dark-mode #deleteMessageModal .btn-light {
     background-color: #262B33 !important;
     color: #ffffff !important;
     border-color: #3a3f47 !important;
 }
+
 body.dark-mode #editMessageModal .modal-content textarea.form-control {
     background-color: #262B33 !important;
     color: #ffffff !important;
     border-color: #3a3f47 !important;
 }
+
 body.dark-mode #editMessageModal .btn-close,
 body.dark-mode #deleteMessageModal .btn-close,
 body.dark-mode #shareResultModal .btn-close {
-        filter: invert(1) grayscale(100%) brightness(200%);
+    filter: invert(1) grayscale(100%) brightness(200%);
+
     body.dark-mode .dashboard-main-title {
         color: #ffffff !important;
     }
@@ -541,8 +573,7 @@ body.dark-mode .chart-grid-line {
 /* Inputs and Selects for Popups */
 .dark-mode #groupsOverlay .form-control,
 .dark-mode #groupsOverlay .form-select,
-.dark-mode #allUsersModal .form-control
-.dark-mode #allUsersModal .form-select {
+.dark-mode #allUsersModal .form-control .dark-mode #allUsersModal .form-select {
     background-color: #262626 !important;
     color: #ffffff !important;
     border: 1px solid #444444 !important;
@@ -598,8 +629,9 @@ body.dark-mode .leaflet-bar {
 
 body.dark-mode .leaflet-bar a.leaflet-disabled {
     background-color: #1a1d21 !important;
-    color: #6c757d !important;}
-    
+    color: #6c757d !important;
+}
+
 body.dark-mode .feed-advanced-search-panel {
     background-color: #121212;
     border-right: 1px solid #333;
@@ -625,6 +657,7 @@ body.dark-mode .feed-advanced-search-panel .form-select {
 body.dark-mode .feed-advanced-search-panel .form-control::placeholder {
     color: #a0a0a0 !important;
 }
+
 body.dark-mode .feed-advanced-search-panel .btn-light {
     background-color: #262626 !important;
     color: #ffffff !important;
@@ -634,6 +667,7 @@ body.dark-mode .feed-advanced-search-panel .btn-light {
 body.dark-mode .feed-advanced-search-panel .btn-light:hover {
     background-color: #333333 !important;
 }
+
 .dark-mode #groupsOverlay .btn-light,
 .dark-mode #allUsersModal .btn-light {
     background-color: #262626 !important;

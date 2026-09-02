@@ -63,5 +63,14 @@ function updateCurrentUserUI() {
                 }
             });
         }
+
+        // 6. Update global stories data state
+        if (typeof feedGroups !== 'undefined') {
+            feedGroups.forEach(group => {
+                if (group.author && group.author.username === CURRENT_USERNAME) {
+                    group.author.profilePic = CURRENT_USER_PIC;
+                }
+            });
+        }
     }
 }
