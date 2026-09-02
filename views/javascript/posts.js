@@ -480,27 +480,40 @@ function showRickRollTranslation() {
 function renderPosts(postsData) {
     let allPostsHTML = ''; // Accumulate all HTML here
 
-    postsData.forEach(post => {
-        let profilePicsHTML = createProfilePicsHTML(post);
-        let authorsNamesHTML = createAuthorsHTML(post);
-        let postContentHTML = createPostContentHTML(post, profilePicsHTML, authorsNamesHTML);
-        let postButtonsHTML = createPostButtonsHTML(post);
-        let likedByHTML = createLikedByHTML(post.likedByUsers, post.stats.likes);
-        let captionHTML = createCaptionHTML(post);
-
-        const postHTML = `
-        <div class="card mb-2 border-0 js-all-post" data-post-id="${post._id}">
-            ${postContentHTML}
-            <div class="card-body border-0 js-card-body">
-                ${postButtonsHTML}
-                ${likedByHTML}  
-                ${captionHTML}
+    if (!postsData || postsData.length === 0) {
+        allPostsHTML = `
+        <div class="empty-feed-container d-flex flex-column align-items-center justify-content-center text-center w-100" style="min-height: 50vh; margin-top: 40px;">
+            <div class="border border-2 border-dark rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 90px; height: 90px;">
+                <i class="bi bi-camera text-dark" style="font-size: 2.5rem;"></i>
             </div>
+            <h3 class="fw-bold mb-2 text-dark">Welcome to Instagram</h3>
+            <p class="text-muted mb-4 fs-6">When you follow people, you'll see the photos<br>and videos they post here.</p>
+            <button class="btn btn-primary fw-bold rounded-pill px-4 py-2" onclick="openAllUsersPopup()">Find people to follow</button>
         </div>
         `;
+    } else {
+        postsData.forEach(post => {
+            let profilePicsHTML = createProfilePicsHTML(post);
+            let authorsNamesHTML = createAuthorsHTML(post);
+            let postContentHTML = createPostContentHTML(post, profilePicsHTML, authorsNamesHTML);
+            let postButtonsHTML = createPostButtonsHTML(post);
+            let likedByHTML = createLikedByHTML(post.likedByUsers, post.stats.likes);
+            let captionHTML = createCaptionHTML(post);
 
-        allPostsHTML += postHTML; // Append to the string, not the html directly to avoid multiple reflows
-    });
+            const postHTML = `
+            <div class="card mb-2 border-0 js-all-post" data-post-id="${post._id}">
+                ${postContentHTML}
+                <div class="card-body border-0 js-card-body">
+                    ${postButtonsHTML}
+                    ${likedByHTML}  
+                    ${captionHTML}
+                </div>
+            </div>
+            `;
+
+            allPostsHTML += postHTML; // Append to the string, not the html directly to avoid multiple reflows
+        });
+    }
 
     // Update the html only once
     postsContainer.innerHTML = allPostsHTML;
