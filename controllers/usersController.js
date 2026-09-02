@@ -6,6 +6,7 @@ const fs = require('fs');
 const multer = require('multer');
 const { sendTweet } = require('../utils/twitterServices');
 const gitService = require('../utils/gitService');
+const Story = require('../models/storiesModel');
 
 // Configure multer for profile picture uploads
 // Files are saved to views/elements/media/profile-pictures/ and named by the user's ID
@@ -673,6 +674,20 @@ class UserController {
       // Delete user's profile picture file from disk and push deletion to Git
       const profilePicRelativePath = '/../views/elements/media/profile-pictures/' + userId + '.jpg';
       gitService.deleteMediaAndPushToGit(profilePicRelativePath);
+
+      // Delete all stories belonging to this user
+      try {
+        const userStories = await Story.find({ author: userId });
+        for (const story of userStories) {
+          if (story.mediaSource) {
+            let relativePath = `/../views/${story.mediaSource}`;
+            gitService.deleteMediaAndPushToGit(relativePath);
+          }
+          await Story.findByIdAndDelete(story._id);
+        }
+      } catch (storyErr) {
+        console.error(`Error deleting stories for user ${userId}:`, storyErr);
+      }
 
       // Delete the user document from the database
       await User.findByIdAndDelete(userId);
