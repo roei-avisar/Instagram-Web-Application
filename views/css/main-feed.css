@@ -412,9 +412,11 @@ body {
 #globalPostsMapOverlay {
     background-color: rgba(0, 0, 0, 0.8);
     z-index: 15;
+}
 
 #globalLeafletMap {
     z-index: 1;
+}
 
 /* Stories Feature Additions */
 .story-progress-segment {
