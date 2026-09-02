@@ -96,6 +96,13 @@ function closePostCreationForm() {
     // Close map and reset selected location on full discard
     document.getElementById('mapModal')?.classList.replace('d-flex', 'd-none');
     selectedLocation = { name: "", lat: null, lng: null };
+
+    // Pause the video preview if it is playing
+    const previewVideo = document.querySelector('.js-preview-video');
+    if (previewVideo) {
+        previewVideo.pause();
+        previewVideo.src = '';
+    }
 }
 
 function switchCreatePostFormState() {
