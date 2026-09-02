@@ -384,16 +384,15 @@ document.querySelector('.js-postUpload-story-btn').addEventListener('click', asy
     }
 });
 
-async function submitPostDataToServer(groupId) {
-    function showPostUploadError(container, msg) {
-        let errorDiv = container.querySelector('.post-action-error');
-        if (!errorDiv) {
-            errorDiv = document.createElement('div');
-            errorDiv.className = 'post-action-error text-danger small mt-2 p-1 fw-bold d-flex align-items-start text-start w-100';
-            container.appendChild(errorDiv);
-        }
+function showPostUploadError(container, msg) {
+    let errorDiv = container.querySelector('.post-action-error');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'post-action-error text-danger small mt-2 p-1 fw-bold d-flex align-items-start text-start w-100';
+        container.appendChild(errorDiv);
+    }
 
-        errorDiv.innerHTML = `
+    errorDiv.innerHTML = `
         <svg class="me-2 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="#ed4956" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px; margin-top:2px;">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -401,75 +400,74 @@ async function submitPostDataToServer(groupId) {
         </svg>
         <span style="word-break: break-word;">${msg}</span>
     `;
+}
+
+async function submitPostDataToServer(groupId, groupAdminId = null) {
+    let captionText = document.querySelector('.js-caption-input').value;
+    let locationText = document.querySelector('.js-location-input').value;
+
+    // Select and disable submission buttons to prevent multiple clicks
+    const followersBtn = document.querySelector('.js-postUpload-followers-btn');
+    const groupsFinalBtn = document.querySelector('.js-final-postUpload-groups-btn');
+    if (followersBtn) followersBtn.disabled = true;
+    if (groupsFinalBtn) groupsFinalBtn.disabled = true;
+
+    const newPost = {
+        "authors": [CURRENT_USER_ID],
+        "isVerified": false,
+        "location": selectedLocation,
+        "mediaType": currentMediaType,
+        "mediaSource": currentMediaSource,
+        "hasMuteButton": isMuted,
+        "stats": { "likes": 0, "comments": 0, "shares": 0 },
+        "likedByUsers": [],
+        "caption": captionText,
+        "isSuggested": false
+    };
+
+    if (groupId) {
+        newPost.groupId = groupId;
+        if (groupAdminId) {
+            newPost.groupAdminId = groupAdminId;
+        }
     }
 
-    async function submitPostDataToServer(groupId, groupAdminId = null) {
-        let captionText = document.querySelector('.js-caption-input').value;
-        let locationText = document.querySelector('.js-location-input').value;
+    const loadingScreen = document.getElementById('postUploadLoadingScreen');
+    if (loadingScreen) loadingScreen.classList.remove('d-none');
 
-        // Select and disable submission buttons to prevent multiple clicks
-        const followersBtn = document.querySelector('.js-postUpload-followers-btn');
-        const groupsFinalBtn = document.querySelector('.js-final-postUpload-groups-btn');
-        if (followersBtn) followersBtn.disabled = true;
-        if (groupsFinalBtn) groupsFinalBtn.disabled = true;
+    try {
+        // Here we target the caption container so it sits nicely without breaking the flexbox!
+        const errorContainer = document.querySelector('.caption-container');
+        const oldError = errorContainer.querySelector('.post-action-error');
+        if (oldError) oldError.remove();
 
-        const newPost = {
-            "authors": [CURRENT_USER_ID],
-            "isVerified": false,
-            "location": selectedLocation,
-            "mediaType": currentMediaType,
-            "mediaSource": currentMediaSource,
-            "hasMuteButton": isMuted,
-            "stats": { "likes": 0, "comments": 0, "shares": 0 },
-            "likedByUsers": [],
-            "caption": captionText,
-            "isSuggested": false
-        };
+        const result = await addNewPost(newPost);
 
-        if (groupId) {
-            newPost.groupId = groupId;
-            if (groupAdminId) {
-                newPost.groupAdminId = groupAdminId;
+        if (result && result.success) {
+            // Close the post creation form and reset its state
+            closePostCreationForm();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            selectedLocation = { name: "", lat: null, lng: null };
+
+            if (typeof uploadNewPostNotification === 'function') {
+                uploadNewPostNotification(currentMediaSource, currentMediaType);
             }
-        }
-
-        const loadingScreen = document.getElementById('postUploadLoadingScreen');
-        if (loadingScreen) loadingScreen.classList.remove('d-none');
-
-        try {
-            // Here we target the caption container so it sits nicely without breaking the flexbox!
-            const errorContainer = document.querySelector('.caption-container');
-            const oldError = errorContainer.querySelector('.post-action-error');
-            if (oldError) oldError.remove();
-
-            const result = await addNewPost(newPost);
-
-            if (result && result.success) {
-                // Close the post creation form and reset its state
-                closePostCreationForm();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                selectedLocation = { name: "", lat: null, lng: null };
-
-                if (typeof uploadNewPostNotification === 'function') {
-                    uploadNewPostNotification(currentMediaSource, currentMediaType);
-                }
-            } else {
-                document.getElementById('postUploadChoiceModal').classList.replace('d-flex', 'd-none');
-                document.getElementById('groupsSelectionModal').classList.replace('d-flex', 'd-none');
-                showPostUploadError(errorContainer, result ? result.error : "Failed to upload post.");
-            }
-        } catch (error) {
-            console.error('Error uploading post:', error);
+        } else {
             document.getElementById('postUploadChoiceModal').classList.replace('d-flex', 'd-none');
             document.getElementById('groupsSelectionModal').classList.replace('d-flex', 'd-none');
-            const errorContainer = document.querySelector('.caption-container');
-            showPostUploadError(errorContainer, "Connection error. Please try again.");
-        } finally {
-            // Re-enable submission buttons and hide loading screen
-            if (followersBtn) followersBtn.disabled = false;
-            if (groupsFinalBtn) groupsFinalBtn.disabled = false;
-            if (loadingScreen) loadingScreen.classList.add('d-none');
+            showPostUploadError(errorContainer, result ? result.error : "Failed to upload post.");
         }
+    } catch (error) {
+        console.error('Error uploading post:', error);
+        document.getElementById('postUploadChoiceModal').classList.replace('d-flex', 'd-none');
+        document.getElementById('groupsSelectionModal').classList.replace('d-flex', 'd-none');
+        const errorContainer = document.querySelector('.caption-container');
+        showPostUploadError(errorContainer, "Connection error. Please try again.");
+    } finally {
+        // Re-enable submission buttons and hide loading screen
+        if (followersBtn) followersBtn.disabled = false;
+        if (groupsFinalBtn) groupsFinalBtn.disabled = false;
+        if (loadingScreen) loadingScreen.classList.add('d-none');
     }
 }
 
