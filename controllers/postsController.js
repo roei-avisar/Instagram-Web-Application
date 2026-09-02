@@ -627,6 +627,27 @@ class PostController {
             res.status(500).json({ message: "Error searching posts", error });
         }
     }
+    // POST /api/posts/share/:id
+    async incrementShares(req, res) {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+        try {
+            const { id } = req.params;
+            const { amount } = req.body;
+            const incAmount = amount ? parseInt(amount) : 1;
+            
+            await Post.findByIdAndUpdate(id, {
+                $inc: { 'stats.shares': incAmount }
+            });
+            
+            return res.status(200).json({ success: true, message: 'Shares updated' });
+        } catch (error) {
+            console.error('Error updating shares:', error);
+            return res.status(500).json({ error: 'Server error' });
+        }
+    }
+
     async deleteComment(req, res) {
         if (!req.session || !req.session.userId) {
          return res.status(401).json({ error: 'Not authenticated' });}
