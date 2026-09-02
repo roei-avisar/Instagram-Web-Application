@@ -49,10 +49,6 @@
 }
 
 .all-users-close {
-  position: absolute;
-  top: 50%;
-  right: 16px;
-  transform: translateY(-50%);
   background: none;
   border: none;
   font-size: 26px;
