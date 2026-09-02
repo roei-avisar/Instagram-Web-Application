@@ -22,6 +22,7 @@ router.delete('/deletePost/:id', postController.deletePost);
 router.post('/like/:id', postController.managelikesPost);
 router.post('/save/:id', postController.manageSavePost);
 router.post('/addComment/:id', postController.addComment);
+router.post('/share/:id', postController.incrementShares);
 
 // Route to like or unlike a comment
 router.post('/likeComment/:id', postController.manageCommentLike);
