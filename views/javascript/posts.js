@@ -468,9 +468,13 @@ function createCaptionHTML(post) {
         ${post.isVerified ? '<span class="bi bi-patch-check-fill text-primary verified-icon"></span>' : ''}
         <span>${post.caption || ''}</span>
     </div>
-    <button class="small-text fw-semibold bg-transparent border-0 p-0"> See translation</button>
+    <button class="small-text fw-semibold bg-transparent border-0 p-0 text-muted" onclick="showRickRollTranslation()">See translation</button>
     `;
     return captionHTML;
+}
+
+function showRickRollTranslation() {
+    alert("Never gonna give you up\nNever gonna let you down\nNever gonna run around and desert you\nNever gonna make you cry\nNever gonna say goodbye\nNever gonna tell a lie and hurt you");
 }
 
 function renderPosts(postsData) {
