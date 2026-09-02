@@ -10,6 +10,11 @@ const xssValidator = (req, res, next) => {
         if (!obj) return false;
         
         for (const key in obj) {
+            // Skip fields that legitimately contain base64 data (which have semicolons)
+            if (['mediaSource', 'audioSource', 'profilePic', 'coverPhoto'].includes(key)) {
+                continue;
+            }
+            
             if (typeof obj[key] === 'string') {
                 if (dangerousCharsRegex.test(obj[key])) {
                     return true;
