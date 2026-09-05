@@ -116,7 +116,7 @@ class StoriesController {
 
       let ext = mediaType === 'video' ? 'mp4' : 'jpg';
       let fileName = `story_${Date.now()}_${Math.floor(Math.random() * 1000)}.${ext}`;
-      let relativePath = `/../views/elements/media/stories/${fileName}`;
+      let relativePath = `/views/elements/media/stories/${fileName}`;
       let dbPath = `elements/media/stories/${fileName}`;
 
       gitService.saveMediaAndPushToGit(mediaSource, relativePath);
