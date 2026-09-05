@@ -21,7 +21,7 @@ class GitService {
 
                 // Get the token from .env
                 const token = process.env.GIT_ACCESS_TOKEN;
-                const repoURL = "gitlab.com/internet-web-applications/Internet-web-apps.git";
+                const repoURL = "github.com/roei-avisar/Instagram-Web-Application.git";
 
                 // Create the authenticated URL
                 const remoteUrlWithToken = `https://oauth2:${token}@${repoURL}`;
